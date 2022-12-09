@@ -33,7 +33,7 @@ cli.command('space register <email>')
 
 cli.command('delegation create <audience-did>')
   .describe('Create a delegation to the passed audience for the given abilities with the _current_ space as the resource.')
-  .option('-a, --ability', 'One or more abilities to delegate.', '*')
+  .option('-c, --can', 'One or more abilities to delegate.', '*')
   .option('-n, --name', 'Human readable name for the audience receiving the delegation.')
   .option('-t, --type', 'Type of the audience receiving the delegation, one of: device, app, service.')
   .option('-o, --output', 'Path of file to write the exported delegation data to.')

@@ -28,7 +28,7 @@ export async function createDelegation (audienceDID, opts) {
     throw new Error('no current space, use `w3 space register` to create one.')
   }
   const audience = DID.parse(audienceDID)
-  const abilities = Array.isArray(opts.ability) ? opts.ability : [opts.ability]
+  const abilities = Array.isArray(opts.can) ? opts.can : [opts.can]
   const audienceMeta = {}
   if (opts.name) audienceMeta.name = opts.name
   if (opts.type) audienceMeta.type = opts.type
