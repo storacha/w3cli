@@ -5,7 +5,8 @@
   "license": "(Apache-2.0 AND MIT)",
   "description": "💾 w3 command line interface",
   "bin": {
-    "w3": "bin.js"
+    "w3": "bin.js",
+    "w3up": "bin.js"
   },
   "scripts": {
     "lint": "standard",
