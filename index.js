@@ -8,6 +8,10 @@ export async function createSpace (name) {
 
 export async function registerSpace (address) {
   const client = await create()
+  const space = await client.createSpace(name)
+  if (space === undefined) {
+    await client.setCurrentSpace((await client.createSpace()).did)
+  }
   try {
     await client.registerSpace(address)
   } catch (err) {
