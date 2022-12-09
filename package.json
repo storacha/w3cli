@@ -32,6 +32,8 @@
     "standard": "^17.0.0"
   },
   "dependencies": {
+    "@ipld/car": "^5.0.1",
+    "@ipld/dag-ucan": "^3.0.1",
     "@web3-storage/w3up-client": "github:web3-storage/w3up-client#feat/consume-upload-and-access-client",
     "open": "^8.4.0",
     "sade": "^1.8.1"
