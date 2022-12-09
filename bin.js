@@ -2,8 +2,10 @@
 
 import sade from 'sade'
 import open from 'open'
-import { getPkg } from './lib.js'
+import { getPkg, unwarnify } from './lib.js'
 import { createSpace, registerSpace, createDelegation } from './index.js'
+
+unwarnify()
 
 const cli = sade('w3')
 
