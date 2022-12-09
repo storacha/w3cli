@@ -1,0 +1,29 @@
+{
+  "name": "@web3-storage/w3cli",
+  "type": "module",
+  "version": "3.0.0",
+  "license": "(Apache-2.0 AND MIT)",
+  "description": "💾 w3 command line interface",
+  "bin": {
+    "w3": "bin.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/web3-storage/w3cli.git"
+  },
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/web3-storage/w3cli/issues"
+  },
+  "homepage": "https://github.com/web3-storage/w3cli#readme",
+  "devDependencies": {
+    "standard": "^17.0.0"
+  },
+  "dependencies": {
+    "open": "^8.4.0",
+    "sade": "^1.8.1"
+  }
+}
