@@ -28,7 +28,7 @@ export async function registerSpace (email) {
   } catch (err) {
     if (spinner) spinner.stop()
     if (err.message.startsWith('Space already registered')) {
-      console.error(`Error: space already registered.`)
+      console.error('Error: space already registered.')
     } else {
       console.error(err)
     }
