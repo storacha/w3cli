@@ -9,18 +9,20 @@
   },
   "scripts": {
     "lint": "standard",
-    "test": "echo \"Error: no test specified\""
+    "test": "ava"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/web3-storage/w3cli.git"
   },
-  "keywords": [],
+  "keywords": ["w3", "web3", "storage", "upload", "cli"],
   "bugs": {
     "url": "https://github.com/web3-storage/w3cli/issues"
   },
   "homepage": "https://github.com/web3-storage/w3cli#readme",
   "devDependencies": {
+    "ava": "^5.1.0",
+    "execa": "^6.1.0",
     "standard": "^17.0.0"
   },
   "dependencies": {
