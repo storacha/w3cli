@@ -36,16 +36,16 @@ w3 up recipies.txt
   * [`w3 open`](#)
   * [`w3 whoami`](#)
 * Space management
-  * [`w3 spaces add`](#)
-  * [`w3 spaces create`](#)
-  * [`w3 spaces ls`](#)
-  * [`w3 spaces register`](#)
-  * [`w3 spaces use`](#)
+  * [`w3 space add`](#)
+  * [`w3 space create`](#)
+  * [`w3 space ls`](#)
+  * [`w3 space register`](#)
+  * [`w3 space use`](#)
 * Capability management
-  * [`w3 delegations create`](#)
-  * [`w3 delegations ls`](#)
-  * [`w3 proofs add`](#)
-  * [`w3 proofs ls`](#)
+  * [`w3 delegation create`](#)
+  * [`w3 delegation ls`](#)
+  * [`w3 proof add`](#)
+  * [`w3 proof ls`](#)
 * Advanced usage
   * [`w3 can space info`](#)
   * [`w3 can space recover`](#)
@@ -94,28 +94,28 @@ w3 open bafybeidluj5ub7okodgg5v6l4x3nytpivvcouuxgzuioa6vodg3xt2uqle/olizilla.png
 
 Print information about the current agent.
 
-### `w3 spaces add <proof.ucan>`
+### `w3 space add <proof.ucan>`
 
 Add a space to the current agent. The proof is a CAR encoded delegation to _this_ agent.
 
-### `w3 spaces create [name]`
+### `w3 space create [name]`
 
-### `w3 spaces ls`
+### `w3 space ls`
 
-### `w3 spaces register <email>`
+### `w3 space register <email>`
 
-### `w3 spaces use <did>`
+### `w3 space use <did>`
 
-### `w3 delegations create <audience-did> <ability> [ability...]`
+### `w3 delegation create <audience-did> <ability> [ability...]`
 
 * `--name` Human readable name for the audience receiving the delegation
 * `--type` Type of the audience receiving the delegation, one of: device, app, service
 
-### `w3 delegations ls`
+### `w3 delegation ls`
 
-### `w3 proofs add <proof.ucan>`
+### `w3 proof add <proof.ucan>`
 
-### `w3 proofs ls`
+### `w3 proof ls`
 
 ### `w3 can space info <did>`
 
