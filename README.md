@@ -106,10 +106,14 @@ Add a space to the current agent. The proof is a CAR encoded delegation to _this
 
 ### `w3 space use <did>`
 
-### `w3 delegation create <audience-did> <ability> [ability...]`
+### `w3 delegation create <audience-did>`
 
-* `--name` Human readable name for the audience receiving the delegation
-* `--type` Type of the audience receiving the delegation, one of: device, app, service
+Create a delegation to the passed audience for the given abilities with the _current_ space as the resource.
+
+* `--ability` One or more abilities to delegate, default `*` (everything).
+* `--name` Human readable name for the audience receiving the delegation.
+* `--type` Type of the audience receiving the delegation, one of: device, app, service.
+* `--output` Path of file to write the exported delegation data to.
 
 ### `w3 delegation ls`
 

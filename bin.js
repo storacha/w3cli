@@ -3,7 +3,7 @@
 import sade from 'sade'
 import open from 'open'
 import { getPkg } from './lib.js'
-import { createSpace, registerSpace } from './index.js'
+import { createSpace, registerSpace, createDelegation } from './index.js'
 
 const cli = sade('w3')
 
@@ -30,5 +30,13 @@ cli.command('space register <email>')
   .action(email => {
     registerSpace(email)
   })
+
+cli.command('delegation create <audience-did>')
+  .describe('Create a delegation to the passed audience for the given abilities with the _current_ space as the resource.')
+  .option('-a, --ability', 'One or more abilities to delegate.', '*')
+  .option('-n, --name', 'Human readable name for the audience receiving the delegation.')
+  .option('-t, --type', 'Type of the audience receiving the delegation, one of: device, app, service.')
+  .option('-o, --output', 'Path of file to write the exported delegation data to.')
+  .action(createDelegation)
 
 cli.parse(process.argv)
