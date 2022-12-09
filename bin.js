@@ -20,14 +20,14 @@ cli.command('space')
 
 cli.command('space create <name>')
   .describe('Create a new w3 space')
-  .action(name => { 
+  .action(name => {
     createSpace(name)
     console.log(`Created ${name}`)
   })
 
 cli.command('space register <email>')
   .describe('Claim the space by associating it with your email address')
-  .action(email => { 
+  .action(email => {
     registerSpace(email)
   })
 

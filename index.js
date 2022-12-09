@@ -12,5 +12,5 @@ export async function registerSpace (address) {
     await client.registerSpace(address)
   } catch (err) {
     console.error('registration failed: ', err)
-  }  
+  }
 }
