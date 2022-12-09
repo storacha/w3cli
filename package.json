@@ -15,7 +15,13 @@
     "type": "git",
     "url": "git+https://github.com/web3-storage/w3cli.git"
   },
-  "keywords": ["w3", "web3", "storage", "upload", "cli"],
+  "keywords": [
+    "w3",
+    "web3",
+    "storage",
+    "upload",
+    "cli"
+  ],
   "bugs": {
     "url": "https://github.com/web3-storage/w3cli/issues"
   },
@@ -26,6 +32,7 @@
     "standard": "^17.0.0"
   },
   "dependencies": {
+    "@web3-storage/w3up-client": "github:web3-storage/w3up-client#feat/consume-upload-and-access-client",
     "open": "^8.4.0",
     "sade": "^1.8.1"
   }
