@@ -1,4 +1,5 @@
 import fs from 'fs'
+import ora from 'ora'
 import { Readable } from 'stream'
 import { create } from '@web3-storage/w3up-client'
 import * as DID from '@ipld/dag-ucan/did'
@@ -8,18 +9,33 @@ export async function createSpace (name) {
   const client = await create()
   const space = await client.createSpace(name)
   await client.setCurrentSpace(space.did)
+  console.log(space.did)
 }
 
-export async function registerSpace (address) {
+export async function registerSpace (email) {
   const client = await create()
-  if (await client.currentSpace() === undefined) {
-    await client.setCurrentSpace((await client.createSpace()).did)
+  let space = client.currentSpace()
+  if (space === undefined) {
+    space = await client.setCurrentSpace(space.did())
+    await client.setCurrentSpace(space.did())
   }
+  let spinner
+  setTimeout(() => {
+    spinner = ora(`🔗 please click the link we sent to ${email} to register your space`).start()
+  }, 1000)
   try {
-    await client.registerSpace(address)
+    await client.registerSpace(email)
   } catch (err) {
-    console.error('registration failed: ', err)
+    if (spinner) spinner.stop()
+    if (err.message.startsWith('Space already registered')) {
+      console.error(`Error: space already registered.`)
+    } else {
+      console.error(err)
+    }
+    process.exit(1)
   }
+  if (spinner) spinner.stop()
+  console.log(`⁂ space registered to ${email}`)
 }
 
 export async function createDelegation (audienceDID, opts) {

@@ -18,18 +18,13 @@ cli.command('open <cid>')
 cli.command('space')
   .describe('Create and mangage w3 spaces')
 
-cli.command('space create <name>')
+cli.command('space create [name]')
   .describe('Create a new w3 space')
-  .action(name => {
-    createSpace(name)
-    console.log(`Created ${name}`)
-  })
+  .action(createSpace)
 
 cli.command('space register <email>')
   .describe('Claim the space by associating it with your email address')
-  .action(email => {
-    registerSpace(email)
-  })
+  .action(registerSpace)
 
 cli.command('delegation create <audience-did>')
   .describe('Create a delegation to the passed audience for the given abilities with the _current_ space as the resource.')
