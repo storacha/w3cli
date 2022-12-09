@@ -8,7 +8,8 @@
     "w3": "bin.js"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "standard",
+    "test": "echo \"Error: no test specified\""
   },
   "repository": {
     "type": "git",
