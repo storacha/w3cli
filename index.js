@@ -2,15 +2,14 @@ import fs from 'fs'
 import ora from 'ora'
 import tree from 'pretty-tree'
 import { Readable } from 'stream'
-import { create } from '@web3-storage/w3up-client'
 import * as DID from '@ipld/dag-ucan/did'
 import { CarWriter } from '@ipld/car'
 import { filesFromPath } from 'files-from-path'
-import { checkPathsExist, filesize } from './lib.js'
+import { getClient, checkPathsExist, filesize } from './lib.js'
 
 export async function upload (firstPath, opts) {
   const paths = checkPathsExist([firstPath, ...opts._])
-  const client = await create()
+  const client = await getClient()
   const hidden = !!opts.hidden
   const files = []
   let totalSize = 0
@@ -40,7 +39,7 @@ export async function upload (firstPath, opts) {
  * Print out all the uploads in the current space
  */
 export async function list (opts) {
-  const client = await create()
+  const client = await getClient()
   let count = 0
   let res
   do {
@@ -73,14 +72,14 @@ export async function list (opts) {
 }
 
 export async function createSpace (name) {
-  const client = await create()
+  const client = await getClient()
   const space = await client.createSpace(name)
   await client.setCurrentSpace(space.did)
   console.log(space.did)
 }
 
 export async function registerSpace (email) {
-  const client = await create()
+  const client = await getClient()
   let space = client.currentSpace()
   if (space === undefined) {
     space = await client.setCurrentSpace(space.did())
@@ -106,7 +105,7 @@ export async function registerSpace (email) {
 }
 
 export async function createDelegation (audienceDID, opts) {
-  const client = await create()
+  const client = await getClient()
   if (client.currentSpace() == null) {
     throw new Error('no current space, use `w3 space register` to create one.')
   }

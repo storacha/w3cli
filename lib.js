@@ -1,7 +1,15 @@
 import fs from 'fs'
 import path from 'path'
+import { connect } from '@ucanto/client'
+import * as CAR from '@ucanto/transport/car'
+import * as CBOR from '@ucanto/transport/cbor'
+import * as HTTP from '@ucanto/transport/http'
+import { parse } from '@ipld/dag-ucan/did'
+import { create } from '@web3-storage/w3up-client'
+import { StoreConf } from '@web3-storage/access/stores/store-conf'
 
 export function getPkg () {
+  // @ts-ignore JSON.parse works with Buffer in Node.js
   return JSON.parse(fs.readFileSync(new URL('./package.json', import.meta.url)))
 }
 
@@ -38,4 +46,43 @@ export function unwarnify () {
     }
     return originalEmit.apply(process, arguments)
   }
+}
+
+/**
+ * Get a new API client configured from env vars.
+ */
+export function getClient () {
+  const store = new StoreConf({ profile: process.env.W3_STORE_NAME ?? 'w3cli' })
+
+  let serviceConf
+  if (
+    process.env.W3_ACCESS_SERVICE_DID &&
+    process.env.W3_ACCESS_SERVICE_URL &&
+    process.env.W3_UPLOAD_SERVICE_DID &&
+    process.env.W3_UPLOAD_SERVICE_URL
+  ) {
+    /** @type {import('@web3-storage/w3up-client/types').ServiceConf} */
+    serviceConf = {
+      access: connect({
+        id: parse(process.env.W3_ACCESS_SERVICE_DID),
+        encoder: CAR,
+        decoder: CBOR,
+        channel: HTTP.open({
+          url: new URL(process.env.W3_ACCESS_SERVICE_URL),
+          method: 'POST'
+        })
+      }),
+      upload: connect({
+        id: parse(process.env.W3_UPLOAD_SERVICE_DID),
+        encoder: CAR,
+        decoder: CBOR,
+        channel: HTTP.open({
+          url: new URL(process.env.W3_UPLOAD_SERVICE_URL),
+          method: 'POST'
+        })
+      })
+    }
+  }
+
+  return create({ store, serviceConf })
 }
