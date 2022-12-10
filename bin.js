@@ -3,7 +3,7 @@
 import sade from 'sade'
 import open from 'open'
 import { getPkg, unwarnify } from './lib.js'
-import { createSpace, registerSpace, createDelegation, upload, list } from './index.js'
+import { createSpace, registerSpace, createDelegation, upload, list, whoami } from './index.js'
 
 unwarnify()
 
@@ -30,6 +30,10 @@ cli.command('ls')
   .option('--json', 'Format as newline delimted JSON')
   .option('--shards', 'Pretty print with shards in output')
   .action(list)
+
+cli.command('whoami')
+  .describe('Print information about the current agent.')
+  .action(whoami)
 
 cli.command('space')
   .describe('Create and mangage w3 spaces')
