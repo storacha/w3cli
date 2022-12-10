@@ -23,7 +23,7 @@ export async function createServer () {
   }).listen()
 
   await once(server, 'listening')
-  
+
   return {
     server,
     // @ts-expect-error
