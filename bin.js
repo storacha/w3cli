@@ -2,8 +2,10 @@
 
 import sade from 'sade'
 import open from 'open'
-import { getPkg } from './lib.js'
-import { createSpace, registerSpace, createDelegation } from './index.js'
+import { getPkg, unwarnify } from './lib.js'
+import { createSpace, registerSpace, createDelegation, upload } from './index.js'
+
+unwarnify()
 
 const cli = sade('w3')
 
@@ -11,8 +13,15 @@ cli
   .version(getPkg().version)
   .example('up path/to/files')
 
+cli.command('up <file>')
+  .alias('upload', 'put')
+  .describe('Store a file(s) to the service and register an upload.')
+  .option('--no-wrap', 'Don\'t wrap input files with a directory.')
+  .option('-H, --hidden', 'Include paths that start with ".".')
+  .action(upload)
+
 cli.command('open <cid>')
-  .describe('open CID on https://w3s.link')
+  .describe('Open CID on https://w3s.link')
   .action(cid => open(`https://w3s.link/ipfs/${cid}`))
 
 cli.command('space')

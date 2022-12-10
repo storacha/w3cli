@@ -4,6 +4,37 @@ import { Readable } from 'stream'
 import { create } from '@web3-storage/w3up-client'
 import * as DID from '@ipld/dag-ucan/did'
 import { CarWriter } from '@ipld/car'
+import ora from 'ora'
+import { filesFromPath } from 'files-from-path'
+import { checkPathsExist, filesize } from './lib.js'
+
+export async function upload (firstPath, opts) {
+  const paths = checkPathsExist([firstPath, ...opts._])
+  const client = await create()
+  const hidden = !!opts.hidden
+  const files = []
+  let totalSize = 0
+  let totalSent = 0
+  const spinner = ora('Packing files').start()
+  for (const p of paths) {
+    for await (const file of filesFromPath(p, { hidden })) {
+      totalSize += file.size
+      files.push({ name: file.name, stream: () => Readable.toWeb(file.stream()) })
+      spinner.text = `Packing ${files.length} file${files.length === 1 ? '' : 's'} (${filesize(totalSize)})`
+    }
+  }
+  spinner.start('Storing')
+  // @ts-ignore
+  const root = await client.uploadDirectory(files, {
+    onShardStored: ({ cid, size }) => {
+      totalSent += size
+      spinner.stopAndPersist({ text: cid.toString() })
+      spinner.start(`Storing ${Math.round((totalSent / totalSize) * 100)}%`)
+    }
+  })
+  spinner.stopAndPersist({ symbol: '⁂', text: `Stored ${files.length} file${files.length === 1 ? '' : 's'}` })
+  console.log(`⁂ https://w3s.link/ipfs/${root}`)
+}
 
 export async function createSpace (name) {
   const client = await create()
