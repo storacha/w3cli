@@ -3,7 +3,7 @@
 import sade from 'sade'
 import open from 'open'
 import { getPkg } from './lib.js'
-import { createSpace, registerSpace, createDelegation } from './index.js'
+import { createSpace, registerSpace, createDelegation, list } from './index.js'
 
 const cli = sade('w3')
 
@@ -14,6 +14,13 @@ cli
 cli.command('open <cid>')
   .describe('open CID on https://w3s.link')
   .action(cid => open(`https://w3s.link/ipfs/${cid}`))
+
+cli.command('ls')
+  .alias('list')
+  .describe('List uploads in the current space')
+  .option('--json', 'Output as ndjson')
+  .option('--shards', 'Include shards in output')
+  .action(list)
 
 cli.command('space')
   .describe('Create and mangage w3 spaces')
