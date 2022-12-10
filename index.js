@@ -4,7 +4,6 @@ import { Readable } from 'stream'
 import { create } from '@web3-storage/w3up-client'
 import * as DID from '@ipld/dag-ucan/did'
 import { CarWriter } from '@ipld/car'
-import ora from 'ora'
 import { filesFromPath } from 'files-from-path'
 import { checkPathsExist, filesize } from './lib.js'
 
