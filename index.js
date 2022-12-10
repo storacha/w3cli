@@ -1,9 +1,40 @@
 import fs from 'fs'
+import ora from 'ora'
+import tree from 'pretty-tree'
 import { Readable } from 'stream'
 import { create } from '@web3-storage/w3up-client'
 import * as DID from '@ipld/dag-ucan/did'
 import { CarWriter } from '@ipld/car'
-import tree from 'pretty-tree'
+import { filesFromPath } from 'files-from-path'
+import { checkPathsExist, filesize } from './lib.js'
+
+export async function upload (firstPath, opts) {
+  const paths = checkPathsExist([firstPath, ...opts._])
+  const client = await create()
+  const hidden = !!opts.hidden
+  const files = []
+  let totalSize = 0
+  let totalSent = 0
+  const spinner = ora('Packing files').start()
+  for (const p of paths) {
+    for await (const file of filesFromPath(p, { hidden })) {
+      totalSize += file.size
+      files.push({ name: file.name, stream: () => Readable.toWeb(file.stream()) })
+      spinner.text = `Packing ${files.length} file${files.length === 1 ? '' : 's'} (${filesize(totalSize)})`
+    }
+  }
+  spinner.start('Storing')
+  // @ts-ignore
+  const root = await client.uploadDirectory(files, {
+    onShardStored: ({ cid, size }) => {
+      totalSent += size
+      spinner.stopAndPersist({ text: cid.toString() })
+      spinner.start(`Storing ${Math.round((totalSent / totalSize) * 100)}%`)
+    }
+  })
+  spinner.stopAndPersist({ symbol: '⁂', text: `Stored ${files.length} file${files.length === 1 ? '' : 's'}` })
+  console.log(`⁂ https://w3s.link/ipfs/${root}`)
+}
 
 /**
  * Print out all the uploads in the current space
@@ -45,18 +76,33 @@ export async function createSpace (name) {
   const client = await create()
   const space = await client.createSpace(name)
   await client.setCurrentSpace(space.did)
+  console.log(space.did)
 }
 
-export async function registerSpace (address) {
+export async function registerSpace (email) {
   const client = await create()
-  if (await client.currentSpace() === undefined) {
-    await client.setCurrentSpace((await client.createSpace()).did)
+  let space = client.currentSpace()
+  if (space === undefined) {
+    space = await client.setCurrentSpace(space.did())
+    await client.setCurrentSpace(space.did())
   }
+  let spinner
+  setTimeout(() => {
+    spinner = ora(`🔗 please click the link we sent to ${email} to register your space`).start()
+  }, 1000)
   try {
-    await client.registerSpace(address)
+    await client.registerSpace(email)
   } catch (err) {
-    console.error('registration failed: ', err)
+    if (spinner) spinner.stop()
+    if (err.message.startsWith('Space already registered')) {
+      console.error('Error: space already registered.')
+    } else {
+      console.error(err)
+    }
+    process.exit(1)
   }
+  if (spinner) spinner.stop()
+  console.log(`⁂ space registered to ${email}`)
 }
 
 export async function createDelegation (audienceDID, opts) {
