@@ -145,3 +145,9 @@ export async function createDelegation (audienceDID, opts) {
   }
   await writer.close()
 }
+
+export async function whoami () {
+  const client = await getClient()
+  const who = client.agent()
+  console.log(who.did())
+}
