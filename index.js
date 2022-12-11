@@ -88,7 +88,7 @@ export async function createSpace (name) {
   const client = await create()
   const space = await client.createSpace(name)
   await client.setCurrentSpace(space.did())
-  console.log(space.did)
+  console.log(space.did())
 }
 
 /**
