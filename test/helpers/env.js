@@ -1,9 +1,12 @@
 /**
- * @param {import('@ucanto/interface').Principal} [servicePrincipal]
- * @param {URL} [serviceURL]
+ * @param {object} [options]
+ * @param {import('@ucanto/interface').Principal} [options.servicePrincipal]
+ * @param {URL} [options.serviceURL]
+ * @param {string} [options.storeName]
  */
-export function createEnv (servicePrincipal, serviceURL) {
-  const env = { W3_STORE_NAME: 'w3cli-test' }
+export function createEnv (options = {}) {
+  const { servicePrincipal, serviceURL, storeName } = options
+  const env = { W3_STORE_NAME: storeName ?? 'w3cli-test' }
   if (servicePrincipal && serviceURL) {
     Object.assign(env, {
       W3_ACCESS_SERVICE_DID: servicePrincipal.did(),

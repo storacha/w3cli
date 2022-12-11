@@ -3,7 +3,7 @@
 import sade from 'sade'
 import open from 'open'
 import { getPkg, unwarnify } from './lib.js'
-import { createSpace, registerSpace, createDelegation, upload, list } from './index.js'
+import { createSpace, registerSpace, addSpace, createDelegation, upload, list } from './index.js'
 
 unwarnify()
 
@@ -41,6 +41,10 @@ cli.command('space create [name]')
 cli.command('space register <email>')
   .describe('Claim the space by associating it with your email address')
   .action(registerSpace)
+
+cli.command('space add <proof>')
+  .describe('Add a space to the agent from the passed proof of delegation')
+  .action(addSpace)
 
 cli.command('delegation create <audience-did>')
   .describe('Create a delegation to the passed audience for the given abilities with the _current_ space as the resource.')
