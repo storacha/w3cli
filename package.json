@@ -11,7 +11,7 @@
   "scripts": {
     "lint": "standard",
     "test": "npm-run-all -p -r mock test:ava",
-    "test:ava": "ava --verbose --serial",
+    "test:ava": "ava --verbose",
     "mock": "run-p mock:*",
     "mock:bucket-200": "PORT=9200 STATUS=200 node test/helpers/bucket-server.js"
   },
