@@ -220,21 +220,21 @@ test('w3 space add - proof not exists', async t => {
   const env = t.context.env.alice
   const err = await t.throwsAsync(() => execa('./bin.js', ['space', 'add', 'djcvbii'], { env }))
   // @ts-expect-error
-  t.regex(err.stderr, /failed to read delegation CAR/)
+  t.regex(err.stderr, /failed to read proof/)
 })
 
 test('w3 space add - proof not a CAR', async t => {
   const env = t.context.env.alice
   const err = await t.throwsAsync(() => execa('./bin.js', ['space', 'add', './package.json'], { env }))
   // @ts-expect-error
-  t.regex(err.stderr, /failed to parse delegation CAR/)
+  t.regex(err.stderr, /failed to parse proof/)
 })
 
 test('w3 space add - proof invalid', async t => {
   const env = t.context.env.alice
   const err = await t.throwsAsync(() => execa('./bin.js', ['space', 'add', './test/fixtures/empty.car'], { env }))
   // @ts-expect-error
-  t.regex(err.stderr, /failed to import delegation DAG/)
+  t.regex(err.stderr, /failed to import proof/)
 })
 
 test('w3 space ls', async t => {

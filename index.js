@@ -129,7 +129,7 @@ export async function addSpace (proofPath) {
   try {
     await fs.promises.access(proofPath, fs.constants.R_OK)
   } catch (err) {
-    console.error(`Error: failed to read delegation CAR: ${err.message}`)
+    console.error(`Error: failed to read proof: ${err.message}`)
     process.exit(1)
   }
 
@@ -140,7 +140,7 @@ export async function addSpace (proofPath) {
       blocks.push(block)
     }
   } catch (err) {
-    console.error(`Error: failed to parse delegation CAR: ${err.message}`)
+    console.error(`Error: failed to parse proof: ${err.message}`)
     process.exit(1)
   }
 
@@ -149,7 +149,7 @@ export async function addSpace (proofPath) {
     // @ts-expect-error
     delegation = importDAG(blocks)
   } catch (err) {
-    console.error(`Error: failed to import delegation DAG: ${err.message}`)
+    console.error(`Error: failed to import proof: ${err.message}`)
     process.exit(1)
   }
   const space = await client.addSpace(delegation)
