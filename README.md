@@ -30,31 +30,31 @@ w3 up recipies.txt
 ## Commands
 
 * Basics
-  * [`w3 up`](#)
-  * [`w3 ls`](#)
-  * [`w3 rm`](#)
-  * [`w3 open`](#)
-  * [`w3 whoami`](#)
+  * [`w3 up`](#w3-up-path-path)
+  * [`w3 ls`](#w3-ls)
+  * [`w3 rm`](#w3-rm-root-cid)
+  * [`w3 open`](#w3-open-cid)
+  * [`w3 whoami`](#w3-whoami)
 * Space management
-  * [`w3 space add`](#)
-  * [`w3 space create`](#)
-  * [`w3 space ls`](#)
-  * [`w3 space register`](#)
-  * [`w3 space use`](#)
+  * [`w3 space add`](#w3-space-add-proofucan)
+  * [`w3 space create`](#w3-space-create-name)
+  * [`w3 space ls`](#w3-space-ls)
+  * [`w3 space register`](#w3-space-register-email)
+  * [`w3 space use`](#w3-space-use-did)
 * Capability management
-  * [`w3 delegation create`](#)
-  * [`w3 delegation ls`](#)
-  * [`w3 proof add`](#)
-  * [`w3 proof ls`](#)
+  * [`w3 delegation create`](#w3-delegation-create-audience-did)
+  * [`w3 delegation ls`](#w3-delegation-ls)
+  * [`w3 proof add`](#w3-proof-add-proofucan)
+  * [`w3 proof ls`](#w3-proof-ls)
 * Advanced usage
-  * [`w3 can space info`](#)
-  * [`w3 can space recover`](#)
-  * [`w3 can store add`](#)
-  * [`w3 can store list`](#)
-  * [`w3 can store remove`](#)
-  * [`w3 can upload add`](#)
-  * [`w3 can upload list`](#)
-  * [`w3 can upload remove`](#)
+  * [`w3 can space info`](#w3-can-space-info-did)
+  * [`w3 can space recover`](#w3-can-space-recover-email)
+  * [`w3 can store add`](#w3-can-store-add-car-path)
+  * [`w3 can store ls`](#w3-can-store-ls)
+  * [`w3 can store rm`](#w3-can-store-rm-car-cid)
+  * [`w3 can upload add`](#w3-can-upload-add-root-cid-shard-cid-shard-cid)
+  * [`w3 can upload ls`](#w3-can-upload-ls)
+  * [`w3 can upload rm`](#w3-can-upload-rm-root-cid)
 
 ---
 
