@@ -12,6 +12,11 @@ test('w3 --version', (t) => {
   t.regex(stdout, /w3, \d.\d.\d/)
 })
 
+test('w3 whoami', (t) => {
+  const { stdout } = execaSync('./bin.js', ['whoami'])
+  t.regex(stdout, /^did:key:/)
+})
+
 test('w3 space create', (t) => {
   const { stdout } = execaSync('./bin.js', ['space', 'create'])
   t.regex(stdout, /^did:key:/)
