@@ -122,6 +122,6 @@ test('w3 ls', async (t) => {
 
   await execa('./bin.js', ['up', 'test/fixtures/pinpie.jpg'], { env })
 
-  const list1 = await execa('./bin.js', ['ls'], { env })
-  t.notThrows(() => CID.parse(list1.stdout.trim()))
+  const list1 = await execa('./bin.js', ['ls', '--json'], { env })
+  t.notThrows(() => CID.parse(JSON.parse(list1.stdout).root))
 })
