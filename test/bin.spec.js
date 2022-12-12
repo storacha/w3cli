@@ -160,26 +160,26 @@ test('w3 delegation create', async t => {
 })
 
 test('w3 space add', async t => {
-  const aliceEnv = () => createEnv()
-  const bobEnv = () => createEnv({ storeName: 'w3cli-test-bob' })
+  const aliceEnv = createEnv()
+  const bobEnv = createEnv({ storeName: 'w3cli-test-bob' })
 
-  const aliceOut0 = await execa('./bin.js', ['space', 'create'], { env: aliceEnv() })
+  const aliceOut0 = await execa('./bin.js', ['space', 'create'], { env: aliceEnv })
   const spaceDID = DID.parse(aliceOut0.stdout.trim()).did()
 
-  const bobOut0 = await execa('./bin.js', ['whoami'], { env: bobEnv() })
+  const bobOut0 = await execa('./bin.js', ['whoami'], { env: bobEnv })
   const bobDID = DID.parse(bobOut0.stdout.trim()).did()
 
   const proofPath = path.join(os.tmpdir(), `w3cli-test-delegation-${Date.now()}`)
 
-  await execa('./bin.js', ['delegation', 'create', bobDID, '--output', proofPath], { env: aliceEnv() })
+  await execa('./bin.js', ['delegation', 'create', bobDID, '--output', proofPath], { env: aliceEnv })
 
-  const bobOut1 = await execa('./bin.js', ['space', 'ls'], { env: bobEnv() })
+  const bobOut1 = await execa('./bin.js', ['space', 'ls'], { env: bobEnv })
   t.false(bobOut1.stdout.includes(spaceDID))
 
-  const bobOut2 = await execa('./bin.js', ['space', 'add', proofPath], { env: bobEnv() })
+  const bobOut2 = await execa('./bin.js', ['space', 'add', proofPath], { env: bobEnv })
   t.is(bobOut2.stdout.trim(), spaceDID)
 
-  const bobOut3 = await execa('./bin.js', ['space', 'ls'], { env: bobEnv() })
+  const bobOut3 = await execa('./bin.js', ['space', 'ls'], { env: bobEnv })
   t.true(bobOut3.stdout.includes(spaceDID))
 })
 
