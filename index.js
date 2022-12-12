@@ -8,6 +8,12 @@ import { filesFromPath } from 'files-from-path'
 import { importDAG } from '@ucanto/core/delegation'
 import { getClient, checkPathsExist, filesize } from './lib.js'
 
+/**
+ * @param {string} firstPath
+ * @param {object} opts
+ * @param {string[]} opts._
+ * @param {boolean} [opts.hidden]
+ */
 export async function upload (firstPath, opts) {
   const paths = checkPathsExist([firstPath, ...opts._])
   const client = await getClient()
@@ -37,7 +43,10 @@ export async function upload (firstPath, opts) {
 }
 
 /**
- * Print out all the uploads in the current space
+ * Print out all the uploads in the current space.
+ * @param {object} opts
+ * @param {boolean} [opts.json]
+ * @param {boolean} [opts.shards]
  */
 export async function list (opts) {
   const client = await getClient()
@@ -50,14 +59,14 @@ export async function list (opts) {
       if (opts.json) {
         console.log(res.results.map(({ root, shards }) => JSON.stringify({
           root: root.toString(),
-          shards: shards.map(s => s.toString())
+          shards: shards?.map(s => s.toString())
         })).join('\n'))
       } else if (opts.shards) {
         console.log(res.results.map(({ root, shards }) => tree({
           label: root.toString(),
           nodes: [{
             label: 'shards',
-            leaf: shards.map(s => s.toString())
+            leaf: shards?.map(s => s.toString())
           }]
         })).join('\n'))
       } else {
@@ -72,6 +81,9 @@ export async function list (opts) {
   }
 }
 
+/**
+ * @param {string} name
+ */
 export async function createSpace (name) {
   const client = await getClient()
   const space = await client.createSpace(name)
@@ -79,13 +91,17 @@ export async function createSpace (name) {
   console.log(space.did())
 }
 
+/**
+ * @param {string} email
+ */
 export async function registerSpace (email) {
   const client = await getClient()
   let space = client.currentSpace()
   if (space === undefined) {
-    space = await client.setCurrentSpace(space.did())
+    space = await client.createSpace()
     await client.setCurrentSpace(space.did())
   }
+  /** @type {import('ora').Ora|undefined} */
   let spinner
   setTimeout(() => {
     spinner = ora(`🔗 please click the link we sent to ${email} to register your space`).start()
@@ -145,6 +161,14 @@ export async function useSpace (did) {
   console.log(space.did())
 }
 
+/**
+ * @param {string} audienceDID
+ * @param {object} opts
+ * @param {string[]|string} opts.can
+ * @param {string} [opts.name]
+ * @param {string} [opts.type]
+ * @param {string} [opts.output]
+ */
 export async function createDelegation (audienceDID, opts) {
   const client = await getClient()
   if (client.currentSpace() == null) {
@@ -156,6 +180,7 @@ export async function createDelegation (audienceDID, opts) {
   if (opts.name) audienceMeta.name = opts.name
   if (opts.type) audienceMeta.type = opts.type
 
+  // @ts-expect-error createDelegation should validate abilities
   const delegation = await client.createDelegation(audience, abilities, { audienceMeta })
   delegation.export()
 
