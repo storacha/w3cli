@@ -1,7 +1,8 @@
-import fs from 'fs'
-import ora from 'ora'
+import fs, { readSync } from 'fs'
+import ora, { oraPromise } from 'ora'
 import tree from 'pretty-tree'
 import { Readable } from 'stream'
+import { CID } from 'multiformats/cid'
 import * as DID from '@ipld/dag-ucan/did'
 import { CarReader, CarWriter } from '@ipld/car'
 import { filesFromPath } from 'files-from-path'
@@ -78,6 +79,34 @@ export async function list (opts) {
   if (count === 0 && !opts.json) {
     console.log('⁂ No uploads in space')
     console.log('⁂ Try out `w3 up <path to files>` to upload some')
+  }
+}
+/**
+ * @param {string} rootCid
+ * @param {object} opts
+ * @param {boolean} [opts.shards]
+ */
+export async function remove (rootCid, opts) {
+  let root
+  try {
+    root = CID.parse(rootCid.trim())
+  } catch (err) {
+    console.error(`Error: ${rootCid} is not a CID`)
+  }
+
+  const client = await getClient()
+  const res = await client.capability.upload.remove(root)
+  console.log(`Removed ${root}`)
+  if (!opts.shards) {
+    return
+  }
+  console.log('shards')
+  for (const shard of res.shards) {
+    oraPromise(client.capability.store.remove(shard, {
+      text: `Removing ${shard}`,
+      successText: `Removed ${shard}`,
+      failText: `Error removing ${shard}`
+    }))
   }
 }
 

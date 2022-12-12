@@ -31,6 +31,11 @@ cli.command('ls')
   .option('--shards', 'Pretty print with shards in output')
   .action(list)
 
+cli.command('rm <root-cid>')
+  .example('rm bafy...')
+  .describe('Remove an upload from the uploads listing. Pass --shards to delete the actual data if you are sure no other uploads need them')
+  .option('--shards', 'Remove all shards referenced by the upload from the store. Use with caution and ensure other uploads do not reference the same shards.')
+
 cli.command('whoami')
   .describe('Print information about the current agent.')
   .action(whoami)
