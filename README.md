@@ -100,11 +100,15 @@ Add a space to the agent. The proof is a CAR encoded delegation to _this_ agent.
 
 ### `w3 space create [name]`
 
+Create a new w3 space with an optional name.
+
 ### `w3 space ls`
 
 List spaces known to the agent.
 
 ### `w3 space register <email>`
+
+Claim the space by associating it with your email address.
 
 ### `w3 space use <did>`
 
