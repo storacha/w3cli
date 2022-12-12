@@ -121,6 +121,30 @@ export async function addSpace (proofPath) {
   console.log(space.did())
 }
 
+export async function listSpaces () {
+  const client = await getClient()
+  const current = client.currentSpace()
+  for (const space of client.spaces()) {
+    const prefix = current && current.did() === space.did() ? '* ' : '  '
+    console.log(`${prefix}${space.did()} ${space.name() ?? ''}`)
+  }
+}
+
+/**
+ * @param {string} did
+ */
+export async function useSpace (did) {
+  const client = await getClient()
+  const spaces = client.spaces()
+  const space = spaces.find(s => s.did() === did) ?? spaces.find(s => s.name() === did)
+  if (!space) {
+    console.error(`Error: space not found: ${did}`)
+    process.exit(1)
+  }
+  await client.setCurrentSpace(space.did())
+  console.log(space.did())
+}
+
 export async function createDelegation (audienceDID, opts) {
   const client = await getClient()
   if (client.currentSpace() == null) {

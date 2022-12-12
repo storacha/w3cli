@@ -11,7 +11,7 @@
   "scripts": {
     "lint": "standard",
     "test": "npm-run-all -p -r mock test:ava",
-    "test:ava": "ava --verbose",
+    "test:ava": "ava --verbose --serial",
     "mock": "run-p mock:*",
     "mock:bucket-200": "PORT=9200 STATUS=200 node test/helpers/bucket-server.js"
   },
@@ -47,7 +47,7 @@
     "@ucanto/core": "^3.0.5",
     "@ucanto/transport": "^3.0.5",
     "@web3-storage/access": "^8.0.4",
-    "@web3-storage/w3up-client": "github:web3-storage/w3up-client#637d7edff0ac7519a6fd98f8c0ab84a9ce8378e3",
+    "@web3-storage/w3up-client": "github:web3-storage/w3up-client#580ea7b650060b6713d76e4b29ae222ada7dfdc5",
     "files-from-path": "^0.2.6",
     "open": "^8.4.0",
     "ora": "^6.1.2",

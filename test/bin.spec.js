@@ -141,10 +141,10 @@ test('w3 delegation create', async t => {
   const { stdout } = await execa('./bin.js', ['space', 'create'], { env: createEnv() })
   const spaceDID = DID.parse(stdout.trim()).did()
 
-  const audience = await Signer.generate()
+  const bob = await Signer.generate()
   const proofPath = path.join(os.tmpdir(), `w3cli-test-delegation-${Date.now()}`)
 
-  await execa('./bin.js', ['delegation', 'create', audience.did(), '--output', proofPath], { env: createEnv() })
+  await execa('./bin.js', ['delegation', 'create', bob.did(), '--output', proofPath], { env: createEnv() })
 
   const reader = await CarReader.fromIterable(fs.createReadStream(proofPath))
   const blocks = []
@@ -154,16 +154,69 @@ test('w3 delegation create', async t => {
 
   // @ts-expect-error
   const delegation = importDAG(blocks)
-  t.is(delegation.audience.did(), audience.did())
+  t.is(delegation.audience.did(), bob.did())
   t.is(delegation.capabilities[0].can, '*')
   t.is(delegation.capabilities[0].with, spaceDID)
 })
 
-// test('w3 space add', async t => {
-//   const { stdout } = await execa('./bin.js', ['space', 'create'], { env: createEnv() })
-//   const spaceDID = stdout.trim()
+test('w3 space add', async t => {
+  const aliceEnv = () => createEnv()
+  const bobEnv = () => createEnv({ storeName: 'w3cli-test-bob' })
 
-//   const proofPath = path.join(os.tmpdir(), `w3cli-test-delegation-${Date.now()}`)
+  const aliceOut0 = await execa('./bin.js', ['space', 'create'], { env: aliceEnv() })
+  const spaceDID = DID.parse(aliceOut0.stdout.trim()).did()
 
-//   await execa('./bin.js', ['delegation', 'create', proofPath], { env: createEnv() })
-// })
+  const bobOut0 = await execa('./bin.js', ['whoami'], { env: bobEnv() })
+  const bobDID = DID.parse(bobOut0.stdout.trim()).did()
+
+  const proofPath = path.join(os.tmpdir(), `w3cli-test-delegation-${Date.now()}`)
+
+  await execa('./bin.js', ['delegation', 'create', bobDID, '--output', proofPath], { env: aliceEnv() })
+
+  const bobOut1 = await execa('./bin.js', ['space', 'ls'], { env: bobEnv() })
+  t.false(bobOut1.stdout.includes(spaceDID))
+
+  const bobOut2 = await execa('./bin.js', ['space', 'add', proofPath], { env: bobEnv() })
+  t.is(bobOut2.stdout.trim(), spaceDID)
+
+  const bobOut3 = await execa('./bin.js', ['space', 'ls'], { env: bobEnv() })
+  t.true(bobOut3.stdout.includes(spaceDID))
+})
+
+test('w3 space ls', async t => {
+  const aliceOut0 = await execa('./bin.js', ['space', 'ls'], { env: createEnv() })
+
+  const aliceOut1 = await execa('./bin.js', ['space', 'create'], { env: createEnv() })
+  const spaceDID = DID.parse(aliceOut1.stdout.trim()).did()
+
+  const aliceOut2 = await execa('./bin.js', ['space', 'ls'], { env: createEnv() })
+
+  t.false(aliceOut0.stdout.includes(spaceDID))
+  t.true(aliceOut2.stdout.includes(spaceDID))
+})
+
+test('w3 space use', async t => {
+  const aliceOut0 = await execa('./bin.js', ['space', 'create'], { env: createEnv() })
+  const spaceDID = DID.parse(aliceOut0.stdout.trim()).did()
+
+  const aliceOut1 = await execa('./bin.js', ['space', 'ls'], { env: createEnv() })
+  t.true(aliceOut1.stdout.includes(`* ${spaceDID}`))
+
+  const spaceName = `name-${Date.now()}`
+  const aliceOut2 = await execa('./bin.js', ['space', 'create', spaceName], { env: createEnv() })
+  const namedSpaceDID = DID.parse(aliceOut2.stdout.trim()).did()
+
+  const aliceOut3 = await execa('./bin.js', ['space', 'ls'], { env: createEnv() })
+  t.false(aliceOut3.stdout.includes(`* ${spaceDID}`))
+  t.true(aliceOut3.stdout.includes(`* ${namedSpaceDID}`))
+
+  await execa('./bin.js', ['space', 'use', spaceDID], { env: createEnv() })
+  const aliceOut4 = await execa('./bin.js', ['space', 'ls'], { env: createEnv() })
+  t.true(aliceOut4.stdout.includes(`* ${spaceDID}`))
+  t.false(aliceOut4.stdout.includes(`* ${namedSpaceDID}`))
+
+  await execa('./bin.js', ['space', 'use', spaceName], { env: createEnv() })
+  const aliceOut5 = await execa('./bin.js', ['space', 'ls'], { env: createEnv() })
+  t.false(aliceOut5.stdout.includes(`* ${spaceDID}`))
+  t.true(aliceOut5.stdout.includes(`* ${namedSpaceDID}`))
+})

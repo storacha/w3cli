@@ -3,7 +3,7 @@
 import sade from 'sade'
 import open from 'open'
 import { getPkg, unwarnify } from './lib.js'
-import { createSpace, registerSpace, addSpace, createDelegation, upload, list, whoami } from './index.js'
+import { createSpace, registerSpace, addSpace, listSpaces, useSpace, createDelegation, upload, list, whoami } from './index.js'
 
 unwarnify()
 
@@ -47,8 +47,16 @@ cli.command('space register <email>')
   .action(registerSpace)
 
 cli.command('space add <proof>')
-  .describe('Add a space to the agent from the passed proof of delegation')
+  .describe('Add a space to the agent. The proof is a CAR encoded delegation to _this_ agent.')
   .action(addSpace)
+
+cli.command('space ls')
+  .describe('List spaces known to the agent')
+  .action(listSpaces)
+
+cli.command('space use <did>')
+  .describe('Set the current space in use by the agent')
+  .action(useSpace)
 
 cli.command('delegation create <audience-did>')
   .describe('Create a delegation to the passed audience for the given abilities with the _current_ space as the resource.')
