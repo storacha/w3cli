@@ -18,7 +18,6 @@ import { mockService } from './helpers/mocks.js'
 import { createServer as createHTTPServer } from './helpers/http-server.js'
 import { createHTTPListener } from './helpers/ucanto.js'
 import { createEnv } from './helpers/env.js'
-import { Readable } from 'stream'
 
 /**
  * @typedef {{
