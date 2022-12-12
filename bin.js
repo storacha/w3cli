@@ -3,7 +3,19 @@
 import sade from 'sade'
 import open from 'open'
 import { getPkg, unwarnify } from './lib.js'
-import { createSpace, registerSpace, addSpace, listSpaces, useSpace, createDelegation, upload, list, whoami } from './index.js'
+import {
+  createSpace,
+  registerSpace,
+  addSpace,
+  listSpaces,
+  useSpace,
+  createDelegation,
+  listDelegations,
+  listProofs,
+  upload,
+  list,
+  whoami
+} from './index.js'
 
 unwarnify()
 
@@ -65,5 +77,15 @@ cli.command('delegation create <audience-did>')
   .option('-t, --type', 'Type of the audience receiving the delegation, one of: device, app, service.')
   .option('-o, --output', 'Path of file to write the exported delegation data to.')
   .action(createDelegation)
+
+cli.command('delegation ls')
+  .describe('List delegations created by this agent for others.')
+  .option('--json', 'Format as newline delimted JSON')
+  .action(listDelegations)
+
+cli.command('proof ls')
+  .describe('List proofs of delegated capabilities. Proofs are delegations with an audience matching the agent DID.')
+  .option('--json', 'Format as newline delimted JSON')
+  .action(listProofs)
 
 cli.parse(process.argv)

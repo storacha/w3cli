@@ -125,9 +125,17 @@ Create a delegation to the passed audience for the given abilities with the _cur
 
 ### `w3 delegation ls`
 
+List delegations created by this agent for others.
+
+- `--json` Format as newline delimted JSON
+
 ### `w3 proof add <proof.ucan>`
 
 ### `w3 proof ls`
+
+List proofs of delegated capabilities. Proofs are delegations with an audience matching the agent DID.
+
+- `--json` Format as newline delimted JSON
 
 ### `w3 can space info <did>`
 
