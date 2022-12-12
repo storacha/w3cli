@@ -126,13 +126,32 @@ export async function registerSpace (email) {
  */
 export async function addSpace (proofPath) {
   const client = await getClient()
-  const reader = await CarReader.fromIterable(fs.createReadStream(proofPath))
-  const blocks = []
-  for await (const block of reader.blocks()) {
-    blocks.push(block)
+  try {
+    await fs.promises.access(proofPath, fs.constants.R_OK)
+  } catch (err) {
+    console.error(`Error: failed to read delegation CAR: ${err.message}`)
+    process.exit(1)
   }
-  // @ts-expect-error
-  const delegation = importDAG(blocks)
+
+  const blocks = []
+  try {
+    const reader = await CarReader.fromIterable(fs.createReadStream(proofPath))
+    for await (const block of reader.blocks()) {
+      blocks.push(block)
+    }
+  } catch (err) {
+    console.error(`Error: failed to parse delegation CAR: ${err.message}`)
+    process.exit(1)
+  }
+
+  let delegation
+  try {
+    // @ts-expect-error
+    delegation = importDAG(blocks)
+  } catch (err) {
+    console.error(`Error: failed to import delegation DAG: ${err.message}`)
+    process.exit(1)
+  }
   const space = await client.addSpace(delegation)
   console.log(space.did())
 }

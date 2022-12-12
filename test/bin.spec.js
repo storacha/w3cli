@@ -18,6 +18,7 @@ import { mockService } from './helpers/mocks.js'
 import { createServer as createHTTPServer } from './helpers/http-server.js'
 import { createHTTPListener } from './helpers/ucanto.js'
 import { createEnv } from './helpers/env.js'
+import { Readable } from 'stream'
 
 /**
  * @typedef {{
@@ -215,6 +216,27 @@ test('w3 space add', async t => {
   t.true(bobOut3.stdout.includes(spaceDID))
 })
 
+test('w3 space add - proof not exists', async t => {
+  const env = t.context.env.alice
+  const err = await t.throwsAsync(() => execa('./bin.js', ['space', 'add', 'djcvbii'], { env }))
+  // @ts-expect-error
+  t.regex(err.stderr, /failed to read delegation CAR/)
+})
+
+test('w3 space add - proof not a CAR', async t => {
+  const env = t.context.env.alice
+  const err = await t.throwsAsync(() => execa('./bin.js', ['space', 'add', './package.json'], { env }))
+  // @ts-expect-error
+  t.regex(err.stderr, /failed to parse delegation CAR/)
+})
+
+test('w3 space add - proof invalid', async t => {
+  const env = t.context.env.alice
+  const err = await t.throwsAsync(() => execa('./bin.js', ['space', 'add', './test/fixtures/empty.car'], { env }))
+  // @ts-expect-error
+  t.regex(err.stderr, /failed to import delegation DAG/)
+})
+
 test('w3 space ls', async t => {
   const env = t.context.env.alice
 
@@ -255,4 +277,20 @@ test('w3 space use', async t => {
   const aliceOut5 = await execa('./bin.js', ['space', 'ls'], { env })
   t.false(aliceOut5.stdout.includes(`* ${spaceDID}`))
   t.true(aliceOut5.stdout.includes(`* ${namedSpaceDID}`))
+})
+
+test('w3 space use - space DID not exists', async t => {
+  const env = t.context.env.alice
+  const did = (await Signer.generate()).did()
+  const err = await t.throwsAsync(() => execa('./bin.js', ['space', 'use', did], { env }))
+  // @ts-expect-error
+  t.regex(err.stderr, /space not found/)
+})
+
+test('w3 space use - space name not exists', async t => {
+  const env = t.context.env.alice
+  const name = 'spaceymcspaceface'
+  const err = await t.throwsAsync(() => execa('./bin.js', ['space', 'use', name], { env }))
+  // @ts-expect-error
+  t.regex(err.stderr, /space not found/)
 })
