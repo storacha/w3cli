@@ -2,11 +2,11 @@ import fs from 'fs'
 import ora from 'ora'
 import tree from 'pretty-tree'
 import { Readable } from 'stream'
-import { create } from '@web3-storage/w3up-client'
 import * as DID from '@ipld/dag-ucan/did'
-import { CarWriter } from '@ipld/car'
+import { CarReader, CarWriter } from '@ipld/car'
 import { filesFromPath } from 'files-from-path'
-import { checkPathsExist, filesize } from './lib.js'
+import { importDAG } from '@ucanto/core/delegation'
+import { getClient, checkPathsExist, filesize } from './lib.js'
 
 /**
  * @param {string} firstPath
@@ -16,7 +16,7 @@ import { checkPathsExist, filesize } from './lib.js'
  */
 export async function upload (firstPath, opts) {
   const paths = checkPathsExist([firstPath, ...opts._])
-  const client = await create()
+  const client = await getClient()
   const hidden = !!opts.hidden
   const files = []
   let totalSize = 0
@@ -49,7 +49,7 @@ export async function upload (firstPath, opts) {
  * @param {boolean} [opts.shards]
  */
 export async function list (opts) {
-  const client = await create()
+  const client = await getClient()
   let count = 0
   let res
   do {
@@ -85,7 +85,7 @@ export async function list (opts) {
  * @param {string} name
  */
 export async function createSpace (name) {
-  const client = await create()
+  const client = await getClient()
   const space = await client.createSpace(name)
   await client.setCurrentSpace(space.did())
   console.log(space.did())
@@ -95,7 +95,7 @@ export async function createSpace (name) {
  * @param {string} email
  */
 export async function registerSpace (email) {
-  const client = await create()
+  const client = await getClient()
   let space = client.currentSpace()
   if (space === undefined) {
     space = await client.createSpace()
@@ -122,6 +122,46 @@ export async function registerSpace (email) {
 }
 
 /**
+ * @param {string} proofPath
+ */
+export async function addSpace (proofPath) {
+  const client = await getClient()
+  const reader = await CarReader.fromIterable(fs.createReadStream(proofPath))
+  const blocks = []
+  for await (const block of reader.blocks()) {
+    blocks.push(block)
+  }
+  // @ts-expect-error
+  const delegation = importDAG(blocks)
+  const space = await client.addSpace(delegation)
+  console.log(space.did())
+}
+
+export async function listSpaces () {
+  const client = await getClient()
+  const current = client.currentSpace()
+  for (const space of client.spaces()) {
+    const prefix = current && current.did() === space.did() ? '* ' : '  '
+    console.log(`${prefix}${space.did()} ${space.name() ?? ''}`)
+  }
+}
+
+/**
+ * @param {string} did
+ */
+export async function useSpace (did) {
+  const client = await getClient()
+  const spaces = client.spaces()
+  const space = spaces.find(s => s.did() === did) ?? spaces.find(s => s.name() === did)
+  if (!space) {
+    console.error(`Error: space not found: ${did}`)
+    process.exit(1)
+  }
+  await client.setCurrentSpace(space.did())
+  console.log(space.did())
+}
+
+/**
  * @param {string} audienceDID
  * @param {object} opts
  * @param {string[]|string} opts.can
@@ -130,7 +170,7 @@ export async function registerSpace (email) {
  * @param {string} [opts.output]
  */
 export async function createDelegation (audienceDID, opts) {
-  const client = await create()
+  const client = await getClient()
   if (client.currentSpace() == null) {
     throw new Error('no current space, use `w3 space register` to create one.')
   }
@@ -156,7 +196,7 @@ export async function createDelegation (audienceDID, opts) {
 }
 
 export async function whoami () {
-  const client = await create()
+  const client = await getClient()
   const who = client.agent()
   console.log(who.did())
 }

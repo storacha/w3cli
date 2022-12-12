@@ -10,7 +10,10 @@
   },
   "scripts": {
     "lint": "standard",
-    "test": "ava"
+    "test": "npm-run-all -p -r mock test:ava",
+    "test:ava": "ava --verbose",
+    "mock": "run-p mock:*",
+    "mock:bucket-200": "PORT=9200 STATUS=200 node test/helpers/bucket-server.js"
   },
   "repository": {
     "type": "git",
@@ -28,14 +31,23 @@
   },
   "homepage": "https://github.com/web3-storage/w3cli#readme",
   "devDependencies": {
+    "@ucanto/principal": "^3.0.1",
+    "@ucanto/server": "^3.0.8",
+    "@web3-storage/capabilities": "^1.0.0",
     "ava": "^5.1.0",
     "execa": "^6.1.0",
+    "multiformats": "^10.0.2",
+    "npm-run-all": "^4.1.5",
     "standard": "^17.0.0"
   },
   "dependencies": {
     "@ipld/car": "^5.0.1",
     "@ipld/dag-ucan": "^3.0.1",
-    "@web3-storage/w3up-client": "github:web3-storage/w3up-client#2bb99c3fb22e425d2a9885b19bebf643e28cdf72",
+    "@ucanto/client": "^3.0.5",
+    "@ucanto/core": "^3.0.5",
+    "@ucanto/transport": "^3.0.5",
+    "@web3-storage/access": "^8.0.4",
+    "@web3-storage/w3up-client": "github:web3-storage/w3up-client#580ea7b650060b6713d76e4b29ae222ada7dfdc5",
     "files-from-path": "^0.2.6",
     "open": "^8.4.0",
     "ora": "^6.1.2",
