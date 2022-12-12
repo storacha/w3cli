@@ -3,8 +3,9 @@ import ora from 'ora'
 import tree from 'pretty-tree'
 import { Readable } from 'stream'
 import * as DID from '@ipld/dag-ucan/did'
-import { CarWriter } from '@ipld/car'
+import { CarReader, CarWriter } from '@ipld/car'
 import { filesFromPath } from 'files-from-path'
+import { importDAG } from '@ucanto/core/delegation'
 import { getClient, checkPathsExist, filesize } from './lib.js'
 
 export async function upload (firstPath, opts) {
@@ -74,8 +75,8 @@ export async function list (opts) {
 export async function createSpace (name) {
   const client = await getClient()
   const space = await client.createSpace(name)
-  await client.setCurrentSpace(space.did)
-  console.log(space.did)
+  await client.setCurrentSpace(space.did())
+  console.log(space.did())
 }
 
 export async function registerSpace (email) {
@@ -104,6 +105,46 @@ export async function registerSpace (email) {
   console.log(`⁂ space registered to ${email}`)
 }
 
+/**
+ * @param {string} proofPath
+ */
+export async function addSpace (proofPath) {
+  const client = await getClient()
+  const reader = await CarReader.fromIterable(fs.createReadStream(proofPath))
+  const blocks = []
+  for await (const block of reader.blocks()) {
+    blocks.push(block)
+  }
+  // @ts-expect-error
+  const delegation = importDAG(blocks)
+  const space = await client.addSpace(delegation)
+  console.log(space.did())
+}
+
+export async function listSpaces () {
+  const client = await getClient()
+  const current = client.currentSpace()
+  for (const space of client.spaces()) {
+    const prefix = current && current.did() === space.did() ? '* ' : '  '
+    console.log(`${prefix}${space.did()} ${space.name() ?? ''}`)
+  }
+}
+
+/**
+ * @param {string} did
+ */
+export async function useSpace (did) {
+  const client = await getClient()
+  const spaces = client.spaces()
+  const space = spaces.find(s => s.did() === did) ?? spaces.find(s => s.name() === did)
+  if (!space) {
+    console.error(`Error: space not found: ${did}`)
+    process.exit(1)
+  }
+  await client.setCurrentSpace(space.did())
+  console.log(space.did())
+}
+
 export async function createDelegation (audienceDID, opts) {
   const client = await getClient()
   if (client.currentSpace() == null) {
@@ -127,4 +168,10 @@ export async function createDelegation (audienceDID, opts) {
     await writer.put(block)
   }
   await writer.close()
+}
+
+export async function whoami () {
+  const client = await getClient()
+  const who = client.agent()
+  console.log(who.did())
 }

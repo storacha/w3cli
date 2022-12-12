@@ -96,15 +96,19 @@ Print information about the current agent.
 
 ### `w3 space add <proof.ucan>`
 
-Add a space to the current agent. The proof is a CAR encoded delegation to _this_ agent.
+Add a space to the agent. The proof is a CAR encoded delegation to _this_ agent.
 
 ### `w3 space create [name]`
 
 ### `w3 space ls`
 
+List spaces known to the agent.
+
 ### `w3 space register <email>`
 
 ### `w3 space use <did>`
+
+Set the current space in use by the agent.
 
 ### `w3 delegation create <audience-did>`
 
