@@ -312,6 +312,51 @@ test('w3 space use - space name not exists', async t => {
   t.regex(err.stderr, /space not found/)
 })
 
+test('w3 proof add', async t => {
+  const aliceEnv = t.context.env.alice
+  const bobEnv = t.context.env.bob
+
+  const aliceOut0 = await execa('./bin.js', ['space', 'create'], { env: aliceEnv })
+  const spaceDID = DID.parse(aliceOut0.stdout.trim()).did()
+
+  const bobOut0 = await execa('./bin.js', ['whoami'], { env: bobEnv })
+  const bobDID = DID.parse(bobOut0.stdout.trim()).did()
+
+  const proofPath = path.join(os.tmpdir(), `w3cli-test-delegation-${Date.now()}`)
+
+  await execa('./bin.js', ['delegation', 'create', bobDID, '--output', proofPath], { env: aliceEnv })
+
+  const bobOut1 = await execa('./bin.js', ['proof', 'ls'], { env: bobEnv })
+  t.false(bobOut1.stdout.includes(spaceDID))
+
+  const bobOut2 = await execa('./bin.js', ['proof', 'add', proofPath], { env: bobEnv })
+  t.true(bobOut2.stdout.includes(`with: ${spaceDID}`))
+
+  const bobOut3 = await execa('./bin.js', ['proof', 'ls'], { env: bobEnv })
+  t.true(bobOut3.stdout.includes(spaceDID))
+})
+
+test('w3 proof add - proof not exists', async t => {
+  const env = t.context.env.alice
+  const err = await t.throwsAsync(() => execa('./bin.js', ['proof', 'add', 'djcvbii'], { env }))
+  // @ts-expect-error
+  t.regex(err.stderr, /failed to read proof/)
+})
+
+test('w3 proof add - proof not a CAR', async t => {
+  const env = t.context.env.alice
+  const err = await t.throwsAsync(() => execa('./bin.js', ['proof', 'add', './package.json'], { env }))
+  // @ts-expect-error
+  t.regex(err.stderr, /failed to parse proof/)
+})
+
+test('w3 proof add - proof invalid', async t => {
+  const env = t.context.env.alice
+  const err = await t.throwsAsync(() => execa('./bin.js', ['proof', 'add', './test/fixtures/empty.car'], { env }))
+  // @ts-expect-error
+  t.regex(err.stderr, /failed to import proof/)
+})
+
 test('w3 proof ls', async t => {
   const aliceEnv = t.context.env.alice
   const bobEnv = t.context.env.bob

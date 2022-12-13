@@ -11,6 +11,7 @@ import {
   useSpace,
   createDelegation,
   listDelegations,
+  addProof,
   listProofs,
   upload,
   list,
@@ -83,6 +84,11 @@ cli.command('delegation ls')
   .describe('List delegations created by this agent for others.')
   .option('--json', 'Format as newline delimted JSON')
   .action(listDelegations)
+
+cli.command('proof add <proof>')
+  .describe('Add a proof delegated to this agent.')
+  .option('--json', 'Format as newline delimted JSON')
+  .action(addProof)
 
 cli.command('proof ls')
   .describe('List proofs of capabilities delegated to this agent.')

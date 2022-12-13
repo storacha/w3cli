@@ -3,10 +3,9 @@ import ora from 'ora'
 import tree from 'pretty-tree'
 import { Readable } from 'stream'
 import * as DID from '@ipld/dag-ucan/did'
-import { CarReader, CarWriter } from '@ipld/car'
+import { CarWriter } from '@ipld/car'
 import { filesFromPath } from 'files-from-path'
-import { importDAG } from '@ucanto/core/delegation'
-import { getClient, checkPathsExist, filesize } from './lib.js'
+import { getClient, checkPathsExist, filesize, readProof } from './lib.js'
 
 /**
  * @param {string} firstPath
@@ -126,32 +125,7 @@ export async function registerSpace (email) {
  */
 export async function addSpace (proofPath) {
   const client = await getClient()
-  try {
-    await fs.promises.access(proofPath, fs.constants.R_OK)
-  } catch (err) {
-    console.error(`Error: failed to read proof: ${err.message}`)
-    process.exit(1)
-  }
-
-  const blocks = []
-  try {
-    const reader = await CarReader.fromIterable(fs.createReadStream(proofPath))
-    for await (const block of reader.blocks()) {
-      blocks.push(block)
-    }
-  } catch (err) {
-    console.error(`Error: failed to parse proof: ${err.message}`)
-    process.exit(1)
-  }
-
-  let delegation
-  try {
-    // @ts-expect-error
-    delegation = importDAG(blocks)
-  } catch (err) {
-    console.error(`Error: failed to import proof: ${err.message}`)
-    process.exit(1)
-  }
+  const delegation = await readProof(proofPath)
   const space = await client.addSpace(delegation)
   console.log(space.did())
 }
@@ -243,6 +217,21 @@ export async function listDelegations (opts) {
         console.log(`  can: ${capability.can}`)
       }
     }
+  }
+}
+
+/**
+ * @param {string} proofPath
+ */
+export async function addProof (proofPath) {
+  const client = await getClient()
+  const proof = await readProof(proofPath)
+  await client.addProof(proof)
+  console.log(proof.cid.toString())
+  console.log(`  issuer: ${proof.issuer.did()}`)
+  for (const capability of proof.capabilities) {
+    console.log(`  with: ${capability.with}`)
+    console.log(`  can: ${capability.can}`)
   }
 }
 
