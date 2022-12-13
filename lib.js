@@ -11,6 +11,10 @@ import { create } from '@web3-storage/w3up-client'
 import { StoreConf } from '@web3-storage/access/stores/store-conf'
 import { CarReader } from '@ipld/car'
 
+/**
+ * @typedef {import('@web3-storage/w3up-client/types').FileLike & { size: number }} FileLike
+ */
+
 export function getPkg () {
   // @ts-ignore JSON.parse works with Buffer in Node.js
   return JSON.parse(fs.readFileSync(new URL('./package.json', import.meta.url)))
@@ -125,11 +129,11 @@ export async function readProof (path) {
  * @param {string[]} paths
  * @param {object} [options]
  * @param {boolean} [options.hidden]
- * @returns {Promise<import('@web3-storage/w3up-client/types').FileLike[]>}
+ * @returns {Promise<FileLike[]>}
  */
 export async function filesFromPaths (paths, options) {
-  /** @type {string[]} */
-  let commonParts = []
+  /** @type {string[]|undefined} */
+  let commonParts
   const files = []
   for (const p of paths) {
     for await (const file of filesFromPath(p, options)) {
@@ -147,7 +151,7 @@ export async function filesFromPaths (paths, options) {
       }
     }
   }
-  const commonPath = `${commonParts.join('/')}/`
+  const commonPath = `${(commonParts ?? []).join('/')}/`
   return files.map(f => ({ ...f, name: f.name.slice(commonPath.length) }))
 }
 
@@ -155,7 +159,7 @@ export async function filesFromPaths (paths, options) {
  * @param {string} filepath
  * @param {object} [options]
  * @param {boolean} [options.hidden]
- * @returns {AsyncIterableIterator<import('@web3-storage/w3up-client/types').FileLike>}
+ * @returns {AsyncIterableIterator<FileLike>}
  */
 async function * filesFromPath (filepath, options = {}) {
   filepath = path.resolve(filepath)
@@ -186,7 +190,7 @@ async function * filesFromPath (filepath, options = {}) {
 /**
  * @param {string} dir
  * @param {(name: string) => boolean} filter
- * @returns {AsyncIterableIterator<import('@web3-storage/w3up-client/types').FileLike>}
+ * @returns {AsyncIterableIterator<FileLike>}
  */
 async function * filesFromDir (dir, filter) {
   const entries = await fs.promises.readdir(path.join(dir), { withFileTypes: true })
