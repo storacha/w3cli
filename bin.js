@@ -17,6 +17,10 @@ import {
   list,
   whoami
 } from './index.js'
+import {
+  storeAdd,
+  uploadAdd
+} from './can.js'
 
 unwarnify()
 
@@ -94,5 +98,13 @@ cli.command('proof ls')
   .describe('List proofs of capabilities delegated to this agent.')
   .option('--json', 'Format as newline delimted JSON')
   .action(listProofs)
+
+cli.command('can store add <car-path>')
+  .describe('Store a CAR file with the service.')
+  .action(storeAdd)
+
+cli.command('can upload add <root-cid> <shard-cid>')
+  .describe('Register an upload - a DAG with the given root data CID that is stored in the given CAR shard(s), identified by CAR CIDs.')
+  .action(uploadAdd)
 
 cli.parse(process.argv)

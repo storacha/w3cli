@@ -383,3 +383,80 @@ test('w3 proof ls', async t => {
   t.is(proofData.capabilities[0].with, spaceDID)
   t.is(proofData.capabilities[0].can, '*')
 })
+
+test('w3 can store add', async t => {
+  const env = t.context.env.alice
+
+  await execa('./bin.js', ['space', 'create'], { env })
+
+  const service = mockService({
+    store: {
+      add: provide(StoreCapabilities.add, () => ({
+        status: 'upload',
+        headers: { 'x-test': 'true' },
+        url: 'http://localhost:9200'
+      }))
+    }
+  })
+
+  t.context.setService(service)
+
+  const { stderr } = await execa('./bin.js', ['can', 'store', 'add', 'test/fixtures/pinpie.car'], { env })
+
+  t.true(service.store.add.called)
+  t.is(service.store.add.callCount, 1)
+
+  t.regex(stderr, /Stored bag/)
+})
+
+test('w3 can upload add', async (t) => {
+  const env = t.context.env.alice
+
+  await execa('./bin.js', ['space', 'create'], { env })
+
+  const service = mockService({
+    store: {
+      add: provide(StoreCapabilities.add, () => ({
+        status: 'upload',
+        headers: { 'x-test': 'true' },
+        url: 'http://localhost:9200'
+      }))
+    },
+    upload: {
+      add: provide(UploadCapabilities.add, ({ invocation }) => {
+        const { nb } = invocation.capabilities[0]
+        if (!nb) throw new Error('missing nb')
+        t.is(nb.root.toString(), root)
+        t.is(nb.shards?.length, 1)
+        t.is(nb.shards?.[0].toString(), shard)
+        return nb
+      })
+    }
+  })
+
+  t.context.setService(service)
+
+  const carPath = 'test/fixtures/pinpie.car'
+  const reader = await CarReader.fromBytes(await fs.promises.readFile(carPath))
+  const root = (await reader.getRoots())[0]?.toString()
+  t.truthy(root)
+
+  const out0 = await execa('./bin.js', ['can', 'store', 'add', carPath], { env })
+
+  t.true(service.store.add.called)
+  t.is(service.store.add.callCount, 1)
+  t.false(service.upload.add.called)
+  t.is(service.upload.add.callCount, 0)
+
+  t.regex(out0.stderr, /Stored bag/)
+
+  const shard = out0.stdout.trim()
+  const out1 = await execa('./bin.js', ['can', 'upload', 'add', root, shard], { env })
+
+  t.true(service.store.add.called)
+  t.is(service.store.add.callCount, 1)
+  t.true(service.upload.add.called)
+  t.is(service.upload.add.callCount, 1)
+
+  t.regex(out1.stderr, /Upload added/)
+})

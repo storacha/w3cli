@@ -4,8 +4,7 @@ import tree from 'pretty-tree'
 import { Readable } from 'stream'
 import * as DID from '@ipld/dag-ucan/did'
 import { CarWriter } from '@ipld/car'
-import { filesFromPath } from 'files-from-path'
-import { getClient, checkPathsExist, filesize, readProof } from './lib.js'
+import { getClient, checkPathsExist, filesize, readProof, filesFromPaths } from './lib.js'
 
 /**
  * @param {string} firstPath
@@ -17,17 +16,11 @@ export async function upload (firstPath, opts) {
   const paths = checkPathsExist([firstPath, ...opts._])
   const client = await getClient()
   const hidden = !!opts.hidden
-  const files = []
-  let totalSize = 0
   let totalSent = 0
-  const spinner = ora('Packing files').start()
-  for (const p of paths) {
-    for await (const file of filesFromPath(p, { hidden })) {
-      totalSize += file.size
-      files.push({ name: file.name, stream: () => Readable.toWeb(file.stream()) })
-      spinner.text = `Packing ${files.length} file${files.length === 1 ? '' : 's'} (${filesize(totalSize)})`
-    }
-  }
+  const spinner = ora('Reading files').start()
+  const files = await filesFromPaths(paths, { hidden })
+  const totalSize = files.reduce((total, f) => total + f.size, 0)
+  spinner.stopAndPersist({ text: `${files.length} file${files.length === 1 ? '' : 's'} (${filesize(totalSize)})` })
   spinner.start('Storing')
   /** @type {(o?: import('@web3-storage/w3up-client/src/types').UploadOptions) => Promise<import('@web3-storage/w3up-client/src/types').AnyLink>} */
   const uploadFn = files.length === 1 && opts['no-wrap']
@@ -202,7 +195,7 @@ export async function createDelegation (audienceDID, opts) {
  */
 export async function listDelegations (opts) {
   const client = await getClient()
-  const delegations = await client.delegations()
+  const delegations = client.delegations()
   if (opts.json) {
     for (const delegation of delegations) {
       console.log(JSON.stringify({
@@ -244,7 +237,7 @@ export async function addProof (proofPath) {
  */
 export async function listProofs (opts) {
   const client = await getClient()
-  const proofs = await client.proofs()
+  const proofs = client.proofs()
   if (opts.json) {
     for (const proof of proofs) {
       console.log(JSON.stringify({
