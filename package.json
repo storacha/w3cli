@@ -31,9 +31,9 @@
   },
   "homepage": "https://github.com/web3-storage/w3cli#readme",
   "devDependencies": {
-    "@ucanto/principal": "^3.0.1",
-    "@ucanto/server": "^3.0.8",
-    "@web3-storage/capabilities": "^1.0.0",
+    "@ucanto/principal": "^4.0.2",
+    "@ucanto/server": "^4.0.2",
+    "@web3-storage/capabilities": "^2.1.0",
     "ava": "^5.1.0",
     "execa": "^6.1.0",
     "multiformats": "^10.0.2",
