@@ -3,7 +3,19 @@
 import sade from 'sade'
 import open from 'open'
 import { getPkg, unwarnify } from './lib.js'
-import { createSpace, registerSpace, addSpace, listSpaces, useSpace, createDelegation, upload, list, whoami } from './index.js'
+import {
+  createSpace,
+  registerSpace,
+  addSpace,
+  listSpaces,
+  useSpace,
+  createDelegation,
+  listDelegations,
+  listProofs,
+  upload,
+  list,
+  whoami
+} from './index.js'
 
 unwarnify()
 
@@ -66,5 +78,15 @@ cli.command('delegation create <audience-did>')
   .option('-e, --expiration', 'Unix timestamp when the delegation is no longer valid. Zero indicates no expiration.', 0)
   .option('-o, --output', 'Path of file to write the exported delegation data to.')
   .action(createDelegation)
+
+cli.command('delegation ls')
+  .describe('List delegations created by this agent for others.')
+  .option('--json', 'Format as newline delimted JSON')
+  .action(listDelegations)
+
+cli.command('proof ls')
+  .describe('List proofs of capabilities delegated to this agent.')
+  .option('--json', 'Format as newline delimted JSON')
+  .action(listProofs)
 
 cli.parse(process.argv)

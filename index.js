@@ -206,7 +206,6 @@ export async function createDelegation (audienceDID, opts) {
     expiration,
     audienceMeta
   })
-  delegation.export()
 
   const { writer, out } = CarWriter.create()
   const dest = opts.output ? fs.createWriteStream(opts.output) : process.stdout
@@ -214,9 +213,64 @@ export async function createDelegation (audienceDID, opts) {
   Readable.from(out).pipe(dest)
 
   for (const block of delegation.export()) {
+    // @ts-expect-error
     await writer.put(block)
   }
   await writer.close()
+}
+
+/**
+ * @param {object} opts
+ * @param {boolean} [opts.json]
+ */
+export async function listDelegations (opts) {
+  const client = await getClient()
+  const delegations = await client.delegations()
+  if (opts.json) {
+    for (const delegation of delegations) {
+      console.log(JSON.stringify({
+        cid: delegation.cid.toString(),
+        audience: delegation.audience.did(),
+        capabilities: delegation.capabilities.map(c => ({ with: c.with, can: c.can }))
+      }))
+    }
+  } else {
+    for (const delegation of delegations) {
+      console.log(delegation.cid.toString())
+      console.log(`  audience: ${delegation.audience.did()}`)
+      for (const capability of delegation.capabilities) {
+        console.log(`  with: ${capability.with}`)
+        console.log(`  can: ${capability.can}`)
+      }
+    }
+  }
+}
+
+/**
+ * @param {object} opts
+ * @param {boolean} [opts.json]
+ */
+export async function listProofs (opts) {
+  const client = await getClient()
+  const proofs = await client.proofs()
+  if (opts.json) {
+    for (const proof of proofs) {
+      console.log(JSON.stringify({
+        cid: proof.cid.toString(),
+        issuer: proof.issuer.did(),
+        capabilities: proof.capabilities.map(c => ({ with: c.with, can: c.can }))
+      }))
+    }
+  } else {
+    for (const proof of proofs) {
+      console.log(proof.cid.toString())
+      console.log(`  issuer: ${proof.issuer.did()}`)
+      for (const capability of proof.capabilities) {
+        console.log(`  with: ${capability.with}`)
+        console.log(`  can: ${capability.can}`)
+      }
+    }
+  }
 }
 
 export async function whoami () {

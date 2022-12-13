@@ -191,6 +191,24 @@ test('w3 delegation create', async t => {
   t.is(delegation.capabilities[0].with, spaceDID)
 })
 
+test('w3 delegation ls', async t => {
+  const env = t.context.env.alice
+
+  const out0 = await execa('./bin.js', ['space', 'create'], { env })
+  const spaceDID = DID.parse(out0.stdout.trim()).did()
+
+  const bob = await Signer.generate()
+  await execa('./bin.js', ['delegation', 'create', bob.did()], { env })
+
+  const out1 = await execa('./bin.js', ['delegation', 'ls', '--json'], { env })
+  const delegationData = JSON.parse(out1.stdout)
+
+  t.is(delegationData.audience, bob.did())
+  t.is(delegationData.capabilities.length, 1)
+  t.is(delegationData.capabilities[0].with, spaceDID)
+  t.is(delegationData.capabilities[0].can, '*')
+})
+
 test('w3 space add', async t => {
   const aliceEnv = t.context.env.alice
   const bobEnv = t.context.env.bob
@@ -292,4 +310,31 @@ test('w3 space use - space name not exists', async t => {
   const err = await t.throwsAsync(() => execa('./bin.js', ['space', 'use', name], { env }))
   // @ts-expect-error
   t.regex(err.stderr, /space not found/)
+})
+
+test('w3 proof ls', async t => {
+  const aliceEnv = t.context.env.alice
+  const bobEnv = t.context.env.bob
+
+  const aliceOut0 = await execa('./bin.js', ['space', 'create'], { env: aliceEnv })
+  const spaceDID = DID.parse(aliceOut0.stdout.trim()).did()
+
+  const aliceOut1 = await execa('./bin.js', ['whoami'], { env: aliceEnv })
+  const aliceDID = DID.parse(aliceOut1.stdout.trim()).did()
+
+  const bobOut0 = await execa('./bin.js', ['whoami'], { env: bobEnv })
+  const bobDID = DID.parse(bobOut0.stdout.trim()).did()
+
+  const proofPath = path.join(os.tmpdir(), `w3cli-test-proof-${Date.now()}`)
+
+  await execa('./bin.js', ['delegation', 'create', bobDID, '--output', proofPath], { env: aliceEnv })
+  await execa('./bin.js', ['space', 'add', proofPath], { env: bobEnv })
+
+  const bobOut1 = await execa('./bin.js', ['proof', 'ls', '--json'], { env: bobEnv })
+  const proofData = JSON.parse(bobOut1.stdout)
+
+  t.is(proofData.issuer, aliceDID)
+  t.is(proofData.capabilities.length, 1)
+  t.is(proofData.capabilities[0].with, spaceDID)
+  t.is(proofData.capabilities[0].can, '*')
 })
