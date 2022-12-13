@@ -19,7 +19,7 @@ export async function upload (firstPath, opts) {
   let totalSent = 0
   const spinner = ora('Reading files').start()
   const files = await filesFromPaths(paths, { hidden })
-  const totalSize = files.reduce((f, total) => total + f.size, 0)
+  const totalSize = files.reduce((total, f) => total + f.size, 0)
   spinner.stopAndPersist({ text: `${files.length} file${files.length === 1 ? '' : 's'} (${filesize(totalSize)})` })
   spinner.start('Storing')
   // @ts-ignore
