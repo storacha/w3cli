@@ -32,7 +32,7 @@ w3 up recipies.txt
 * Basics
   * [`w3 up`](#w3-up-path-path)
   * [`w3 ls`](#w3-ls)
-  * [`w3 rm`](#w3-rm-root-cid)
+  * [`w3 rm`](#w3-rm-root-cid) <sup>coming soon!</sup>
   * [`w3 open`](#w3-open-cid)
   * [`w3 whoami`](#w3-whoami)
 * Space management
