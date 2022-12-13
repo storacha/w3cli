@@ -125,7 +125,7 @@ export async function readProof (path) {
  * @param {string[]} paths
  * @param {object} [options]
  * @param {boolean} [options.hidden]
- * @returns {Promise<import('@web3-storage/w3up-client/types').FileLike>}
+ * @returns {Promise<import('@web3-storage/w3up-client/types').FileLike[]>}
  */
 export async function filesFromPaths (paths, options) {
   let commonParts
