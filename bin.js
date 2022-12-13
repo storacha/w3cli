@@ -29,7 +29,7 @@ cli
 cli.command('up <file>')
   .alias('upload', 'put')
   .describe('Store a file(s) to the service and register an upload.')
-  .option('--no-wrap', 'Don\'t wrap input files with a directory.')
+  .option('--no-wrap', 'Don\'t wrap input files with a directory.', false)
   .option('-H, --hidden', 'Include paths that start with ".".')
   .action(upload)
 
