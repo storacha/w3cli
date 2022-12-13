@@ -84,7 +84,7 @@ cli.command('delegation ls')
   .action(listDelegations)
 
 cli.command('proof ls')
-  .describe('List proofs of delegated capabilities. Proofs are delegations with an audience matching the agent DID.')
+  .describe('List proofs of capabilities delegated to this agent.')
   .option('--json', 'Format as newline delimted JSON')
   .action(listProofs)
 
