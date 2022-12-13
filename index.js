@@ -186,6 +186,7 @@ export async function useSpace (did) {
  * @param {string[]|string} opts.can
  * @param {string} [opts.name]
  * @param {string} [opts.type]
+ * @param {number} [opts.expiration]
  * @param {string} [opts.output]
  */
 export async function createDelegation (audienceDID, opts) {
@@ -198,9 +199,13 @@ export async function createDelegation (audienceDID, opts) {
   const audienceMeta = {}
   if (opts.name) audienceMeta.name = opts.name
   if (opts.type) audienceMeta.type = opts.type
+  const expiration = opts.expiration || Infinity
 
   // @ts-expect-error createDelegation should validate abilities
-  const delegation = await client.createDelegation(audience, abilities, { audienceMeta })
+  const delegation = await client.createDelegation(audience, abilities, {
+    expiration,
+    audienceMeta
+  })
 
   const { writer, out } = CarWriter.create()
   const dest = opts.output ? fs.createWriteStream(opts.output) : process.stdout

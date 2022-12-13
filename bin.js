@@ -75,6 +75,7 @@ cli.command('delegation create <audience-did>')
   .option('-c, --can', 'One or more abilities to delegate.', '*')
   .option('-n, --name', 'Human readable name for the audience receiving the delegation.')
   .option('-t, --type', 'Type of the audience receiving the delegation, one of: device, app, service.')
+  .option('-e, --expiration', 'Unix timestamp when the delegation is no longer valid. Zero indicates no expiration.', 0)
   .option('-o, --output', 'Path of file to write the exported delegation data to.')
   .action(createDelegation)
 
