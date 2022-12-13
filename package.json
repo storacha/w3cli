@@ -48,7 +48,6 @@
     "@ucanto/transport": "^3.0.5",
     "@web3-storage/access": "^8.0.4",
     "@web3-storage/w3up-client": "github:web3-storage/w3up-client#7f9cb85651d28fe2789d5b45ec91ec60ae0b075c",
-    "files-from-path": "^0.2.6",
     "open": "^8.4.0",
     "ora": "^6.1.2",
     "pretty-tree": "^1.0.0",

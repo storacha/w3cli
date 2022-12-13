@@ -1,5 +1,6 @@
 import fs from 'fs'
 import path from 'path'
+import { Readable } from 'stream'
 import { importDAG } from '@ucanto/core/delegation'
 import { connect } from '@ucanto/client'
 import * as CAR from '@ucanto/transport/car'
@@ -117,5 +118,91 @@ export async function readProof (path) {
   } catch (err) {
     console.error(`Error: failed to import proof: ${err.message}`)
     process.exit(1)
+  }
+}
+
+/**
+ * @param {string[]} paths
+ * @param {object} [options]
+ * @param {boolean} [options.hidden]
+ * @returns {Promise<import('@web3-storage/w3up-client/types').FileLike>}
+ */
+export async function filesFromPaths (paths, options) {
+  let commonParts
+  const files = []
+  for (const p of paths) {
+    for await (const file of filesFromPath(p, options)) {
+      files.push(file)
+      const nameParts = file.name.split('/')
+      if (commonParts == null) {
+        commonParts = nameParts
+        continue
+      }
+      for (let i = 0; i < commonParts.length; i++) {
+        if (commonParts[i] === nameParts[i]) continue
+        if (commonParts[i] !== nameParts[i]) {
+          commonParts = commonParts.slice(0, i)
+          break
+        }
+      }
+    }
+  }
+  const commonPath = `${commonParts.join('/')}/`
+  return files.map(f => ({ ...f, name: f.name.slice(commonPath.length) }))
+}
+
+/**
+ * @param {string} filepath
+ * @param {object} [options]
+ * @param {boolean} [options.hidden]
+ * @returns {AsyncIterableIterator<import('@web3-storage/w3up-client/types').FileLike>}
+ */
+async function * filesFromPath (filepath, options = {}) {
+  filepath = path.resolve(filepath)
+  const hidden = options.hidden ?? false
+
+  /** @param {string} filepath */
+  const filter = filepath => {
+    if (!hidden && path.basename(filepath).startsWith('.')) return false
+    return true
+  }
+
+  const name = filepath
+  const stat = await fs.promises.stat(filepath)
+
+  if (!filter(name)) {
+    return
+  }
+
+  if (stat.isFile()) {
+    const stream = () => Readable.toWeb(fs.createReadStream(filepath))
+    yield { name, stream, size: stat.size }
+  } else if (stat.isDirectory()) {
+    yield * filesFromDir(filepath, filter)
+  }
+}
+
+/**
+ * @param {string} dir
+ * @param {(name: string) => boolean} filter
+ */
+async function * filesFromDir (dir, filter) {
+  const entries = await fs.promises.readdir(path.join(dir), { withFileTypes: true })
+  for (const entry of entries) {
+    if (!filter(entry.name)) {
+      continue
+    }
+
+    if (entry.isFile()) {
+      if (filter(entry.name)) {
+        yield {
+          name: path.join(dir, entry.name),
+          stream: () => Readable.toWeb(fs.createReadStream(path.join(dir, entry.name))),
+          size: entry.size
+        }
+      }
+    } else if (entry.isDirectory()) {
+      yield * filesFromDir(path.join(dir, entry.name), filter)
+    }
   }
 }
