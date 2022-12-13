@@ -131,6 +131,8 @@ List delegations created by this agent for others.
 
 ### `w3 proof add <proof.ucan>`
 
+Add a proof delegated to this agent. The proof is a CAR encoded delegation to _this_ agent. Note: use `w3 space add` to add a proof _as well as_ add the resource to your list of spaces.
+
 ### `w3 proof ls`
 
 List proofs of delegated capabilities. Proofs are delegations with an audience matching the agent DID.
