@@ -228,7 +228,7 @@ export async function createDelegation (audienceDID, opts) {
  */
 export async function listDelegations (opts) {
   const client = await getClient()
-  const delegations = await client.delegations()
+  const delegations = client.delegations()
   if (opts.json) {
     for (const delegation of delegations) {
       console.log(JSON.stringify({
@@ -270,7 +270,7 @@ export async function addProof (proofPath) {
  */
 export async function listProofs (opts) {
   const client = await getClient()
-  const proofs = await client.proofs()
+  const proofs = client.proofs()
   if (opts.json) {
     for (const proof of proofs) {
       console.log(JSON.stringify({
