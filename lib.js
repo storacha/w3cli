@@ -128,7 +128,8 @@ export async function readProof (path) {
  * @returns {Promise<import('@web3-storage/w3up-client/types').FileLike[]>}
  */
 export async function filesFromPaths (paths, options) {
-  let commonParts
+  /** @type {string[]} */
+  let commonParts = []
   const files = []
   for (const p of paths) {
     for await (const file of filesFromPath(p, options)) {
@@ -139,7 +140,6 @@ export async function filesFromPaths (paths, options) {
         continue
       }
       for (let i = 0; i < commonParts.length; i++) {
-        if (commonParts[i] === nameParts[i]) continue
         if (commonParts[i] !== nameParts[i]) {
           commonParts = commonParts.slice(0, i)
           break
@@ -176,6 +176,7 @@ async function * filesFromPath (filepath, options = {}) {
 
   if (stat.isFile()) {
     const stream = () => Readable.toWeb(fs.createReadStream(filepath))
+    // @ts-expect-error node web stream not type compatible with web stream
     yield { name, stream, size: stat.size }
   } else if (stat.isDirectory()) {
     yield * filesFromDir(filepath, filter)
@@ -185,6 +186,7 @@ async function * filesFromPath (filepath, options = {}) {
 /**
  * @param {string} dir
  * @param {(name: string) => boolean} filter
+ * @returns {AsyncIterableIterator<import('@web3-storage/w3up-client/types').FileLike>}
  */
 async function * filesFromDir (dir, filter) {
   const entries = await fs.promises.readdir(path.join(dir), { withFileTypes: true })
@@ -194,13 +196,11 @@ async function * filesFromDir (dir, filter) {
     }
 
     if (entry.isFile()) {
-      if (filter(entry.name)) {
-        yield {
-          name: path.join(dir, entry.name),
-          stream: () => Readable.toWeb(fs.createReadStream(path.join(dir, entry.name))),
-          size: entry.size
-        }
-      }
+      const name = path.join(dir, entry.name)
+      const { size } = await fs.promises.stat(name)
+      const stream = () => Readable.toWeb(fs.createReadStream(name))
+      // @ts-expect-error node web stream not type compatible with web stream
+      yield { name, stream, size }
     } else if (entry.isDirectory()) {
       yield * filesFromDir(path.join(dir, entry.name), filter)
     }
