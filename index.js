@@ -4,10 +4,9 @@ import tree from 'pretty-tree'
 import { Readable } from 'stream'
 import { CID } from 'multiformats/cid'
 import * as DID from '@ipld/dag-ucan/did'
-import { CarReader, CarWriter } from '@ipld/car'
+import { CarWriter } from '@ipld/car'
 import { filesFromPath } from 'files-from-path'
-import { importDAG } from '@ucanto/core/delegation'
-import { getClient, checkPathsExist, filesize } from './lib.js'
+import { getClient, checkPathsExist, filesize, readProof } from './lib.js'
 
 /**
  * @param {string} firstPath
@@ -155,32 +154,7 @@ export async function registerSpace (email) {
  */
 export async function addSpace (proofPath) {
   const client = await getClient()
-  try {
-    await fs.promises.access(proofPath, fs.constants.R_OK)
-  } catch (err) {
-    console.error(`Error: failed to read proof: ${err.message}`)
-    process.exit(1)
-  }
-
-  const blocks = []
-  try {
-    const reader = await CarReader.fromIterable(fs.createReadStream(proofPath))
-    for await (const block of reader.blocks()) {
-      blocks.push(block)
-    }
-  } catch (err) {
-    console.error(`Error: failed to parse proof: ${err.message}`)
-    process.exit(1)
-  }
-
-  let delegation
-  try {
-    // @ts-expect-error
-    delegation = importDAG(blocks)
-  } catch (err) {
-    console.error(`Error: failed to import proof: ${err.message}`)
-    process.exit(1)
-  }
+  const delegation = await readProof(proofPath)
   const space = await client.addSpace(delegation)
   console.log(space.did())
 }
@@ -215,6 +189,7 @@ export async function useSpace (did) {
  * @param {string[]|string} opts.can
  * @param {string} [opts.name]
  * @param {string} [opts.type]
+ * @param {number} [opts.expiration]
  * @param {string} [opts.output]
  */
 export async function createDelegation (audienceDID, opts) {
@@ -227,10 +202,13 @@ export async function createDelegation (audienceDID, opts) {
   const audienceMeta = {}
   if (opts.name) audienceMeta.name = opts.name
   if (opts.type) audienceMeta.type = opts.type
+  const expiration = opts.expiration || Infinity
 
   // @ts-expect-error createDelegation should validate abilities
-  const delegation = await client.createDelegation(audience, abilities, { audienceMeta })
-  delegation.export()
+  const delegation = await client.createDelegation(audience, abilities, {
+    expiration,
+    audienceMeta
+  })
 
   const { writer, out } = CarWriter.create()
   const dest = opts.output ? fs.createWriteStream(opts.output) : process.stdout
@@ -238,9 +216,79 @@ export async function createDelegation (audienceDID, opts) {
   Readable.from(out).pipe(dest)
 
   for (const block of delegation.export()) {
+    // @ts-expect-error
     await writer.put(block)
   }
   await writer.close()
+}
+
+/**
+ * @param {object} opts
+ * @param {boolean} [opts.json]
+ */
+export async function listDelegations (opts) {
+  const client = await getClient()
+  const delegations = await client.delegations()
+  if (opts.json) {
+    for (const delegation of delegations) {
+      console.log(JSON.stringify({
+        cid: delegation.cid.toString(),
+        audience: delegation.audience.did(),
+        capabilities: delegation.capabilities.map(c => ({ with: c.with, can: c.can }))
+      }))
+    }
+  } else {
+    for (const delegation of delegations) {
+      console.log(delegation.cid.toString())
+      console.log(`  audience: ${delegation.audience.did()}`)
+      for (const capability of delegation.capabilities) {
+        console.log(`  with: ${capability.with}`)
+        console.log(`  can: ${capability.can}`)
+      }
+    }
+  }
+}
+
+/**
+ * @param {string} proofPath
+ */
+export async function addProof (proofPath) {
+  const client = await getClient()
+  const proof = await readProof(proofPath)
+  await client.addProof(proof)
+  console.log(proof.cid.toString())
+  console.log(`  issuer: ${proof.issuer.did()}`)
+  for (const capability of proof.capabilities) {
+    console.log(`  with: ${capability.with}`)
+    console.log(`  can: ${capability.can}`)
+  }
+}
+
+/**
+ * @param {object} opts
+ * @param {boolean} [opts.json]
+ */
+export async function listProofs (opts) {
+  const client = await getClient()
+  const proofs = await client.proofs()
+  if (opts.json) {
+    for (const proof of proofs) {
+      console.log(JSON.stringify({
+        cid: proof.cid.toString(),
+        issuer: proof.issuer.did(),
+        capabilities: proof.capabilities.map(c => ({ with: c.with, can: c.can }))
+      }))
+    }
+  } else {
+    for (const proof of proofs) {
+      console.log(proof.cid.toString())
+      console.log(`  issuer: ${proof.issuer.did()}`)
+      for (const capability of proof.capabilities) {
+        console.log(`  with: ${capability.with}`)
+        console.log(`  can: ${capability.can}`)
+      }
+    }
+  }
 }
 
 export async function whoami () {

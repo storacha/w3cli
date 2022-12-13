@@ -3,7 +3,24 @@
 import sade from 'sade'
 import open from 'open'
 import { getPkg, unwarnify } from './lib.js'
-import { createSpace, registerSpace, addSpace, listSpaces, useSpace, createDelegation, upload, list, whoami } from './index.js'
+import {
+  createSpace,
+  registerSpace,
+  addSpace,
+  listSpaces,
+  useSpace,
+  createDelegation,
+  listDelegations,
+  addProof,
+  listProofs,
+  upload,
+  list,
+  whoami
+} from './index.js'
+import {
+  storeAdd,
+  uploadAdd
+} from './can.js'
 
 unwarnify()
 
@@ -68,7 +85,31 @@ cli.command('delegation create <audience-did>')
   .option('-c, --can', 'One or more abilities to delegate.', '*')
   .option('-n, --name', 'Human readable name for the audience receiving the delegation.')
   .option('-t, --type', 'Type of the audience receiving the delegation, one of: device, app, service.')
+  .option('-e, --expiration', 'Unix timestamp when the delegation is no longer valid. Zero indicates no expiration.', 0)
   .option('-o, --output', 'Path of file to write the exported delegation data to.')
   .action(createDelegation)
+
+cli.command('delegation ls')
+  .describe('List delegations created by this agent for others.')
+  .option('--json', 'Format as newline delimted JSON')
+  .action(listDelegations)
+
+cli.command('proof add <proof>')
+  .describe('Add a proof delegated to this agent.')
+  .option('--json', 'Format as newline delimted JSON')
+  .action(addProof)
+
+cli.command('proof ls')
+  .describe('List proofs of capabilities delegated to this agent.')
+  .option('--json', 'Format as newline delimted JSON')
+  .action(listProofs)
+
+cli.command('can store add <car-path>')
+  .describe('Store a CAR file with the service.')
+  .action(storeAdd)
+
+cli.command('can upload add <root-cid> <shard-cid>')
+  .describe('Register an upload - a DAG with the given root data CID that is stored in the given CAR shard(s), identified by CAR CIDs.')
+  .action(uploadAdd)
 
 cli.parse(process.argv)

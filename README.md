@@ -1,7 +1,7 @@
 <h1 align="center">⁂<br/>web3.storage</h1>
 <h3 align="center">💾 w3 command line interface.</h3>
 <p align="center">
-  <a href="https://github.com/web3-storage/w3cli/actions/workflows/test.yaml"><img alt="GitHub Workflow Status" src="https://img.shields.io/github/workflow/status/web3-storage/w3cli/Test?style=for-the-badge" /></a>
+  <a href="https://github.com/web3-storage/w3cli/actions/workflows/test.yml"><img alt="GitHub Workflow Status" src="https://img.shields.io/github/workflow/status/web3-storage/w3cli/Test?style=for-the-badge" /></a>
   <a href="https://discord.com/channels/806902334369824788/864892166470893588"><img src="https://img.shields.io/badge/chat-discord?style=for-the-badge&logo=discord&label=discord&logoColor=ffffff&color=7389D8" /></a>
   <a href="https://github.com/web3-storage/w3cli/blob/main/LICENSE.md"><img alt="License: Apache-2.0 OR MIT" src="https://img.shields.io/badge/LICENSE-Apache--2.0%20OR%20MIT-yellow?style=for-the-badge" /></a>
 </p>
@@ -47,14 +47,14 @@ w3 up recipies.txt
   * [`w3 proof add`](#w3-proof-add-proofucan)
   * [`w3 proof ls`](#w3-proof-ls)
 * Advanced usage
-  * [`w3 can space info`](#w3-can-space-info-did)
-  * [`w3 can space recover`](#w3-can-space-recover-email)
+  * [`w3 can space info`](#w3-can-space-info-did) <sup>coming soon!</sup>
+  * [`w3 can space recover`](#w3-can-space-recover-email) <sup>coming soon!</sup>
   * [`w3 can store add`](#w3-can-store-add-car-path)
-  * [`w3 can store ls`](#w3-can-store-ls)
-  * [`w3 can store rm`](#w3-can-store-rm-car-cid)
+  * [`w3 can store ls`](#w3-can-store-ls) <sup>coming soon!</sup>
+  * [`w3 can store rm`](#w3-can-store-rm-car-cid) <sup>coming soon!</sup>
   * [`w3 can upload add`](#w3-can-upload-add-root-cid-shard-cid-shard-cid)
-  * [`w3 can upload ls`](#w3-can-upload-ls)
-  * [`w3 can upload rm`](#w3-can-upload-rm-root-cid)
+  * [`w3 can upload ls`](#w3-can-upload-ls) <sup>coming soon!</sup>
+  * [`w3 can upload rm`](#w3-can-upload-rm-root-cid) <sup>coming soon!</sup>
 
 ---
 
@@ -125,9 +125,19 @@ Create a delegation to the passed audience for the given abilities with the _cur
 
 ### `w3 delegation ls`
 
+List delegations created by this agent for others.
+
+- `--json` Format as newline delimted JSON
+
 ### `w3 proof add <proof.ucan>`
 
+Add a proof delegated to this agent. The proof is a CAR encoded delegation to _this_ agent. Note: you probably want to use `w3 space add` unless you know the delegation you received targets a resource _other_ than a w3 space.
+
 ### `w3 proof ls`
+
+List proofs of delegated capabilities. Proofs are delegations with an audience matching the agent DID.
+
+- `--json` Format as newline delimted JSON
 
 ### `w3 can space info <did>`
 
