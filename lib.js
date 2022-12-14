@@ -138,9 +138,9 @@ export async function filesFromPaths (paths, options) {
   for (const p of paths) {
     for await (const file of filesFromPath(p, options)) {
       files.push(file)
-      const nameParts = file.name.split('/')
+      const nameParts = file.name.split(path.sep)
       if (commonParts == null) {
-        commonParts = nameParts
+        commonParts = nameParts.slice(0, -1)
         continue
       }
       for (let i = 0; i < commonParts.length; i++) {
