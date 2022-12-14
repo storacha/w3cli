@@ -14,7 +14,7 @@ jobs:
           package-name: "@web3-storage/w3cli"
       - uses: actions/checkout@v3
       - uses: ./.github/actions/test
-      - run: npm publish --public
+      - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
         if: ${{ steps.release.outputs.release_created }}
