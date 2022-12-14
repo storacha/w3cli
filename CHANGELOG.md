@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/web3-storage/w3cli/compare/v1.0.0...v1.0.1) (2022-12-14)
+
+
+### Bug Fixes
+
+* missing file name when only single path passed to filesFromPaths ([#31](https://github.com/web3-storage/w3cli/issues/31)) ([fc3b5a0](https://github.com/web3-storage/w3cli/commit/fc3b5a0b22b275a3ecd5e680d69dafed099b82fd))
+
 ## 1.0.0 (2022-12-14)
 
 
