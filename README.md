@@ -11,7 +11,7 @@
 Install the CLI from npm :
 
 ```console
-npm install -g @web3-storage/w3up-cli
+npm install -g @web3-storage/w3cli
 ```
 
 Create a new space for storing your data and register it:
