@@ -140,7 +140,7 @@ export async function filesFromPaths (paths, options) {
       files.push(file)
       const nameParts = file.name.split('/')
       if (commonParts == null) {
-        commonParts = nameParts
+        commonParts = nameParts.slice(0, -1)
         continue
       }
       for (let i = 0; i < commonParts.length; i++) {
