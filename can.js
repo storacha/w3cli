@@ -33,7 +33,7 @@ export async function storeAdd (carPath) {
  * @param {object} opts
  * @param {string[]} opts._
  */
-export async function uploadAdd (root, shard, opts = {}) {
+export async function uploadAdd (root, shard, opts) {
   const client = await getClient()
 
   let rootCID
@@ -44,9 +44,11 @@ export async function uploadAdd (root, shard, opts = {}) {
     process.exit(1)
   }
 
+  /** @type {import('@web3-storage/upload-client/types').CARLink[]} */
   const shards = []
   for (const str of [shard, ...opts._]) {
     try {
+      // @ts-expect-error may not be a CAR CID...
       shards.push(CID.parse(str))
     } catch (err) {
       console.error(`Error: failed to parse shard CID: ${str}: ${err.message}`)

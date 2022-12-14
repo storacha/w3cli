@@ -5,8 +5,7 @@ import { Readable } from 'stream'
 import { CID } from 'multiformats/cid'
 import * as DID from '@ipld/dag-ucan/did'
 import { CarWriter } from '@ipld/car'
-import { filesFromPath } from 'files-from-path'
-import { getClient, checkPathsExist, filesize, readProof } from './lib.js'
+import { getClient, checkPathsExist, filesize, readProof, filesFromPaths } from './lib.js'
 
 /**
  * @param {string} firstPath
@@ -18,20 +17,17 @@ export async function upload (firstPath, opts) {
   const paths = checkPathsExist([firstPath, ...opts._])
   const client = await getClient()
   const hidden = !!opts.hidden
-  const files = []
-  let totalSize = 0
   let totalSent = 0
-  const spinner = ora('Packing files').start()
-  for (const p of paths) {
-    for await (const file of filesFromPath(p, { hidden })) {
-      totalSize += file.size
-      files.push({ name: file.name, stream: () => Readable.toWeb(file.stream()) })
-      spinner.text = `Packing ${files.length} file${files.length === 1 ? '' : 's'} (${filesize(totalSize)})`
-    }
-  }
+  const spinner = ora('Reading files').start()
+  const files = await filesFromPaths(paths, { hidden })
+  const totalSize = files.reduce((total, f) => total + f.size, 0)
+  spinner.stopAndPersist({ text: `${files.length} file${files.length === 1 ? '' : 's'} (${filesize(totalSize)})` })
   spinner.start('Storing')
-  // @ts-ignore
-  const root = await client.uploadDirectory(files, {
+  /** @type {(o?: import('@web3-storage/w3up-client/src/types').UploadOptions) => Promise<import('@web3-storage/w3up-client/src/types').AnyLink>} */
+  const uploadFn = files.length === 1 && opts['no-wrap']
+    ? client.uploadFile.bind(client, files[0])
+    : client.uploadDirectory.bind(client, files)
+  const root = await uploadFn({
     onShardStored: ({ cid, size }) => {
       totalSent += size
       spinner.stopAndPersist({ text: cid.toString() })
