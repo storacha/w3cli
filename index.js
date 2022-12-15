@@ -1,4 +1,4 @@
-import fs, { readSync } from 'fs'
+import fs from 'fs'
 import ora, { oraPromise } from 'ora'
 import tree from 'pretty-tree'
 import { Readable } from 'stream'
@@ -101,6 +101,9 @@ export async function remove (rootCid, opts) {
   }
   if (!upload) {
     return console.log(`⁂ upload not found. could not determine shards to remove.`)
+  }
+  if (!upload.shards || !upload.shards.length) {
+    return console.log(`⁂ no shards to remove.`)
   }
   
   const { shards } = upload
