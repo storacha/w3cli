@@ -93,7 +93,8 @@ export async function remove (rootCid, opts) {
   try {
     upload = await client.capability.upload.remove(root)
   } catch (err) {
-    console.error(`Error: remove failed: ${err.message ?? err}`)
+    console.error(`Remove failed: ${err.message ?? err}`)
+    console.error(err)
     process.exit(1)
   }
   if (!opts.shards) {

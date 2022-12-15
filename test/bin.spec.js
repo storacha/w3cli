@@ -18,6 +18,7 @@ import { mockService } from './helpers/mocks.js'
 import { createServer as createHTTPServer } from './helpers/http-server.js'
 import { createHTTPListener } from './helpers/ucanto.js'
 import { createEnv } from './helpers/env.js'
+import { Store } from '@web3-storage/capabilities'
 
 /**
  * @typedef {{
@@ -165,6 +166,99 @@ test('w3 ls', async (t) => {
 
   const list1 = await execa('./bin.js', ['ls', '--json'], { env })
   t.notThrows(() => CID.parse(JSON.parse(list1.stdout).root))
+})
+
+test('w3 remove', async t => {
+  const env = t.context.env.alice
+
+  await execa('./bin.js', ['space', 'create'], { env })
+
+  const service = mockService({
+    upload: {
+      remove: provide(UploadCapabilities.remove, ({ invocation }) => {
+        const { nb } = invocation.capabilities[0]
+        return { root: nb.root }
+      })
+    }
+  })
+  t.context.setService(service)
+
+  t.throwsAsync(() => execa('./bin.js', ['rm', 'nope'], { env }), { message: /not a CID/ })
+
+  const rm = await execa('./bin.js', ['rm', 'bafybeih2k7ughhfwedltjviunmn3esueijz34snyay77zmsml5w24tqamm'], { env })
+  t.is(rm.exitCode, 0)
+  t.is(service.upload.remove.callCount, 1)
+  t.is(service.store.remove.callCount, 0)
+  t.is(rm.stdout, '')
+})
+
+test('w3 remove - no such upload', async t => {
+  const env = t.context.env.alice
+
+  await execa('./bin.js', ['space', 'create'], { env })
+
+  const service = mockService({
+    upload: {
+      remove: provide(UploadCapabilities.remove, () => {})
+    }
+  })
+  t.context.setService(service)
+
+  const rm = await execa('./bin.js', ['rm', 'bafybeih2k7ughhfwedltjviunmn3esueijz34snyay77zmsml5w24tqamm', '--shards'], { env })
+  t.is(rm.exitCode, 0)
+  t.is(rm.stdout, '⁂ upload not found. could not determine shards to remove.')
+})
+
+test('w3 remove --shards', async t => {
+  const env = t.context.env.alice
+
+  await execa('./bin.js', ['space', 'create'], { env })
+
+  const service = mockService({
+    store: {
+      remove: provide(StoreCapabilities.remove, () => {})
+    },
+    upload: {
+      remove: provide(UploadCapabilities.remove, ({ invocation }) => {
+        const { nb } = invocation.capabilities[0]
+        return { root: nb.root, shards: [
+          CID.parse('bagbaiera7ciaeifwrn7oo35gxdalocfj23vkvqus2eup27wt2qcxlvta2wya'),
+          CID.parse('bagbaiera7ciaeifwrn7oo35gxdalocfj23vkvqus2eup27wt2qcxlvta2wya')
+        ] }
+      })
+    }
+  })
+  t.context.setService(service)
+
+  const rm = await execa('./bin.js', ['rm', 'bafybeih2k7ughhfwedltjviunmn3esueijz34snyay77zmsml5w24tqamm', '--shards'], { env })
+  t.is(rm.exitCode, 0)
+  t.is(service.upload.remove.callCount, 1)
+  t.is(service.store.remove.callCount, 2)
+})
+
+test('w3 remove --shards - no shards to remove', async t => {
+  const env = t.context.env.alice
+
+  await execa('./bin.js', ['space', 'create'], { env })
+
+  const service = mockService({
+    store: {
+      remove: provide(StoreCapabilities.remove, () => {})
+    },
+    upload: {
+      remove: provide(UploadCapabilities.remove, ({ invocation }) => {
+        const { nb } = invocation.capabilities[0]
+        return { root: nb.root }
+      })
+    }
+  })
+  t.context.setService(service)
+
+  const rm = await execa('./bin.js', ['rm', 'bafybeih2k7ughhfwedltjviunmn3esueijz34snyay77zmsml5w24tqamm', '--shards'], { env })
+  t.is(rm.exitCode, 0)
+  t.is(service.upload.remove.callCount, 1)
+  t.is(service.store.remove.callCount, 0)
+  t.is(rm.stdout, '⁂ no shards to remove.')
 })
 
 test('w3 delegation create', async t => {
