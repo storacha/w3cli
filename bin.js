@@ -1,8 +1,8 @@
-#!/usr/bin/env node
+#!/usr/bin/env -S node --no-warnings
 
 import sade from 'sade'
 import open from 'open'
-import { getPkg, unwarnify } from './lib.js'
+import { getPkg } from './lib.js'
 import {
   createSpace,
   registerSpace,
@@ -21,8 +21,6 @@ import {
   storeAdd,
   uploadAdd
 } from './can.js'
-
-unwarnify()
 
 const cli = sade('w3')
 
