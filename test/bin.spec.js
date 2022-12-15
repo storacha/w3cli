@@ -221,10 +221,13 @@ test('w3 remove --shards', async t => {
     upload: {
       remove: provide(UploadCapabilities.remove, ({ invocation }) => {
         const { nb } = invocation.capabilities[0]
-        return { root: nb.root, shards: [
-          CID.parse('bagbaiera7ciaeifwrn7oo35gxdalocfj23vkvqus2eup27wt2qcxlvta2wya'),
-          CID.parse('bagbaiera7ciaeifwrn7oo35gxdalocfj23vkvqus2eup27wt2qcxlvta2wya')
-        ] }
+        return {
+          root: nb.root,
+          shards: [
+            CID.parse('bagbaiera7ciaeifwrn7oo35gxdalocfj23vkvqus2eup27wt2qcxlvta2wya'),
+            CID.parse('bagbaiera7ciaeifwrn7oo35gxdalocfj23vkvqus2eup27wt2qcxlvta2wya')
+          ]
+        }
       })
     }
   })
