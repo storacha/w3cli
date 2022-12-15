@@ -88,20 +88,36 @@ export async function remove (rootCid, opts) {
   } catch (err) {
     console.error(`Error: ${rootCid} is not a CID`)
   }
-
   const client = await getClient()
-  const res = await client.capability.upload.remove(root)
-  console.log(`Removed ${root}`)
+  let upload
+  try {
+    upload = await client.capability.upload.remove(root)
+  } catch (err) {
+    console.error(`Error: remove failed: ${err.message ?? err}`)
+    process.exit(1)
+  }
   if (!opts.shards) {
     return
   }
-  console.log('shards')
-  for (const shard of res.shards) {
-    oraPromise(client.capability.store.remove(shard, {
-      text: `Removing ${shard}`,
-      successText: `Removed ${shard}`,
-      failText: `Error removing ${shard}`
-    }))
+  if (!upload) {
+    return console.log(`⁂ upload not found. could not determine shards to remove.`)
+  }
+  
+  const { shards } = upload
+  console.log(`⁂ removing ${shards.length} shard${ shards.length === 1 ? '' : 's'}`)
+
+  function removeShard(shard) {
+    return oraPromise(client.capability.store.remove(shard), {
+      text: `${shard}`,
+      successText: `${shard} removed`,
+      failText: `${shard} failed`
+    })
+  }
+
+  const results = await Promise.allSettled(shards.map(removeShard))
+
+  if (results.some(res => res.status === 'rejected')) {
+    process.exit(1)
   }
 }
 
