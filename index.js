@@ -87,6 +87,7 @@ export async function remove (rootCid, opts) {
     root = CID.parse(rootCid.trim())
   } catch (err) {
     console.error(`Error: ${rootCid} is not a CID`)
+    process.exit(1)
   }
   const client = await getClient()
   let upload
