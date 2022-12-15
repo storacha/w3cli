@@ -100,16 +100,16 @@ export async function remove (rootCid, opts) {
     return
   }
   if (!upload) {
-    return console.log(`⁂ upload not found. could not determine shards to remove.`)
+    return console.log('⁂ upload not found. could not determine shards to remove.')
   }
   if (!upload.shards || !upload.shards.length) {
-    return console.log(`⁂ no shards to remove.`)
+    return console.log('⁂ no shards to remove.')
   }
-  
-  const { shards } = upload
-  console.log(`⁂ removing ${shards.length} shard${ shards.length === 1 ? '' : 's'}`)
 
-  function removeShard(shard) {
+  const { shards } = upload
+  console.log(`⁂ removing ${shards.length} shard${shards.length === 1 ? '' : 's'}`)
+
+  function removeShard (shard) {
     return oraPromise(client.capability.store.remove(shard), {
       text: `${shard}`,
       successText: `${shard} removed`,
