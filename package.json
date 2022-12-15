@@ -1,7 +1,7 @@
 {
   "name": "@web3-storage/w3cli",
   "type": "module",
-  "version": "3.0.0",
+  "version": "1.0.1",
   "license": "(Apache-2.0 AND MIT)",
   "description": "💾 w3 command line interface",
   "bin": {
@@ -31,8 +31,8 @@
   },
   "homepage": "https://github.com/web3-storage/w3cli#readme",
   "devDependencies": {
-    "@ucanto/principal": "^4.0.2",
-    "@ucanto/server": "^4.0.2",
+    "@ucanto/principal": "^4.0.3",
+    "@ucanto/server": "^4.0.3",
     "@web3-storage/capabilities": "^2.1.0",
     "ava": "^5.1.0",
     "execa": "^6.1.0",
@@ -43,11 +43,11 @@
   "dependencies": {
     "@ipld/car": "^5.0.1",
     "@ipld/dag-ucan": "^3.0.1",
-    "@ucanto/client": "^4.0.2",
-    "@ucanto/core": "^4.0.2",
-    "@ucanto/transport": "^4.0.2",
-    "@web3-storage/access": "^9.1.0",
-    "@web3-storage/w3up-client": "github:web3-storage/w3up-client#6579c2d1f6579740fb1e1b1c1ccf1ec1f3c9135f",
+    "@ucanto/client": "^4.0.3",
+    "@ucanto/core": "^4.0.3",
+    "@ucanto/transport": "^4.0.3",
+    "@web3-storage/access": "^9.1.1",
+    "@web3-storage/w3up-client": "^4.0.1",
     "open": "^8.4.0",
     "ora": "^6.1.2",
     "pretty-tree": "^1.0.0",

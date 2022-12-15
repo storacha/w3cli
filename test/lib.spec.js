@@ -20,3 +20,9 @@ test('filesFromPaths removes common path prefix', async (t) => {
     t.false(file.name.startsWith('test/'))
   }
 })
+
+test('filesFromPaths single file has name', async (t) => {
+  const files = await filesFromPaths(['test/fixtures/empty.car'])
+  t.is(files.length, 1)
+  t.is(files[0].name, 'empty.car')
+})
