@@ -1,7 +1,8 @@
 import fs from 'fs'
-import ora from 'ora'
+import ora, { oraPromise } from 'ora'
 import tree from 'pretty-tree'
 import { Readable } from 'stream'
+import { CID } from 'multiformats/cid'
 import * as DID from '@ipld/dag-ucan/did'
 import { CarWriter } from '@ipld/car'
 import { getClient, checkPathsExist, filesize, readProof, filesFromPaths } from './lib.js'
@@ -73,6 +74,55 @@ export async function list (opts) {
   if (count === 0 && !opts.json) {
     console.log('⁂ No uploads in space')
     console.log('⁂ Try out `w3 up <path to files>` to upload some')
+  }
+}
+/**
+ * @param {string} rootCid
+ * @param {object} opts
+ * @param {boolean} [opts.shards]
+ */
+export async function remove (rootCid, opts) {
+  let root
+  try {
+    root = CID.parse(rootCid.trim())
+  } catch (err) {
+    console.error(`Error: ${rootCid} is not a CID`)
+    process.exit(1)
+  }
+  const client = await getClient()
+  let upload
+  try {
+    upload = await client.capability.upload.remove(root)
+  } catch (err) {
+    console.error(`Remove failed: ${err.message ?? err}`)
+    console.error(err)
+    process.exit(1)
+  }
+  if (!opts.shards) {
+    return
+  }
+  if (!upload) {
+    return console.log('⁂ upload not found. could not determine shards to remove.')
+  }
+  if (!upload.shards || !upload.shards.length) {
+    return console.log('⁂ no shards to remove.')
+  }
+
+  const { shards } = upload
+  console.log(`⁂ removing ${shards.length} shard${shards.length === 1 ? '' : 's'}`)
+
+  function removeShard (shard) {
+    return oraPromise(client.capability.store.remove(shard), {
+      text: `${shard}`,
+      successText: `${shard} removed`,
+      failText: `${shard} failed`
+    })
+  }
+
+  const results = await Promise.allSettled(shards.map(removeShard))
+
+  if (results.some(res => res.status === 'rejected')) {
+    process.exit(1)
   }
 }
 
