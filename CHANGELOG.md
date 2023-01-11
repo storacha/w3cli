@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.1.0](https://github.com/web3-storage/w3cli/compare/v1.0.1...v1.1.0) (2023-01-11)
+
+
+### Features
+
+* add support for sharded CAR uploads ([#36](https://github.com/web3-storage/w3cli/issues/36)) ([b055c78](https://github.com/web3-storage/w3cli/commit/b055c781e5a955249aaf8a4a07d094c3314a895b))
+* adds `w3 rm &lt;root-cid&gt;` cmd ([#20](https://github.com/web3-storage/w3cli/issues/20)) ([899a4d4](https://github.com/web3-storage/w3cli/commit/899a4d4b5b427e1d1814ce2a7702faa6bb916177))
+
+
+### Bug Fixes
+
+* remove warnings using shebang ([#33](https://github.com/web3-storage/w3cli/issues/33)) ([f3a1aac](https://github.com/web3-storage/w3cli/commit/f3a1aac15eb88cd1096c45d83104fe8b75534c66))
+
 ## [1.0.1](https://github.com/web3-storage/w3cli/compare/v1.0.0...v1.0.1) (2022-12-14)
 
 
