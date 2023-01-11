@@ -128,6 +128,42 @@ test('w3 up', async (t) => {
   t.regex(stderr, /Stored 1 file/)
 })
 
+test('w3 up --car', async (t) => {
+  const env = t.context.env.alice
+
+  await execa('./bin.js', ['space', 'create'], { env })
+
+  const service = mockService({
+    store: {
+      add: provide(StoreCapabilities.add, () => ({
+        status: 'upload',
+        headers: { 'x-test': 'true' },
+        url: 'http://localhost:9200'
+      }))
+    },
+    upload: {
+      add: provide(UploadCapabilities.add, ({ invocation }) => {
+        const { nb } = invocation.capabilities[0]
+        if (!nb) throw new Error('missing nb')
+        t.assert(nb.shards)
+        t.is(nb.shards[0]?.toString(), 'bagbaieracyt3l5gpf3ovcmedm6ktgvxzi6gpp7x42ffu43zrqh2qwm6q7peq')
+        return nb
+      })
+    }
+  })
+
+  t.context.setService(service)
+
+  const { stderr } = await execa('./bin.js', ['up', '--car', 'test/fixtures/pinpie.car'], { env })
+
+  t.true(service.store.add.called)
+  t.is(service.store.add.callCount, 1)
+  t.true(service.upload.add.called)
+  t.is(service.upload.add.callCount, 1)
+
+  t.regex(stderr, /Stored 1 file/)
+})
+
 test('w3 ls', async (t) => {
   const env = t.context.env.alice
 

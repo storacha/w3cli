@@ -47,7 +47,7 @@
     "@ucanto/core": "^4.0.3",
     "@ucanto/transport": "^4.0.3",
     "@web3-storage/access": "^9.1.1",
-    "@web3-storage/w3up-client": "^4.0.1",
+    "@web3-storage/w3up-client": "^4.1.0",
     "open": "^8.4.0",
     "ora": "^6.1.2",
     "pretty-tree": "^1.0.0",

@@ -68,8 +68,11 @@ w3 up recipies.txt
 
 Upload file(s) to web3.storage. The IPFS Content ID (CID) for your files is calculated on your machine, and sent up along with your files. web3.storage makes your content available on the IPFS network
 
-- `--no-wrap` Don't wrap input files with a directory
-- `-H, --hidden` Include paths that start with "."
+- `--no-wrap` Don't wrap input files with a directory.
+- `-H, --hidden` Include paths that start with ".".
+- `-c, --car` File is a CAR file.
+- `--shard-size` Shard uploads into CAR files of approximately this size in bytes.
+- `--concurrent-requests` Send up to this many CAR shards concurrently.
 
 ### `w3 ls`
 

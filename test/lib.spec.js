@@ -1,5 +1,5 @@
 import test from 'ava'
-import { filesFromPaths } from '../lib.js'
+import { filesFromPaths, filesize } from '../lib.js'
 
 test('filesFromPaths', async (t) => {
   const files = await filesFromPaths(['node_modules'])
@@ -25,4 +25,19 @@ test('filesFromPaths single file has name', async (t) => {
   const files = await filesFromPaths(['test/fixtures/empty.car'])
   t.is(files.length, 1)
   t.is(files[0].name, 'empty.car')
+})
+
+test('filesize', t => {
+  [
+    [5, '5B'],
+    [50, '0.1KB'],
+    [500, '0.5KB'],
+    [5_000, '5.0KB'],
+    [50_000, '0.1MB'],
+    [500_000, '0.5MB'],
+    [5_000_000, '5.0MB'],
+    [50_000_000, '0.1GB'],
+    [500_000_000, '0.5GB'],
+    [5_000_000_000, '5.0GB']
+  ].forEach(([size, str]) => t.is(filesize(size), str))
 })
