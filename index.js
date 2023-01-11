@@ -22,17 +22,28 @@ export async function upload (firstPath, opts) {
   const files = await filesFromPaths(paths, { hidden })
   const totalSize = files.reduce((total, f) => total + f.size, 0)
   spinner.stopAndPersist({ text: `${files.length} file${files.length === 1 ? '' : 's'} (${filesize(totalSize)})` })
+
+  if (opts.car && files.length > 1) {
+    console.error('Error: multiple CAR files not supported')
+    process.exit(1)
+  }
+
   spinner.start('Storing')
   /** @type {(o?: import('@web3-storage/w3up-client/src/types').UploadOptions) => Promise<import('@web3-storage/w3up-client/src/types').AnyLink>} */
-  const uploadFn = files.length === 1 && opts['no-wrap']
-    ? client.uploadFile.bind(client, files[0])
-    : client.uploadDirectory.bind(client, files)
+  const uploadFn = opts.car
+    ? client.uploadCAR.bind(client, files[0])
+    : files.length === 1 && opts['no-wrap']
+      ? client.uploadFile.bind(client, files[0])
+      : client.uploadDirectory.bind(client, files)
+
   const root = await uploadFn({
     onShardStored: ({ cid, size }) => {
       totalSent += size
       spinner.stopAndPersist({ text: cid.toString() })
       spinner.start(`Storing ${Math.round((totalSent / totalSize) * 100)}%`)
-    }
+    },
+    shardSize: opts['shard-size'] && parseInt(opts['shard-size']),
+    concurrentRequests: opts['concurrent-requests'] && parseInt(opts['concurrent-requests'])
   })
   spinner.stopAndPersist({ symbol: '⁂', text: `Stored ${files.length} file${files.length === 1 ? '' : 's'}` })
   console.log(`⁂ https://w3s.link/ipfs/${root}`)
