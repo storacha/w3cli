@@ -35,8 +35,7 @@ export function filesize (bytes) {
   if (bytes < 50) return `${bytes}B` // avoid 0.0KB
   if (bytes < 50000) return `${(bytes / 1000).toFixed(1)}KB` // avoid 0.0MB
   if (bytes < 50000000) return `${(bytes / 1000 / 1000).toFixed(1)}MB` // avoid 0.0GB
-  const size = bytes / 1000 / 1000 / 1000
-  return `${size.toFixed(1)}GB`
+  return `${(bytes / 1000 / 1000 / 1000).toFixed(1)}GB`
 }
 
 /**
