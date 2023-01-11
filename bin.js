@@ -35,7 +35,7 @@ cli.command('up <file>')
   .option('--no-wrap', 'Don\'t wrap input files with a directory.', false)
   .option('-H, --hidden', 'Include paths that start with ".".')
   .option('-c, --car', 'File is a CAR file.', false)
-  .option('--shard-size', 'Shard uploads into CAR files of approximately this size.')
+  .option('--shard-size', 'Shard uploads into CAR files of approximately this size in bytes.')
   .option('--concurrent-requests', 'Send up to this many CAR shards concurrently.')
   .action(upload)
 
