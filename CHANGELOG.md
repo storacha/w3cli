@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/web3-storage/w3cli/compare/v1.1.0...v1.1.1) (2023-01-13)
+
+
+### Bug Fixes
+
+* dont error on systems that cant pass flags to env in shebang ([#38](https://github.com/web3-storage/w3cli/issues/38)) ([1e24e9f](https://github.com/web3-storage/w3cli/commit/1e24e9f581059c0d26d92a8882b0c37f997dc66b))
+
 ## [1.1.0](https://github.com/web3-storage/w3cli/compare/v1.0.1...v1.1.0) (2023-01-11)
 
 
