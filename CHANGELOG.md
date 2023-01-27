@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/web3-storage/w3cli/compare/v1.1.1...v1.2.0) (2023-01-27)
+
+
+### Features
+
+* `proof add --dry-run --json` to view a delegation ([#40](https://github.com/web3-storage/w3cli/issues/40)) ([c32283a](https://github.com/web3-storage/w3cli/commit/c32283afa4e77895b35ea2055b1a9edf264bd360))
+
 ## [1.1.1](https://github.com/web3-storage/w3cli/compare/v1.1.0...v1.1.1) (2023-01-13)
 
 
