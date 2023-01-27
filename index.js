@@ -279,16 +279,31 @@ export async function listDelegations (opts) {
 
 /**
  * @param {string} proofPath
+ * @param {object} opts
+ * @param {boolean} [opts.json]
+ * @param {boolean} [opts.dry-run]
  */
-export async function addProof (proofPath) {
+export async function addProof (proofPath, opts) {
   const client = await getClient()
-  const proof = await readProof(proofPath)
-  await client.addProof(proof)
-  console.log(proof.cid.toString())
-  console.log(`  issuer: ${proof.issuer.did()}`)
-  for (const capability of proof.capabilities) {
-    console.log(`  with: ${capability.with}`)
-    console.log(`  can: ${capability.can}`)
+  let proof
+  try {
+    proof = await readProof(proofPath)
+    if (!opts['dry-run']) {
+      await client.addProof(proof)
+    }
+  } catch (err) {
+    console.log(`Error: ${err.message}`)
+    process.exit(1)
+  }
+  if (opts.json) {
+    console.log(JSON.stringify(proof.toJSON()))
+  } else {
+    console.log(proof.cid.toString())
+    console.log(`  issuer: ${proof.issuer.did()}`)
+    for (const capability of proof.capabilities) {
+      console.log(`  with: ${capability.with}`)
+      console.log(`  can: ${capability.can}`)
+    }
   }
 }
 

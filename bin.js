@@ -100,6 +100,7 @@ cli.command('delegation ls')
 cli.command('proof add <proof>')
   .describe('Add a proof delegated to this agent.')
   .option('--json', 'Format as newline delimted JSON')
+  .option('--dry-run', 'Decode and view the proof but do not add it')
   .action(addProof)
 
 cli.command('proof ls')
