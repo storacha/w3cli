@@ -319,7 +319,7 @@ export async function listProofs (opts) {
   }
 }
 
-export async function whoam () {
+export async function whoami () {
   const client = await getClient()
   const who = client.agent()
   console.log(who.did())
