@@ -195,7 +195,7 @@ async function * filesFromDir (dir, filter) {
   }
 }
 
-export function uploadListResponseToString(res, opts) {
+export function uploadListResponseToString(res, opts = {}) {
   if (opts.raw) {
     return JSON.stringify(res)
   } else if (opts.json) {
@@ -216,7 +216,7 @@ export function uploadListResponseToString(res, opts) {
   }
 }
 
-export function storeListResponseToString(res, opts) {
+export function storeListResponseToString(res, opts = {}) {
   if (opts.raw) {
     return JSON.stringify(res)
   } else if (opts.json) {

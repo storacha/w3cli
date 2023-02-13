@@ -34,8 +34,9 @@ export async function storeAdd (carPath) {
  * @param {boolean} [opts.json]
  * @param {string} [opts.cursor]
  * @param {number} [opts.size]
+ * @param {boolean} [opts.pre]
  */
-export async function storeList (opts) {
+export async function storeList (opts = {}) {
   const client = await getClient()
   const listOptions = {}
   if (opts.size) {
@@ -43,6 +44,9 @@ export async function storeList (opts) {
   }
   if (opts.cursor) {
     listOptions.cursor = opts.cursor
+  }
+  if (opts.pre) {
+    listOptions.pre = opts.pre
   }
 
   const spinner = ora('Listing CARs').start()
@@ -93,8 +97,9 @@ export async function uploadAdd (root, shard, opts) {
  * @param {boolean} [opts.shards]
  * @param {string} [opts.cursor]
  * @param {number} [opts.size]
+ * @param {boolean} [opts.pre]
  */
-export async function uploadList (opts) {
+export async function uploadList (opts = {}) {
   const client = await getClient()
   const listOptions = {}
   if (opts.size) {
@@ -102,6 +107,9 @@ export async function uploadList (opts) {
   }
   if (opts.cursor) {
     listOptions.cursor = opts.cursor
+  }
+  if (opts.pre) {
+    listOptions.pre = opts.pre
   }
 
   const spinner = ora('Listing uploads').start()
