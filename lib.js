@@ -1,5 +1,6 @@
 import fs from 'fs'
 import path from 'path'
+import tree from 'pretty-tree'
 import { Readable } from 'stream'
 import { importDAG } from '@ucanto/core/delegation'
 import { connect } from '@ucanto/client'
@@ -191,5 +192,36 @@ async function * filesFromDir (dir, filter) {
     } else if (entry.isDirectory()) {
       yield * filesFromDir(path.join(dir, entry.name), filter)
     }
+  }
+}
+
+export function uploadListResponseToString(res, opts) {
+  if (opts.json) {
+    return res.results.map(({ root, shards }) => JSON.stringify({
+      root: root.toString(),
+      shards: shards?.map(s => s.toString())
+    })).join('\n')
+  } else if (opts.shards) {
+    return res.results.map(({ root, shards }) => tree({
+      label: root.toString(),
+      nodes: [{
+        label: 'shards',
+        leaf: shards?.map(s => s.toString())
+      }]
+    })).join('\n')
+  } else {
+    return res.results.map(({ root }) => root.toString()).join('\n')
+  }
+}
+
+export function storeListResponseToString(res, opts) {
+  if (opts.json) {
+    return res.results.map(({ link, size, insertedAt }) => JSON.stringify({
+      link: link.toString(),
+      size,
+      insertedAt
+    })).join('\n')
+  } else {
+    return res.results.map(({ link }) => link.toString()).join('\n')
   }
 }

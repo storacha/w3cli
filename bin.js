@@ -20,7 +20,9 @@ import {
 } from './index.js'
 import {
   storeAdd,
-  uploadAdd
+  storeList,
+  uploadAdd,
+  uploadList
 } from './can.js'
 
 const cli = sade('w3')
@@ -112,8 +114,19 @@ cli.command('can store add <car-path>')
   .describe('Store a CAR file with the service.')
   .action(storeAdd)
 
+cli.command('can store ls')
+  .describe('List CAR files in the current space.')
+  .option('--json', 'Format as newline delimted JSON')
+  .action(storeList)
+
 cli.command('can upload add <root-cid> <shard-cid>')
   .describe('Register an upload - a DAG with the given root data CID that is stored in the given CAR shard(s), identified by CAR CIDs.')
   .action(uploadAdd)
+
+cli.command('can upload ls')
+  .describe('List uploads in the current space.')
+  .option('--json', 'Format as newline delimted JSON')
+  .option('--shards', 'Pretty print with shards in output')
+  .action(uploadList)
 
 cli.parse(process.argv)

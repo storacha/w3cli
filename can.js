@@ -2,7 +2,7 @@
 import fs from 'fs'
 import { CID } from 'multiformats'
 import ora from 'ora'
-import { getClient } from './lib.js'
+import { getClient, uploadListResponseToString, storeListResponseToString } from './lib.js'
 
 /**
  * @param {string} carPath
@@ -25,6 +25,20 @@ export async function storeAdd (carPath) {
   const cid = await client.capability.store.add(blob)
   console.log(cid.toString())
   spinner.stopAndPersist({ symbol: '⁂', text: `Stored ${cid}` })
+}
+
+/**
+ * Print out all the CARs in the current space.
+ * @param {object} opts
+ * @param {boolean} [opts.json]
+ */
+export async function storeList (opts) {
+  const client = await getClient()
+
+  const spinner = ora('Listing CARs').start()
+  const res = await client.capability.store.list()
+  spinner.stop()
+  console.log(storeListResponseToString(res, opts))
 }
 
 /**
@@ -59,4 +73,19 @@ export async function uploadAdd (root, shard, opts) {
   const spinner = ora('Adding upload').start()
   await client.capability.upload.add(rootCID, shards)
   spinner.stopAndPersist({ symbol: '⁂', text: `Upload added ${rootCID}` })
+}
+
+/**
+ * Print out all the uploads in the current space.
+ * @param {object} opts
+ * @param {boolean} [opts.json]
+ * @param {boolean} [opts.shards]
+ */
+export async function uploadList (opts) {
+  const client = await getClient()
+
+  const spinner = ora('Listing uploads').start()
+  const res = await client.capability.upload.list()
+  spinner.stop()
+  console.log(uploadListResponseToString(res, opts))
 }
