@@ -196,7 +196,9 @@ async function * filesFromDir (dir, filter) {
 }
 
 export function uploadListResponseToString(res, opts) {
-  if (opts.json) {
+  if (opts.raw) {
+    return JSON.stringify(res)
+  } else if (opts.json) {
     return res.results.map(({ root, shards }) => JSON.stringify({
       root: root.toString(),
       shards: shards?.map(s => s.toString())
@@ -215,7 +217,9 @@ export function uploadListResponseToString(res, opts) {
 }
 
 export function storeListResponseToString(res, opts) {
-  if (opts.json) {
+  if (opts.raw) {
+    return JSON.stringify(res)
+  } else if (opts.json) {
     return res.results.map(({ link, size, insertedAt }) => JSON.stringify({
       link: link.toString(),
       size,

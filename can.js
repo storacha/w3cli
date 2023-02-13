@@ -30,10 +30,20 @@ export async function storeAdd (carPath) {
 /**
  * Print out all the CARs in the current space.
  * @param {object} opts
+ * @param {boolean} [opts.raw]
  * @param {boolean} [opts.json]
+ * @param {string} [opts.cursor]
+ * @param {number} [opts.size]
  */
 export async function storeList (opts) {
   const client = await getClient()
+  const listOptions = {}
+  if (opts.size) {
+    listOptions.size = parseInt(opts.size)
+  }
+  if (opts.cursor) {
+    listOptions.cursor = opts.cursor
+  }
 
   const spinner = ora('Listing CARs').start()
   const res = await client.capability.store.list()
@@ -78,14 +88,24 @@ export async function uploadAdd (root, shard, opts) {
 /**
  * Print out all the uploads in the current space.
  * @param {object} opts
+ * @param {boolean} [opts.raw]
  * @param {boolean} [opts.json]
  * @param {boolean} [opts.shards]
+ * @param {string} [opts.cursor]
+ * @param {number} [opts.size]
  */
 export async function uploadList (opts) {
   const client = await getClient()
+  const listOptions = {}
+  if (opts.size) {
+    listOptions.size = parseInt(opts.size)
+  }
+  if (opts.cursor) {
+    listOptions.cursor = opts.cursor
+  }
 
   const spinner = ora('Listing uploads').start()
-  const res = await client.capability.upload.list()
+  const res = await client.capability.upload.list(listOptions)
   spinner.stop()
   console.log(uploadListResponseToString(res, opts))
 }

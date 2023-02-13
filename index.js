@@ -51,6 +51,7 @@ export async function upload(firstPath, opts) {
 /**
  * Print out all the uploads in the current space.
  * @param {object} opts
+ * @param {boolean} [opts.raw]
  * @param {boolean} [opts.json]
  * @param {boolean} [opts.shards]
  */
