@@ -12,7 +12,7 @@ import { getClient, checkPathsExist, filesize, readProof, filesFromPaths, upload
  * @param {string[]} opts._
  * @param {boolean} [opts.hidden]
  */
-export async function upload(firstPath, opts) {
+export async function upload (firstPath, opts) {
   const paths = checkPathsExist([firstPath, ...opts._])
   const client = await getClient()
   const hidden = !!opts.hidden
@@ -55,7 +55,7 @@ export async function upload(firstPath, opts) {
  * @param {boolean} [opts.json]
  * @param {boolean} [opts.shards]
  */
-export async function list(opts) {
+export async function list (opts) {
   const client = await getClient()
   let count = 0
   let res
@@ -77,7 +77,7 @@ export async function list(opts) {
  * @param {object} opts
  * @param {boolean} [opts.shards]
  */
-export async function remove(rootCid, opts) {
+export async function remove (rootCid, opts) {
   let root
   try {
     root = CID.parse(rootCid.trim())
@@ -107,7 +107,7 @@ export async function remove(rootCid, opts) {
   const { shards } = upload
   console.log(`⁂ removing ${shards.length} shard${shards.length === 1 ? '' : 's'}`)
 
-  function removeShard(shard) {
+  function removeShard (shard) {
     return oraPromise(client.capability.store.remove(shard), {
       text: `${shard}`,
       successText: `${shard} removed`,
@@ -125,7 +125,7 @@ export async function remove(rootCid, opts) {
 /**
  * @param {string} name
  */
-export async function createSpace(name) {
+export async function createSpace (name) {
   const client = await getClient()
   const space = await client.createSpace(name)
   await client.setCurrentSpace(space.did())
@@ -135,7 +135,7 @@ export async function createSpace(name) {
 /**
  * @param {string} email
  */
-export async function registerSpace(email) {
+export async function registerSpace (email) {
   const client = await getClient()
   let space = client.currentSpace()
   if (space === undefined) {
@@ -165,14 +165,14 @@ export async function registerSpace(email) {
 /**
  * @param {string} proofPath
  */
-export async function addSpace(proofPath) {
+export async function addSpace (proofPath) {
   const client = await getClient()
   const delegation = await readProof(proofPath)
   const space = await client.addSpace(delegation)
   console.log(space.did())
 }
 
-export async function listSpaces() {
+export async function listSpaces () {
   const client = await getClient()
   const current = client.currentSpace()
   for (const space of client.spaces()) {
@@ -184,7 +184,7 @@ export async function listSpaces() {
 /**
  * @param {string} did
  */
-export async function useSpace(did) {
+export async function useSpace (did) {
   const client = await getClient()
   const spaces = client.spaces()
   const space = spaces.find(s => s.did() === did) ?? spaces.find(s => s.name() === did)
@@ -205,7 +205,7 @@ export async function useSpace(did) {
  * @param {number} [opts.expiration]
  * @param {string} [opts.output]
  */
-export async function createDelegation(audienceDID, opts) {
+export async function createDelegation (audienceDID, opts) {
   const client = await getClient()
   if (client.currentSpace() == null) {
     throw new Error('no current space, use `w3 space register` to create one.')
@@ -239,7 +239,7 @@ export async function createDelegation(audienceDID, opts) {
  * @param {object} opts
  * @param {boolean} [opts.json]
  */
-export async function listDelegations(opts) {
+export async function listDelegations (opts) {
   const client = await getClient()
   const delegations = client.delegations()
   if (opts.json) {
@@ -268,7 +268,7 @@ export async function listDelegations(opts) {
  * @param {boolean} [opts.json]
  * @param {boolean} [opts.dry-run]
  */
-export async function addProof(proofPath, opts) {
+export async function addProof (proofPath, opts) {
   const client = await getClient()
   let proof
   try {
@@ -296,7 +296,7 @@ export async function addProof(proofPath, opts) {
  * @param {object} opts
  * @param {boolean} [opts.json]
  */
-export async function listProofs(opts) {
+export async function listProofs (opts) {
   const client = await getClient()
   const proofs = client.proofs()
   if (opts.json) {
@@ -319,7 +319,7 @@ export async function listProofs(opts) {
   }
 }
 
-export async function whoami() {
+export async function whoam () {
   const client = await getClient()
   const who = client.agent()
   console.log(who.did())
