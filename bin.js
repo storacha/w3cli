@@ -48,7 +48,7 @@ cli.command('open <cid>')
 cli.command('ls')
   .alias('list')
   .describe('List uploads in the current space')
-  .option('--json', 'Format as newline delimted JSON')
+  .option('--json', 'Format as newline delimited JSON')
   .option('--shards', 'Pretty print with shards in output')
   .action(list)
 
@@ -96,18 +96,18 @@ cli.command('delegation create <audience-did>')
 
 cli.command('delegation ls')
   .describe('List delegations created by this agent for others.')
-  .option('--json', 'Format as newline delimted JSON')
+  .option('--json', 'Format as newline delimited JSON')
   .action(listDelegations)
 
 cli.command('proof add <proof>')
   .describe('Add a proof delegated to this agent.')
-  .option('--json', 'Format as newline delimted JSON')
+  .option('--json', 'Format as newline delimited JSON')
   .option('--dry-run', 'Decode and view the proof but do not add it')
   .action(addProof)
 
 cli.command('proof ls')
   .describe('List proofs of capabilities delegated to this agent.')
-  .option('--json', 'Format as newline delimted JSON')
+  .option('--json', 'Format as newline delimited JSON')
   .action(listProofs)
 
 cli.command('can store add <car-path>')
@@ -116,7 +116,7 @@ cli.command('can store add <car-path>')
 
 cli.command('can store ls')
   .describe('List CAR files in the current space.')
-  .option('--json', 'Format as newline delimted JSON')
+  .option('--json', 'Format as newline delimited JSON')
   .action(storeList)
 
 cli.command('can upload add <root-cid> <shard-cid>')
@@ -125,7 +125,7 @@ cli.command('can upload add <root-cid> <shard-cid>')
 
 cli.command('can upload ls')
   .describe('List uploads in the current space.')
-  .option('--json', 'Format as newline delimted JSON')
+  .option('--json', 'Format as newline delimited JSON')
   .option('--shards', 'Pretty print with shards in output')
   .action(uploadList)
 
