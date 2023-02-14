@@ -55,7 +55,7 @@ export async function upload (firstPath, opts) {
  * @param {boolean} [opts.json]
  * @param {boolean} [opts.shards]
  */
-export async function list (opts) {
+export async function list (opts = {}) {
   const client = await getClient()
   let count = 0
   let res
@@ -63,7 +63,7 @@ export async function list (opts) {
     res = await client.capability.upload.list()
     count += res.results.length
     if (res.results.length) {
-      console.log(uploadListResponseToString(res))
+      console.log(uploadListResponseToString(res, opts))
     }
   } while (res.cursor && res.results.length)
 
