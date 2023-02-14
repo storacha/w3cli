@@ -14,6 +14,9 @@ import { CarReader } from '@ipld/car'
 
 /**
  * @typedef {import('@web3-storage/w3up-client/types').FileLike & { size: number }} FileLike
+ * @typedef {import('@web3-storage/w3up-client/src/types').ListResponse} ListResponse
+ * @typedef {import('@web3-storage/w3up-client/src/types').StoreListResult} StoreListResult
+ * @typedef {import('@web3-storage/w3up-client/src/types').UploadListResult} UploadListResult
  */
 
 export function getPkg () {
@@ -195,6 +198,13 @@ async function * filesFromDir (dir, filter) {
   }
 }
 
+/**
+ * @param {ListResponse<UploadListResult>} res
+ * @param {boolean} [opts.raw]
+ * @param {boolean} [opts.json]
+ * @param {boolean} [opts.shards]
+ * @returns {string}
+ */
 export function uploadListResponseToString (res, opts = {}) {
   if (opts.raw) {
     return JSON.stringify(res)
@@ -216,6 +226,12 @@ export function uploadListResponseToString (res, opts = {}) {
   }
 }
 
+/**
+ * @param {ListResponse<StoreListResult>} res
+ * @param {boolean} [opts.raw]
+ * @param {boolean} [opts.json]
+ * @returns {string}
+ */
 export function storeListResponseToString (res, opts = {}) {
   if (opts.raw) {
     return JSON.stringify(res)

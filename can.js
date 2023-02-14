@@ -50,7 +50,7 @@ export async function storeList (opts = {}) {
   }
 
   const spinner = ora('Listing CARs').start()
-  const res = await client.capability.store.list()
+  const res = await client.capability.store.list(listOptions)
   spinner.stop()
   console.log(storeListResponseToString(res, opts))
 }
