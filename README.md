@@ -78,7 +78,8 @@ Upload file(s) to web3.storage. The IPFS Content ID (CID) for your files is calc
 
 List all the uploads registered in the current space.
 
-* `--json` Format as newline delimted JSON
+* `--raw` Format full response as JSON
+* `--json` Format as newline delimited JSON
 * `--shards` Pretty print with shards in output
 
 ### `w3 rm <root-cid>`
@@ -136,7 +137,7 @@ Create a delegation to the passed audience for the given abilities with the _cur
 
 List delegations created by this agent for others.
 
-* `--json` Format as newline delimted JSON
+* `--json` Format as newline delimited JSON
 
 ### `w3 proof add <proof.ucan>`
 
@@ -146,7 +147,7 @@ Add a proof delegated to this agent. The proof is a CAR encoded delegation to _t
 
 List proofs of delegated capabilities. Proofs are delegations with an audience matching the agent DID.
 
-* `--json` Format as newline delimted JSON
+* `--json` Format as newline delimited JSON
 
 ### `w3 can space info <did>`
 
@@ -160,7 +161,11 @@ Store a [CAR](https://ipld.io/specs/transport/car/carv1/) file to web3.storage.
 
 List CARs in the current space.
 
-* `--json` Format as newline delimted JSON
+* `--raw` Format full response as JSON
+* `--json` Format as newline delimited JSON
+* `--size` The desired number of results to return
+* `--cursor` An opaque string included in a prior upload/list response that allows the service to provide the next "page" of results
+* `--pre` If true, return the page of results preceding the cursor
 
 ### `w3 can store rm <car-cid>`
 
@@ -172,8 +177,12 @@ Register an upload - a DAG with the given root data CID that is stored in the gi
 
 List uploads in the current space.
 
-* `--json` Format as newline delimted JSON
+* `--raw` Format full response as JSON
+* `--json` Format as newline delimited JSON
 * `--shards` Pretty print with shards in output
+* `--size` The desired number of results to return
+* `--cursor` An opaque string included in a prior upload/list response that allows the service to provide the next "page" of results
+* `--pre` If true, return the page of results preceding the cursor
 
 ### `w3 can upload rm <root-cid>`
 
