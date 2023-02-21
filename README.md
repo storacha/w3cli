@@ -78,7 +78,6 @@ Upload file(s) to web3.storage. The IPFS Content ID (CID) for your files is calc
 
 List all the uploads registered in the current space.
 
-* `--raw` Format full response as JSON
 * `--json` Format as newline delimited JSON
 * `--shards` Pretty print with shards in output
 
