@@ -19,12 +19,12 @@ import { CarReader } from '@ipld/car'
  * @typedef {import('@web3-storage/w3up-client/src/types').UploadListResult} UploadListResult
  */
 
-export function getPkg() {
+export function getPkg () {
   // @ts-ignore JSON.parse works with Buffer in Node.js
   return JSON.parse(fs.readFileSync(new URL('./package.json', import.meta.url)))
 }
 
-export function checkPathsExist(paths) {
+export function checkPathsExist (paths) {
   paths = Array.isArray(paths) ? paths : [paths]
   for (const p of paths) {
     if (!fs.existsSync(p)) {
@@ -35,7 +35,7 @@ export function checkPathsExist(paths) {
   return paths
 }
 
-export function filesize(bytes) {
+export function filesize (bytes) {
   if (bytes < 50) return `${bytes}B` // avoid 0.0KB
   if (bytes < 50000) return `${(bytes / 1000).toFixed(1)}KB` // avoid 0.0MB
   if (bytes < 50000000) return `${(bytes / 1000 / 1000).toFixed(1)}MB` // avoid 0.0GB
@@ -45,7 +45,7 @@ export function filesize(bytes) {
 /**
  * Get a new API client configured from env vars.
  */
-export function getClient() {
+export function getClient () {
   const store = new StoreConf({ profile: process.env.W3_STORE_NAME ?? 'w3cli' })
 
   let serviceConf
@@ -84,7 +84,7 @@ export function getClient() {
 /**
  * @param {string} path Path to the proof file.
  */
-export async function readProof(path) {
+export async function readProof (path) {
   try {
     await fs.promises.access(path, fs.constants.R_OK)
   } catch (err) {
@@ -118,7 +118,7 @@ export async function readProof(path) {
  * @param {boolean} [options.hidden]
  * @returns {Promise<FileLike[]>}
  */
-export async function filesFromPaths(paths, options) {
+export async function filesFromPaths (paths, options) {
   /** @type {string[]|undefined} */
   let commonParts
   const files = []
@@ -148,7 +148,7 @@ export async function filesFromPaths(paths, options) {
  * @param {boolean} [options.hidden]
  * @returns {AsyncIterableIterator<FileLike>}
  */
-async function* filesFromPath(filepath, options = {}) {
+async function * filesFromPath (filepath, options = {}) {
   filepath = path.resolve(filepath)
   const hidden = options.hidden ?? false
 
@@ -170,7 +170,7 @@ async function* filesFromPath(filepath, options = {}) {
     // @ts-expect-error node web stream not type compatible with web stream
     yield { name, stream, size: stat.size }
   } else if (stat.isDirectory()) {
-    yield* filesFromDir(filepath, filter)
+    yield * filesFromDir(filepath, filter)
   }
 }
 
@@ -179,7 +179,7 @@ async function* filesFromPath(filepath, options = {}) {
  * @param {(name: string) => boolean} filter
  * @returns {AsyncIterableIterator<FileLike>}
  */
-async function* filesFromDir(dir, filter) {
+async function * filesFromDir (dir, filter) {
   const entries = await fs.promises.readdir(path.join(dir), { withFileTypes: true })
   for (const entry of entries) {
     if (!filter(entry.name)) {
@@ -193,7 +193,7 @@ async function* filesFromDir(dir, filter) {
       // @ts-expect-error node web stream not type compatible with web stream
       yield { name, stream, size }
     } else if (entry.isDirectory()) {
-      yield* filesFromDir(path.join(dir, entry.name), filter)
+      yield * filesFromDir(path.join(dir, entry.name), filter)
     }
   }
 }
@@ -205,7 +205,7 @@ async function* filesFromDir(dir, filter) {
  * @param {boolean} [opts.shards]
  * @returns {string}
  */
-export function uploadListResponseToString(res, opts = {}) {
+export function uploadListResponseToString (res, opts = {}) {
   if (opts.json) {
     return res.results.map(({ root, shards }) => JSON.stringify({
       root: root.toString(),
@@ -230,7 +230,7 @@ export function uploadListResponseToString(res, opts = {}) {
  * @param {boolean} [opts.json]
  * @returns {string}
  */
-export function storeListResponseToString(res, opts = {}) {
+export function storeListResponseToString (res, opts = {}) {
   if (opts.json) {
     return res.results.map(({ link, size, insertedAt }) => JSON.stringify({
       link: link.toString(),

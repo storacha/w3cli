@@ -10,6 +10,7 @@
   },
   "scripts": {
     "lint": "standard",
+    "lint:fix": "standard --fix",
     "test": "npm-run-all -p -r mock test:ava",
     "test:ava": "ava --verbose",
     "test:watch": "ava --watch",
