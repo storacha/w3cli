@@ -234,7 +234,7 @@ test('w3 remove - no such upload', async t => {
 
   const service = mockService({
     upload: {
-      remove: provide(UploadCapabilities.remove, () => { })
+      remove: provide(UploadCapabilities.remove, () => {})
     }
   })
   t.context.setService(service)
@@ -251,7 +251,7 @@ test('w3 remove --shards', async t => {
 
   const service = mockService({
     store: {
-      remove: provide(StoreCapabilities.remove, () => { })
+      remove: provide(StoreCapabilities.remove, () => {})
     },
     upload: {
       remove: provide(UploadCapabilities.remove, ({ invocation }) => {
@@ -281,7 +281,7 @@ test('w3 remove --shards - no shards to remove', async t => {
 
   const service = mockService({
     store: {
-      remove: provide(StoreCapabilities.remove, () => { })
+      remove: provide(StoreCapabilities.remove, () => {})
     },
     upload: {
       remove: provide(UploadCapabilities.remove, ({ invocation }) => {

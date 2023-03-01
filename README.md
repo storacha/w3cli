@@ -56,10 +56,10 @@ w3 up recipies.txt
   * [`w3 can space info`](#w3-can-space-info-did) <sup>coming soon!</sup>
   * [`w3 can space recover`](#w3-can-space-recover-email) <sup>coming soon!</sup>
   * [`w3 can store add`](#w3-can-store-add-car-path)
-  * [`w3 can store ls`](#w3-can-store-ls) <sup>coming soon!</sup>
+  * [`w3 can store ls`](#w3-can-store-ls)
   * [`w3 can store rm`](#w3-can-store-rm-car-cid) <sup>coming soon!</sup>
   * [`w3 can upload add`](#w3-can-upload-add-root-cid-shard-cid-shard-cid)
-  * [`w3 can upload ls`](#w3-can-upload-ls) <sup>coming soon!</sup>
+  * [`w3 can upload ls`](#w3-can-upload-ls)
   * [`w3 can upload rm`](#w3-can-upload-rm-root-cid) <sup>coming soon!</sup>
 
 ---
