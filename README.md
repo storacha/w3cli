@@ -160,7 +160,6 @@ Store a [CAR](https://ipld.io/specs/transport/car/carv1/) file to web3.storage.
 
 List CARs in the current space.
 
-* `--raw` Format full response as JSON
 * `--json` Format as newline delimited JSON
 * `--size` The desired number of results to return
 * `--cursor` An opaque string included in a prior upload/list response that allows the service to provide the next "page" of results
@@ -176,7 +175,6 @@ Register an upload - a DAG with the given root data CID that is stored in the gi
 
 List uploads in the current space.
 
-* `--raw` Format full response as JSON
 * `--json` Format as newline delimited JSON
 * `--shards` Pretty print with shards in output
 * `--size` The desired number of results to return

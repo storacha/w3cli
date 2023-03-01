@@ -30,7 +30,6 @@ export async function storeAdd (carPath) {
 /**
  * Print out all the CARs in the current space.
  * @param {object} opts
- * @param {boolean} [opts.raw]
  * @param {boolean} [opts.json]
  * @param {string} [opts.cursor]
  * @param {number} [opts.size]
@@ -92,7 +91,6 @@ export async function uploadAdd (root, shard, opts) {
 /**
  * Print out all the uploads in the current space.
  * @param {object} opts
- * @param {boolean} [opts.raw]
  * @param {boolean} [opts.json]
  * @param {boolean} [opts.shards]
  * @param {string} [opts.cursor]

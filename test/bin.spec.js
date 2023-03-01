@@ -623,9 +623,6 @@ test('w3 can upload ls', async (t) => {
 
   t.context.setService(service)
 
-  const list0 = await execa('./bin.js', ['can', 'upload', 'ls', '--raw'], { env })
-  t.regex(list0.stdout, /\{"size":0,"results":\[\]\}/)
-
   await execa('./bin.js', ['up', 'test/fixtures/pinpie.jpg'], { env })
 
   const list1 = await execa('./bin.js', ['can', 'upload', 'ls', '--json'], { env })
@@ -663,9 +660,6 @@ test('w3 can store ls', async (t) => {
   })
 
   t.context.setService(service)
-
-  const list0 = await execa('./bin.js', ['can', 'store', 'ls', '--raw'], { env })
-  t.regex(list0.stdout, /\{"size":0,"results":\[\]\}/)
 
   await execa('./bin.js', ['up', 'test/fixtures/pinpie.jpg'], { env })
 
