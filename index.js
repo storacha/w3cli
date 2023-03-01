@@ -60,7 +60,7 @@ export async function list (opts) {
   let count = 0
   let res
   do {
-    res = await client.capability.upload.list()
+    res = await client.capability.upload.list({ cursor: res?.cursor })
     count += res.results.length
     if (res.results.length) {
       if (opts.json) {
