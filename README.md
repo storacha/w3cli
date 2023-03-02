@@ -56,10 +56,10 @@ w3 up recipies.txt
   * [`w3 can space info`](#w3-can-space-info-did) <sup>coming soon!</sup>
   * [`w3 can space recover`](#w3-can-space-recover-email) <sup>coming soon!</sup>
   * [`w3 can store add`](#w3-can-store-add-car-path)
-  * [`w3 can store ls`](#w3-can-store-ls) <sup>coming soon!</sup>
+  * [`w3 can store ls`](#w3-can-store-ls)
   * [`w3 can store rm`](#w3-can-store-rm-car-cid) <sup>coming soon!</sup>
   * [`w3 can upload add`](#w3-can-upload-add-root-cid-shard-cid-shard-cid)
-  * [`w3 can upload ls`](#w3-can-upload-ls) <sup>coming soon!</sup>
+  * [`w3 can upload ls`](#w3-can-upload-ls)
   * [`w3 can upload rm`](#w3-can-upload-rm-root-cid) <sup>coming soon!</sup>
 
 ---
@@ -68,24 +68,24 @@ w3 up recipies.txt
 
 Upload file(s) to web3.storage. The IPFS Content ID (CID) for your files is calculated on your machine, and sent up along with your files. web3.storage makes your content available on the IPFS network
 
-- `--no-wrap` Don't wrap input files with a directory.
-- `-H, --hidden` Include paths that start with ".".
-- `-c, --car` File is a CAR file.
-- `--shard-size` Shard uploads into CAR files of approximately this size in bytes.
-- `--concurrent-requests` Send up to this many CAR shards concurrently.
+* `--no-wrap` Don't wrap input files with a directory.
+* `-H, --hidden` Include paths that start with ".".
+* `-c, --car` File is a CAR file.
+* `--shard-size` Shard uploads into CAR files of approximately this size in bytes.
+* `--concurrent-requests` Send up to this many CAR shards concurrently.
 
 ### `w3 ls`
 
 List all the uploads registered in the current space.
 
-- `--json` Format as newline delimted JSON
-- `--shards` Pretty print with shards in output
+* `--json` Format as newline delimited JSON
+* `--shards` Pretty print with shards in output
 
 ### `w3 rm <root-cid>`
 
 Remove an upload from the uploads listing. Note that this command does not remove the data from the IPFS network, nor does it remove it from space storage (by default).
 
-- `--shards` Also remove all shards referenced by the upload from the store. Use with caution and ensure other uploads do not reference the same shards.
+* `--shards` Also remove all shards referenced by the upload from the store. Use with caution and ensure other uploads do not reference the same shards.
 
 ### `w3 open <cid>`
 
@@ -136,7 +136,7 @@ Create a delegation to the passed audience for the given abilities with the _cur
 
 List delegations created by this agent for others.
 
-- `--json` Format as newline delimted JSON
+* `--json` Format as newline delimited JSON
 
 ### `w3 proof add <proof.ucan>`
 
@@ -146,7 +146,7 @@ Add a proof delegated to this agent. The proof is a CAR encoded delegation to _t
 
 List proofs of delegated capabilities. Proofs are delegations with an audience matching the agent DID.
 
-- `--json` Format as newline delimted JSON
+* `--json` Format as newline delimited JSON
 
 ### `w3 can space info <did>`
 
@@ -158,6 +158,13 @@ Store a [CAR](https://ipld.io/specs/transport/car/carv1/) file to web3.storage.
 
 ### `w3 can store ls`
 
+List CARs in the current space.
+
+* `--json` Format as newline delimited JSON
+* `--size` The desired number of results to return
+* `--cursor` An opaque string included in a prior upload/list response that allows the service to provide the next "page" of results
+* `--pre` If true, return the page of results preceding the cursor
+
 ### `w3 can store rm <car-cid>`
 
 ### `w3 can upload add <root-cid> <shard-cid> [shard-cid...]`
@@ -165,6 +172,14 @@ Store a [CAR](https://ipld.io/specs/transport/car/carv1/) file to web3.storage.
 Register an upload - a DAG with the given root data CID that is stored in the given CAR shard(s), identified by CAR CIDs.
 
 ### `w3 can upload ls`
+
+List uploads in the current space.
+
+* `--json` Format as newline delimited JSON
+* `--shards` Pretty print with shards in output
+* `--size` The desired number of results to return
+* `--cursor` An opaque string included in a prior upload/list response that allows the service to provide the next "page" of results
+* `--pre` If true, return the page of results preceding the cursor
 
 ### `w3 can upload rm <root-cid>`
 

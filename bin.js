@@ -20,7 +20,9 @@ import {
 } from './index.js'
 import {
   storeAdd,
-  uploadAdd
+  storeList,
+  uploadAdd,
+  uploadList
 } from './can.js'
 
 const cli = sade('w3')
@@ -46,7 +48,7 @@ cli.command('open <cid>')
 cli.command('ls')
   .alias('list')
   .describe('List uploads in the current space')
-  .option('--json', 'Format as newline delimted JSON')
+  .option('--json', 'Format as newline delimited JSON')
   .option('--shards', 'Pretty print with shards in output')
   .action(list)
 
@@ -94,26 +96,43 @@ cli.command('delegation create <audience-did>')
 
 cli.command('delegation ls')
   .describe('List delegations created by this agent for others.')
-  .option('--json', 'Format as newline delimted JSON')
+  .option('--json', 'Format as newline delimited JSON')
   .action(listDelegations)
 
 cli.command('proof add <proof>')
   .describe('Add a proof delegated to this agent.')
-  .option('--json', 'Format as newline delimted JSON')
+  .option('--json', 'Format as newline delimited JSON')
   .option('--dry-run', 'Decode and view the proof but do not add it')
   .action(addProof)
 
 cli.command('proof ls')
   .describe('List proofs of capabilities delegated to this agent.')
-  .option('--json', 'Format as newline delimted JSON')
+  .option('--json', 'Format as newline delimited JSON')
   .action(listProofs)
 
 cli.command('can store add <car-path>')
   .describe('Store a CAR file with the service.')
   .action(storeAdd)
 
+cli.command('can store ls')
+  .describe('List CAR files in the current space.')
+  .option('--json', 'Format as newline delimited JSON')
+  .option('--size', 'The desired number of results to return')
+  .option('--cursor', 'An opaque string included in a prior store/list response that allows the service to provide the next "page" of results')
+  .option('--pre', 'If true, return the page of results preceding the cursor')
+  .action(storeList)
+
 cli.command('can upload add <root-cid> <shard-cid>')
   .describe('Register an upload - a DAG with the given root data CID that is stored in the given CAR shard(s), identified by CAR CIDs.')
   .action(uploadAdd)
+
+cli.command('can upload ls')
+  .describe('List uploads in the current space.')
+  .option('--json', 'Format as newline delimited JSON')
+  .option('--shards', 'Pretty print with shards in output')
+  .option('--size', 'The desired number of results to return')
+  .option('--cursor', 'An opaque string included in a prior upload/list response that allows the service to provide the next "page" of results')
+  .option('--pre', 'If true, return the page of results preceding the cursor')
+  .action(uploadList)
 
 cli.parse(process.argv)

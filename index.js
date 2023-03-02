@@ -1,11 +1,10 @@
 import fs from 'fs'
 import ora, { oraPromise } from 'ora'
-import tree from 'pretty-tree'
 import { Readable } from 'stream'
 import { CID } from 'multiformats/cid'
 import * as DID from '@ipld/dag-ucan/did'
 import { CarWriter } from '@ipld/car'
-import { getClient, checkPathsExist, filesize, readProof, filesFromPaths } from './lib.js'
+import { getClient, checkPathsExist, filesize, readProof, filesFromPaths, uploadListResponseToString } from './lib.js'
 
 /**
  * @param {string} firstPath
@@ -55,7 +54,7 @@ export async function upload (firstPath, opts) {
  * @param {boolean} [opts.json]
  * @param {boolean} [opts.shards]
  */
-export async function list (opts) {
+export async function list (opts = {}) {
   const client = await getClient()
   let count = 0
   let res
@@ -63,22 +62,7 @@ export async function list (opts) {
     res = await client.capability.upload.list()
     count += res.results.length
     if (res.results.length) {
-      if (opts.json) {
-        console.log(res.results.map(({ root, shards }) => JSON.stringify({
-          root: root.toString(),
-          shards: shards?.map(s => s.toString())
-        })).join('\n'))
-      } else if (opts.shards) {
-        console.log(res.results.map(({ root, shards }) => tree({
-          label: root.toString(),
-          nodes: [{
-            label: 'shards',
-            leaf: shards?.map(s => s.toString())
-          }]
-        })).join('\n'))
-      } else {
-        console.log(res.results.map(({ root }) => root.toString()).join('\n'))
-      }
+      console.log(uploadListResponseToString(res, opts))
     }
   } while (res.cursor && res.results.length)
 

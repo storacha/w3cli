@@ -10,8 +10,10 @@
   },
   "scripts": {
     "lint": "standard",
+    "lint:fix": "standard --fix",
     "test": "npm-run-all -p -r mock test:ava",
     "test:ava": "ava --verbose",
+    "test:watch": "ava --watch",
     "mock": "run-p mock:*",
     "mock:bucket-200": "PORT=9200 STATUS=200 node test/helpers/bucket-server.js"
   },
@@ -36,7 +38,7 @@
     "@web3-storage/capabilities": "^2.1.0",
     "ava": "^5.1.0",
     "execa": "^6.1.0",
-    "multiformats": "^10.0.2",
+    "multiformats": "^11.0.0",
     "npm-run-all": "^4.1.5",
     "standard": "^17.0.0"
   },
@@ -47,7 +49,7 @@
     "@ucanto/core": "^4.0.3",
     "@ucanto/transport": "^4.0.3",
     "@web3-storage/access": "^9.1.1",
-    "@web3-storage/w3up-client": "^4.1.0",
+    "@web3-storage/w3up-client": "^4.2.0",
     "open": "^8.4.0",
     "ora": "^6.1.2",
     "pretty-tree": "^1.0.0",

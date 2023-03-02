@@ -592,3 +592,77 @@ test('w3 can upload add', async (t) => {
 
   t.regex(out1.stderr, /Upload added/)
 })
+
+test('w3 can upload ls', async (t) => {
+  const env = t.context.env.alice
+
+  await execa('./bin.js', ['space', 'create'], { env })
+
+  const uploads = []
+
+  const service = mockService({
+    store: {
+      add: provide(StoreCapabilities.add, () => ({
+        status: 'upload',
+        headers: { 'x-test': 'true' },
+        url: 'http://localhost:9200'
+      }))
+    },
+    upload: {
+      add: provide(UploadCapabilities.add, ({ invocation }) => {
+        const { nb } = invocation.capabilities[0]
+        if (!nb) throw new Error('missing nb')
+        uploads.push(nb)
+        return nb
+      }),
+      list: provide(UploadCapabilities.list, () => {
+        return { results: uploads, size: uploads.length }
+      })
+    }
+  })
+
+  t.context.setService(service)
+
+  await execa('./bin.js', ['up', 'test/fixtures/pinpie.jpg'], { env })
+
+  const list1 = await execa('./bin.js', ['can', 'upload', 'ls', '--json'], { env })
+  t.notThrows(() => CID.parse(JSON.parse(list1.stdout).root))
+})
+
+test('w3 can store ls', async (t) => {
+  const env = t.context.env.alice
+
+  await execa('./bin.js', ['space', 'create'], { env })
+
+  const cars = []
+
+  const service = mockService({
+    store: {
+      add: provide(StoreCapabilities.add, ({ invocation }) => {
+        cars.push({ link: invocation.root.cid })
+        return ({
+          status: 'upload',
+          headers: { 'x-test': 'true' },
+          url: 'http://localhost:9200'
+        })
+      }),
+      list: provide(StoreCapabilities.list, () => {
+        return { results: cars, size: cars.length }
+      })
+    },
+    upload: {
+      add: provide(UploadCapabilities.add, ({ invocation }) => {
+        const { nb } = invocation.capabilities[0]
+        if (!nb) throw new Error('missing nb')
+        return nb
+      })
+    }
+  })
+
+  t.context.setService(service)
+
+  await execa('./bin.js', ['up', 'test/fixtures/pinpie.jpg'], { env })
+
+  const list1 = await execa('./bin.js', ['can', 'store', 'ls', '--json'], { env })
+  t.notThrows(() => CID.parse(JSON.parse(list1.stdout).link))
+})
