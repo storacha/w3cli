@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/web3-storage/w3cli/compare/v1.2.0...v1.2.1) (2023-03-02)
+
+
+### Bug Fixes
+
+* pass cursor to list in `w3 ls` ([#50](https://github.com/web3-storage/w3cli/issues/50)) ([324e913](https://github.com/web3-storage/w3cli/commit/324e913bd44f92a79225e4cf24fe3708ff105dbf))
+
 ## [1.2.0](https://github.com/web3-storage/w3cli/compare/v1.1.1...v1.2.0) (2023-01-27)
 
 
