@@ -14,9 +14,9 @@ import { CarReader } from '@ipld/car'
 
 /**
  * @typedef {import('@web3-storage/w3up-client/types').FileLike & { size: number }} FileLike
- * @typedef {import('@web3-storage/w3up-client/src/types').ListResponse} ListResponse
- * @typedef {import('@web3-storage/w3up-client/src/types').StoreListResult} StoreListResult
- * @typedef {import('@web3-storage/w3up-client/src/types').UploadListResult} UploadListResult
+ * @typedef {import('@web3-storage/w3up-client/types').ListResponse} ListResponse
+ * @typedef {import('@web3-storage/w3up-client/types').StoreListResult} StoreListResult
+ * @typedef {import('@web3-storage/w3up-client/types').UploadListResult} UploadListResult
  */
 
 export function getPkg () {
