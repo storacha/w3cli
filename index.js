@@ -6,6 +6,42 @@ import * as DID from '@ipld/dag-ucan/did'
 import { CarWriter } from '@ipld/car'
 import { getClient, checkPathsExist, filesize, readProof, filesFromPaths, uploadListResponseToString } from './lib.js'
 
+export async function accessClaim () {
+  const client = await getClient()
+  const delegations = await client.capability.access.claim()
+  for (const delegation of delegations) {
+    console.log('claimed delegation', delegation.toJSON().att)
+    for (const proof of delegation.proofs) {
+      console.log('with proof', proof.toJSON().att)
+    }
+  }
+}
+
+/**
+ * @param {string} email
+ */
+export async function authorize (email) {
+  const client = await getClient()
+  /** @type {import('ora').Ora|undefined} */
+  let spinner
+  setTimeout(() => {
+    spinner = ora(`🔗 please click the link we sent to ${email} to authorize this device`).start()
+  }, 1000)
+  try {
+    await client.capability.access.authorize(email)
+  } catch (err) {
+    if (spinner) spinner.stop()
+    if (err.message.startsWith('Device already authorized')) {
+      console.error('Error: device already authorized.')
+    } else {
+      console.error(err)
+    }
+    process.exit(1)
+  }
+  if (spinner) spinner.stop()
+  console.log(`⁂ device authorized to use capabilities delegated to ${email}`)
+}
+
 /**
  * @param {string} firstPath
  * @param {object} opts
