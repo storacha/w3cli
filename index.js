@@ -4,7 +4,8 @@ import { Readable } from 'stream'
 import { CID } from 'multiformats/cid'
 import * as DID from '@ipld/dag-ucan/did'
 import { CarWriter } from '@ipld/car'
-import { getClient, checkPathsExist, filesize, readProof, filesFromPaths, uploadListResponseToString } from './lib.js'
+import { filesFromPaths } from 'files-from-path'
+import { getClient, checkPathsExist, filesize, readProof, uploadListResponseToString } from './lib.js'
 
 /**
  * @param {string} firstPath
