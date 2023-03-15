@@ -77,8 +77,8 @@ cli.command('space create [name]')
   .describe('Create a new w3 space')
   .action(createSpace)
 
-cli.command('space register <email>')
-  .describe('Claim the space by associating it with your email address')
+cli.command('space register')
+  .describe('Claim the space by associating it with your account')
   .action(registerSpace)
 
 cli.command('space add <proof>')

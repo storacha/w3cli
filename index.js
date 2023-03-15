@@ -10,9 +10,9 @@ export async function accessClaim () {
   const client = await getClient()
   const delegations = await client.capability.access.claim()
   for (const delegation of delegations) {
-    console.log('claimed delegation', delegation.toJSON().att)
+    console.log('claimed delegation', JSON.stringify(delegation, null, 4))
     for (const proof of delegation.proofs) {
-      console.log('with proof', proof.toJSON().att)
+      console.log('with proof', JSON.stringify(proof, null, 4))
     }
   }
 }
@@ -170,7 +170,7 @@ export async function createSpace (name) {
 /**
  * @param {string} email
  */
-export async function registerSpace (email) {
+export async function registerSpace () {
   const client = await getClient()
   let space = client.currentSpace()
   if (space === undefined) {
@@ -180,10 +180,10 @@ export async function registerSpace (email) {
   /** @type {import('ora').Ora|undefined} */
   let spinner
   setTimeout(() => {
-    spinner = ora(`🔗 please click the link we sent to ${email} to register your space`).start()
+    spinner = ora('registering space').start()
   }, 1000)
   try {
-    await client.registerSpace(email)
+    await client.registerSpace()
   } catch (err) {
     if (spinner) spinner.stop()
     if (err.message.startsWith('Space already registered')) {
@@ -194,7 +194,7 @@ export async function registerSpace (email) {
     process.exit(1)
   }
   if (spinner) spinner.stop()
-  console.log(`⁂ space registered to ${email}`)
+  console.log('⁂ space registered')
 }
 
 /**
