@@ -10,10 +10,7 @@ export async function accessClaim () {
   const client = await getClient()
   const delegations = await client.capability.access.claim()
   for (const delegation of delegations) {
-    console.log('claimed delegation', delegation.toJSON().att)
-    for (const proof of delegation.proofs) {
-      console.log('with proof', proof.toJSON().att)
-    }
+    console.log('claimed delegation', JSON.stringify(delegation, null, 4))
   }
 }
 
@@ -179,9 +176,8 @@ export async function registerSpace (email) {
   }
   /** @type {import('ora').Ora|undefined} */
   let spinner
-  setTimeout(() => {
-    spinner = ora(`🔗 please click the link we sent to ${email} to register your space`).start()
-  }, 1000)
+  spinner = ora('registering your space').start()
+
   try {
     await client.registerSpace(email, { provider: 'did:web:staging.web3.storage' })
   } catch (err) {
