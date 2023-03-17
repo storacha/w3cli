@@ -178,7 +178,7 @@ export async function registerSpace (email) {
   const spinner = ora('registering your space').start()
 
   try {
-    await client.registerSpace(email, { provider: 'did:web:staging.web3.storage' })
+    await client.registerSpace(email)
   } catch (err) {
     if (spinner) spinner.stop()
     if (err.message.startsWith('Space already registered')) {
