@@ -175,8 +175,7 @@ export async function registerSpace (email) {
     await client.setCurrentSpace(space.did())
   }
   /** @type {import('ora').Ora|undefined} */
-  let spinner
-  spinner = ora('registering your space').start()
+  const spinner = ora('registering your space').start()
 
   try {
     await client.registerSpace(email, { provider: 'did:web:staging.web3.storage' })
@@ -342,6 +341,7 @@ export async function listProofs (opts) {
     for (const proof of proofs) {
       console.log(proof.cid.toString())
       console.log(`  issuer: ${proof.issuer.did()}`)
+      console.log(`  audience: ${proof.audience.did()}`)
       for (const capability of proof.capabilities) {
         console.log(`  with: ${capability.with}`)
         console.log(`  can: ${capability.can}`)
