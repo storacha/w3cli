@@ -341,6 +341,12 @@ test('w3 delegation ls', async t => {
   t.is(delegationData.capabilities[0].can, '*')
 })
 
+test('w3 space', async t => {
+  const aliceEnv = t.context.env.alice
+
+  await t.notThrowsAsync(() => execa('./bin.js', ['space'], { env: aliceEnv }))
+})
+
 test('w3 space add', async t => {
   const aliceEnv = t.context.env.alice
   const bobEnv = t.context.env.bob
