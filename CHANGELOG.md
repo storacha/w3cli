@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.2](https://github.com/web3-storage/w3cli/compare/v1.2.1...v1.2.2) (2023-03-20)
+
+
+### Bug Fixes
+
+* drop redudant w3 space command for consistency ([#57](https://github.com/web3-storage/w3cli/issues/57)) ([8dfab92](https://github.com/web3-storage/w3cli/commit/8dfab9272b83e175ff2e3016b0f166e5e59e08a7)), closes [#44](https://github.com/web3-storage/w3cli/issues/44)
+* warnings about uploads being public/permanent ([84a9fd5](https://github.com/web3-storage/w3cli/commit/84a9fd56c287939c4127c9b8e03e2b661a751d79))
+
 ## [1.2.1](https://github.com/web3-storage/w3cli/compare/v1.2.0...v1.2.1) (2023-03-02)
 
 
