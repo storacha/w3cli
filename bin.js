@@ -62,14 +62,6 @@ cli.command('whoami')
   .describe('Print information about the current agent.')
   .action(whoami)
 
-cli.command('space')
-  .describe('Create and mangage w3 spaces')
-  .action(async () => {
-    console.log('List of spaces known to the agent:')
-    await listSpaces()
-    console.log('\nSee other space commands with w3cli --help`')
-  })
-
 cli.command('space create [name]')
   .describe('Create a new w3 space')
   .action(createSpace)
