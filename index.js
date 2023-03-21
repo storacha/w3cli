@@ -8,10 +8,7 @@ import { getClient, checkPathsExist, filesize, readProof, filesFromPaths, upload
 
 export async function accessClaim () {
   const client = await getClient()
-  const delegations = await client.capability.access.claim()
-  for (const delegation of delegations) {
-    console.log('claimed delegation', JSON.stringify(delegation, null, 4))
-  }
+  await client.capability.access.claim()
 }
 
 /**
@@ -22,21 +19,17 @@ export async function authorize (email) {
   /** @type {import('ora').Ora|undefined} */
   let spinner
   setTimeout(() => {
-    spinner = ora(`🔗 please click the link we sent to ${email} to authorize this device`).start()
+    spinner = ora(`🔗 please click the link we sent to ${email} to authorize this agent`).start()
   }, 1000)
   try {
     await client.capability.access.authorize(email)
   } catch (err) {
     if (spinner) spinner.stop()
-    if (err.message.startsWith('Device already authorized')) {
-      console.error('Error: device already authorized.')
-    } else {
-      console.error(err)
-    }
+    console.error(err)
     process.exit(1)
   }
   if (spinner) spinner.stop()
-  console.log(`⁂ device authorized to use capabilities delegated to ${email}`)
+  console.log(`⁂ agent authorized to use capabilities delegated to ${email}`)
 }
 
 /**
