@@ -116,7 +116,7 @@ cli.command('proof ls')
   .action(listProofs)
 
 cli.command('can access claim')
-  .describe('Claim delegations available to this device based on current authorizations.')
+  .describe('Claim access delegated to this agent.')
   .action(accessClaim)
 
 cli.command('can store add <car-path>')
