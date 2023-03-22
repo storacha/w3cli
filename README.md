@@ -136,6 +136,8 @@ capabilities to the currently authorized account. If you are authorized against
 more than one account you'll need to pass email to specify which account to
 register the space with.
 
+* `--provider` The storage provider to associate with this space.
+
 ### `w3 space use <did>`
 
 Set the current space in use by the agent.

@@ -76,6 +76,7 @@ cli.command('space create [name]')
 
 cli.command('space register [email]')
   .describe('Claim the space by associating it with your email address')
+  .option('-p, --provider', 'The storage provider to associate with this space.')
   .action(registerSpace)
 
 cli.command('space add <proof>')

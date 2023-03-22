@@ -181,8 +181,9 @@ function createEmailFromDidMailto (did) {
 
 /**
  * @param {string} email
+ * @param {string} [opts.provider]
  */
-export async function registerSpace (email) {
+export async function registerSpace (email, opts) {
   const client = await getClient()
   let accountEmail = email
   if (!accountEmail) {
@@ -207,7 +208,7 @@ export async function registerSpace (email) {
   const spinner = ora('registering your space').start()
 
   try {
-    await client.registerSpace(accountEmail)
+    await client.registerSpace(accountEmail, { provider: opts.provider })
   } catch (err) {
     if (spinner) spinner.stop()
     if (err.message.startsWith('Space already registered')) {
