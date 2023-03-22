@@ -33,9 +33,9 @@
   },
   "homepage": "https://github.com/web3-storage/w3cli#readme",
   "devDependencies": {
-    "@ucanto/principal": "^4.0.3",
-    "@ucanto/server": "^4.0.3",
-    "@web3-storage/capabilities": "^2.1.0",
+    "@ucanto/principal": "^5.1.0",
+    "@ucanto/server": "^6.1.0",
+    "@web3-storage/capabilities": "^4.0.0",
     "ava": "^5.1.0",
     "execa": "^6.1.0",
     "multiformats": "^11.0.0",
@@ -43,11 +43,11 @@
     "standard": "^17.0.0"
   },
   "dependencies": {
-    "@ipld/car": "^5.0.1",
+    "@ipld/car": "^5.1.1",
     "@ipld/dag-ucan": "^3.0.1",
-    "@ucanto/client": "^4.0.3",
-    "@ucanto/core": "^4.0.3",
-    "@ucanto/transport": "^4.0.3",
+    "@ucanto/client": "^5.1.0",
+    "@ucanto/core": "^5.2.0",
+    "@ucanto/transport": "^5.1.1",
     "@web3-storage/access": "11.0.0-rc.0",
     "@web3-storage/w3up-client": "^4.3.0",
     "files-from-path": "^1.0.0",
