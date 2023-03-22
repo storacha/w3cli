@@ -50,6 +50,7 @@
     "@ucanto/transport": "^4.0.3",
     "@web3-storage/access": "11.0.0-rc.0",
     "@web3-storage/w3up-client": "^4.3.0",
+    "files-from-path": "^1.0.0",
     "open": "^8.4.0",
     "ora": "^6.1.2",
     "pretty-tree": "^1.0.0",
