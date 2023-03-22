@@ -62,8 +62,8 @@ cli.command('rm <root-cid>')
 
 cli.command('authorize <email>')
   .alias('auth')
-  .example('auth user@example.com')
-  .describe('Authorize this device to interact with the w3up service with any capabilities already granted to the given email.')
+  .example('authorize user@example.com')
+  .describe('Authorize this agent to interact with the w3up service with any capabilities granted to the given email.')
   .action(authorize)
 
 cli.command('whoami')
@@ -116,7 +116,7 @@ cli.command('proof ls')
   .action(listProofs)
 
 cli.command('can access claim')
-  .describe('Claim access delegated to this agent.')
+  .describe('Claim delegated capabilities for the authorized account.')
   .action(accessClaim)
 
 cli.command('can store add <car-path>')

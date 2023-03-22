@@ -39,6 +39,7 @@ w3 up recipies.txt
 ## Commands
 
 * Basics
+  * [`w3 authorize`](#w3-authorize-email)
   * [`w3 up`](#w3-up-path-path)
   * [`w3 ls`](#w3-ls)
   * [`w3 rm`](#w3-rm-root-cid) <sup>coming soon!</sup>
@@ -66,6 +67,10 @@ w3 up recipies.txt
   * [`w3 can upload rm`](#w3-can-upload-rm-root-cid) <sup>coming soon!</sup>
 
 ---
+
+### `w3 authorize <email>`
+
+Authorize this agent to interact with the w3up service with any capabilities granted to the given email.
 
 ### `w3 up <path> [path...]`
 
