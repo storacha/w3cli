@@ -180,19 +180,19 @@ function createEmailFromDidMailto (did) {
 }
 
 /**
- * @param {string} email
+ * @param {string} [opts.email]
  * @param {string} [opts.provider]
  */
-export async function registerSpace (email, opts) {
+export async function registerSpace (opts) {
   const client = await getClient()
-  let accountEmail = email
+  let accountEmail = opts.email
   if (!accountEmail) {
     const accounts = findAccountsThatCanProviderAdd(client)
     if (accounts.length === 1) {
       accountEmail = createEmailFromDidMailto(accounts[0])
     } else {
       if (accounts.length > 1) {
-        console.error('Error: you are authorized to use more than one account and have not specified which one you would like to use to register this space. ')
+        console.error('Error: you are authorized to use more than one account and have not specified which one you would like to use to register this space.')
       } else {
         console.error('Error: please authorize before registering spaces')
       }
