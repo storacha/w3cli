@@ -62,9 +62,6 @@ cli.command('whoami')
   .describe('Print information about the current agent.')
   .action(whoami)
 
-cli.command('space')
-  .describe('Create and mangage w3 spaces')
-
 cli.command('space create [name]')
   .describe('Create a new w3 space')
   .action(createSpace)
