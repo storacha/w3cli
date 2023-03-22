@@ -1,8 +1,11 @@
 #!/usr/bin/env node
 
+import fs from 'fs'
+import path from 'path'
+import os from 'os'
 import sade from 'sade'
 import open from 'open'
-import { getPkg } from './lib.js'
+import { getClient, getPkg } from './lib.js'
 import {
   accessClaim,
   authorize,
@@ -163,4 +166,20 @@ Run \`$ w3 --help\` for more info.
     }
   })
 
-cli.parse(process.argv)
+async function loadPlugins () {
+  try {
+    const dir = path.join(os.homedir(), '.w3cli', 'plugins')
+    const files = await fs.promises.readdir(dir)
+    if (!files.length) return
+
+    const client = await getClient()
+    for (const file of files) {
+      const module = await import(path.join(dir, file, 'index.js'))
+      await module.plugin(cli, client)
+    }
+  } catch (err) {
+    if (err.code !== 'ENOENT') throw err
+  }
+}
+
+loadPlugins().then(() => cli.parse(process.argv))
