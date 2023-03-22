@@ -4,6 +4,8 @@ import sade from 'sade'
 import open from 'open'
 import { getPkg } from './lib.js'
 import {
+  accessClaim,
+  authorize,
   createSpace,
   registerSpace,
   addSpace,
@@ -58,6 +60,12 @@ cli.command('rm <root-cid>')
   .option('--shards', 'Remove all shards referenced by the upload from the store. Use with caution and ensure other uploads do not reference the same shards.')
   .action(remove)
 
+cli.command('authorize <email>')
+  .alias('auth')
+  .example('authorize user@example.com')
+  .describe('Authorize this agent to interact with the w3up service with any capabilities granted to the given email.')
+  .action(authorize)
+
 cli.command('whoami')
   .describe('Print information about the current agent.')
   .action(whoami)
@@ -106,6 +114,10 @@ cli.command('proof ls')
   .describe('List proofs of capabilities delegated to this agent.')
   .option('--json', 'Format as newline delimited JSON')
   .action(listProofs)
+
+cli.command('can access claim')
+  .describe('Claim delegated capabilities for the authorized account.')
+  .action(accessClaim)
 
 cli.command('can store add <car-path>')
   .describe('Store a CAR file with the service.')

@@ -7,6 +7,32 @@ import { CarWriter } from '@ipld/car'
 import { filesFromPaths } from 'files-from-path'
 import { getClient, checkPathsExist, filesize, readProof, uploadListResponseToString } from './lib.js'
 
+export async function accessClaim () {
+  const client = await getClient()
+  await client.capability.access.claim()
+}
+
+/**
+ * @param {string} email
+ */
+export async function authorize (email) {
+  const client = await getClient()
+  /** @type {import('ora').Ora|undefined} */
+  let spinner
+  setTimeout(() => {
+    spinner = ora(`🔗 please click the link we sent to ${email} to authorize this agent`).start()
+  }, 1000)
+  try {
+    await client.capability.access.authorize(email)
+  } catch (err) {
+    if (spinner) spinner.stop()
+    console.error(err)
+    process.exit(1)
+  }
+  if (spinner) spinner.stop()
+  console.log(`⁂ agent authorized to use capabilities delegated to ${email}`)
+}
+
 /**
  * @param {string} firstPath
  * @param {object} opts
@@ -143,10 +169,8 @@ export async function registerSpace (email) {
     await client.setCurrentSpace(space.did())
   }
   /** @type {import('ora').Ora|undefined} */
-  let spinner
-  setTimeout(() => {
-    spinner = ora(`🔗 please click the link we sent to ${email} to register your space`).start()
-  }, 1000)
+  const spinner = ora('registering your space').start()
+
   try {
     await client.registerSpace(email)
   } catch (err) {
@@ -311,6 +335,7 @@ export async function listProofs (opts) {
     for (const proof of proofs) {
       console.log(proof.cid.toString())
       console.log(`  issuer: ${proof.issuer.did()}`)
+      console.log(`  audience: ${proof.audience.did()}`)
       for (const capability of proof.capabilities) {
         console.log(`  with: ${capability.with}`)
         console.log(`  can: ${capability.can}`)
