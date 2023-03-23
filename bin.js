@@ -31,7 +31,14 @@ const cli = sade('w3')
 
 cli
   .version(getPkg().version)
+  .example('authorize user@example.com')
   .example('up path/to/files')
+
+cli.command('authorize <email>')
+  .alias('auth')
+  .example('authorize user@example.com')
+  .describe('Authorize this agent to interact with the w3up service with any capabilities granted to the given email.')
+  .action(authorize)
 
 cli.command('up <file>')
   .alias('upload', 'put')
@@ -59,12 +66,6 @@ cli.command('rm <root-cid>')
   .describe('Remove an upload from the uploads listing. Pass --shards to delete the actual data if you are sure no other uploads need them')
   .option('--shards', 'Remove all shards referenced by the upload from the store. Use with caution and ensure other uploads do not reference the same shards.')
   .action(remove)
-
-cli.command('authorize <email>')
-  .alias('auth')
-  .example('authorize user@example.com')
-  .describe('Authorize this agent to interact with the w3up service with any capabilities granted to the given email.')
-  .action(authorize)
 
 cli.command('whoami')
   .describe('Print information about the current agent.')
@@ -145,5 +146,21 @@ cli.command('can upload ls')
   .option('--cursor', 'An opaque string included in a prior upload/list response that allows the service to provide the next "page" of results')
   .option('--pre', 'If true, return the page of results preceding the cursor')
   .action(uploadList)
+
+// show help text if no command provided
+cli.command('help [cmd]', 'Show help text', { default: true })
+  .action(cmd => {
+    try {
+      cli.help(cmd)
+    } catch (err) {
+      console.log(`
+ERROR
+  Invalid command: ${cmd}
+  
+Run \`$ w3 --help\` for more info.
+`)
+      process.exit(1)
+    }
+  })
 
 cli.parse(process.argv)

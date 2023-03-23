@@ -73,9 +73,20 @@ test.afterEach(async t => {
 })
 
 test('w3', async (t) => {
-  t.throws(() => {
-    execaSync('./bin.js')
-  }, { message: /No command specified./ })
+  const env = t.context.env.alice
+  const res = await execa('./bin.js', [], { env })
+  t.regex(res.stdout, /Available Commands/)
+})
+
+test('w3 nosuchcmd', async (t) => {
+  const env = t.context.env.alice
+  try {
+    execaSync('./bin.js', ['nosuchcmd'], { env })
+    t.fail('Expected to throw')
+  } catch (err) {
+    t.is(err.exitCode, 1)
+    t.regex(err.stdout, /Invalid command: nosuch/)
+  }
 })
 
 test('w3 --version', (t) => {
