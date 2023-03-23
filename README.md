@@ -7,7 +7,7 @@
 </p>
 
 > ### ⚠️❗ w3cli and the underlying APIs are currently beta preview features
-> By registering your w3up beta Space via email confirmation with either [NFT.Storage](http://nft.storage/) or [web3.storage](http://web3.storage/), you agree to the relevant w3up beta Terms of Service ([web3.storage](https://beta.console.web3.storage/terms), [NFT.Storage](https://beta.console.nft.storage/terms)). If you have an existing non-w3up beta account with NFT.Storage or web3.storage and register for the w3up beta version of the same product (NFT.Storage or web3.storage) using the same email, then at the end of the beta period, these accounts will be combined. Until the beta period is over and this migration occurs, uploads to w3up will not appear in your NFT.Storage or web3.storage account (and vice versa), even if you register with the same email.
+> Please read the beta Terms of Service ([web3.storage](https://beta.console.web3.storage/terms), [NFT.Storage](https://beta.console.nft.storage/terms)) for more details.
 >
 > Open an issue on the repo or reach out to the #web3-storage channel on [IPFS Discord](https://docs.ipfs.tech/community/chat/#discord) if you have any 
 questions!
@@ -32,6 +32,8 @@ Create a new space for storing your data and register it:
 w3 space create Documents # pick a good name!
 w3 space register
 ```
+
+> By registering your w3up beta Space with either [NFT.Storage](http://nft.storage/) or [web3.storage](http://web3.storage/), you agree to the relevant w3up beta Terms of Service ([web3.storage](https://beta.console.web3.storage/terms), [NFT.Storage](https://beta.console.nft.storage/terms)). If you have an existing non-w3up beta account with NFT.Storage or web3.storage and register for the w3up beta version of the same product (NFT.Storage or web3.storage) using the same email, then at the end of the beta period, these accounts will be combined. Until the beta period is over and this migration occurs, uploads to w3up will not appear in your NFT.Storage or web3.storage account (and vice versa), even if you register with the same email.
 
 Upload a file or directory:
 
