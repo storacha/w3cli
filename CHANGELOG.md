@@ -1,5 +1,22 @@
 # Changelog
 
+## [2.0.0](https://github.com/web3-storage/w3cli/compare/v1.2.2...v2.0.0) (2023-03-23)
+
+
+### ⚠ BREAKING CHANGES
+
+* upgrade to latest access & upload clients ([#64](https://github.com/web3-storage/w3cli/issues/64))
+* move `space register` email parameter to an `--email` option and add `--provider` option ([#60](https://github.com/web3-storage/w3cli/issues/60))
+* use new account model ([#53](https://github.com/web3-storage/w3cli/issues/53))
+
+### Features
+
+* move `space register` email parameter to an `--email` option and add `--provider` option ([#60](https://github.com/web3-storage/w3cli/issues/60)) ([c1ed0e5](https://github.com/web3-storage/w3cli/commit/c1ed0e526947f0f9cae50c3974f7e8ec0408f8ec))
+* show help text if no cmd ([#63](https://github.com/web3-storage/w3cli/issues/63)) ([fd5f342](https://github.com/web3-storage/w3cli/commit/fd5f342fae68a6d2f81591f1b0d61d3740c86650))
+* update README with new ToS ([#62](https://github.com/web3-storage/w3cli/issues/62)) ([4ce61d7](https://github.com/web3-storage/w3cli/commit/4ce61d7657dc046004de006b5cabe3f534c58ee3)), closes [#54](https://github.com/web3-storage/w3cli/issues/54)
+* upgrade to latest access & upload clients ([#64](https://github.com/web3-storage/w3cli/issues/64)) ([b5851ca](https://github.com/web3-storage/w3cli/commit/b5851ca51e69b9314ced8c962128a673628fcc25))
+* use new account model ([#53](https://github.com/web3-storage/w3cli/issues/53)) ([7f63286](https://github.com/web3-storage/w3cli/commit/7f63286b4f4fa158b0211fc1763dba236a27369b))
+
 ## [1.2.2](https://github.com/web3-storage/w3cli/compare/v1.2.1...v1.2.2) (2023-03-20)
 
 
