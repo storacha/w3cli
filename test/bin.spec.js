@@ -84,7 +84,6 @@ test('w3 nosuchcmd', async (t) => {
     execaSync('./bin.js', ['nosuchcmd'], { env })
     t.fail('Expected to throw')
   } catch (err) {
-    // console.log(err)
     t.is(err.exitCode, 1)
     t.regex(err.stdout, /Invalid command: nosuch/)
   }
