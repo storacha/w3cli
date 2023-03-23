@@ -6,6 +6,7 @@ import * as DID from '@ipld/dag-ucan/did'
 import { CarWriter } from '@ipld/car'
 import { filesFromPaths } from 'files-from-path'
 import { getClient, checkPathsExist, filesize, readProof, uploadListResponseToString } from './lib.js'
+import * as ucanto from '@ucanto/core'
 
 export async function accessClaim () {
   const client = await getClient()
@@ -158,11 +159,46 @@ export async function createSpace (name) {
   console.log(space.did())
 }
 
+function findAccountsThatCanProviderAdd (client) {
+  const accounts = []
+  const proofs = client.proofs()
+  for (const proof of proofs) {
+    const allows = ucanto.Delegation.allows(proof)
+    for (const resourceDID of Object.keys(allows)) {
+      if (resourceDID.startsWith('did:mailto:') && allows[resourceDID]['provider/add']) {
+        accounts.push(resourceDID)
+      }
+    }
+  }
+  return accounts
+}
+
+// TODO: extract to external library along with its counterpart in https://github.com/web3-storage/w3protocol/blob/main/packages/access-client/src/utils/did-mailto.js
+function createEmailFromDidMailto (did) {
+  const parts = did.split(':')
+  return `${parts[3]}@${parts[2]}`
+}
+
 /**
- * @param {string} email
+ * @param {string} [opts.email]
+ * @param {string} [opts.provider]
  */
-export async function registerSpace (email) {
+export async function registerSpace (opts) {
   const client = await getClient()
+  let accountEmail = opts.email
+  if (!accountEmail) {
+    const accounts = findAccountsThatCanProviderAdd(client)
+    if (accounts.length === 1) {
+      accountEmail = createEmailFromDidMailto(accounts[0])
+    } else {
+      if (accounts.length > 1) {
+        console.error('Error: you are authorized to use more than one account and have not specified which one you would like to use to register this space.')
+      } else {
+        console.error('Error: please authorize before registering spaces')
+      }
+      process.exit(1)
+    }
+  }
   let space = client.currentSpace()
   if (space === undefined) {
     space = await client.createSpace()
@@ -172,18 +208,20 @@ export async function registerSpace (email) {
   const spinner = ora('registering your space').start()
 
   try {
-    await client.registerSpace(email)
+    await client.registerSpace(accountEmail, { provider: opts.provider })
   } catch (err) {
     if (spinner) spinner.stop()
     if (err.message.startsWith('Space already registered')) {
       console.error('Error: space already registered.')
+    } else if (err.message.startsWith('no proofs available')) {
+      console.error(`Error: you are not authorized as ${accountEmail}`)
     } else {
       console.error(err)
     }
     process.exit(1)
   }
   if (spinner) spinner.stop()
-  console.log(`⁂ space registered to ${email}`)
+  console.log(`⁂ space registered to ${accountEmail}`)
 }
 
 /**

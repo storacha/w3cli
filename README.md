@@ -20,11 +20,17 @@ Install the CLI from npm :
 npm install -g @web3-storage/w3cli
 ```
 
+Authorize this agent to act on behalf of the account associated with your email address:
+
+```console
+w3 authorize alice@example.com
+```
+
 Create a new space for storing your data and register it:
 
 ```console
 w3 space create Documents # pick a good name!
-w3 space register alice@example.com
+w3 space register
 ```
 
 Upload a file or directory:
@@ -123,9 +129,15 @@ Create a new w3 space with an optional name.
 
 List spaces known to the agent.
 
-### `w3 space register <email>`
+### `w3 space register`
 
-Claim the space by associating it with your email address.
+Register the space by adding a storage provider and delegating all of its 
+capabilities to the currently authorized account. If you are authorized against
+more than one account you'll need to pass the `--email` option to specify which account to
+register the space with.
+
+* `--email` The email address of the account to associate this space with.
+* `--provider` The storage provider to associate with this space.
 
 ### `w3 space use <did>`
 
