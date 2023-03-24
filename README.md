@@ -57,7 +57,7 @@ w3 up recipies.txt
   * [`w3 space add`](#w3-space-add-proofucan)
   * [`w3 space create`](#w3-space-create-name)
   * [`w3 space ls`](#w3-space-ls)
-  * [`w3 space register`](#w3-space-register-email)
+  * [`w3 space register`](#w3-space-register)
   * [`w3 space use`](#w3-space-use-did)
 * Capability management
   * [`w3 delegation create`](#w3-delegation-create-audience-did)
@@ -139,7 +139,12 @@ more than one account you'll need to pass the `--email` option to specify which 
 register the space with.
 
 * `--email` The email address of the account to associate this space with.
-* `--provider` The storage provider to associate with this space.
+* `--provider` The storage provider to associate with this space. The default is w3up web3.storage.
+```
+# to use w3up nft.storage as a storage provider instead of default did:web:web3.storage
+w3 space register --provider did:web:nft.storage
+```
+> By registering your w3up beta Space with either [NFT.Storage](http://nft.storage/) or [web3.storage](http://web3.storage/), you agree to the relevant w3up beta Terms of Service ([web3.storage](https://console.web3.storage/terms), [NFT.Storage](https://console.nft.storage/terms)). If you have an existing non-w3up beta account with NFT.Storage or web3.storage and register for the w3up beta version of the same product (NFT.Storage or web3.storage) using the same email, then at the end of the beta period, these accounts will be combined. Until the beta period is over and this migration occurs, uploads to w3up will not appear in your NFT.Storage or web3.storage account (and vice versa), even if you register with the same email.
 
 ### `w3 space use <did>`
 
