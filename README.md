@@ -140,6 +140,10 @@ register the space with.
 
 * `--email` The email address of the account to associate this space with.
 * `--provider` The storage provider to associate with this space.
+    * ```
+      # to use nft.storage as a storage provider instead of default did:web:web3.storage
+      w3 space register --provider did:web:nft.storage
+      ```
 
 ### `w3 space use <did>`
 
