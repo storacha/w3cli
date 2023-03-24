@@ -11,6 +11,9 @@ import { create as createServer, provide } from '@ucanto/server'
 import * as DID from '@ipld/dag-ucan/did'
 import * as StoreCapabilities from '@web3-storage/capabilities/store'
 import * as UploadCapabilities from '@web3-storage/capabilities/upload'
+import * as AccessCapabilities from '@web3-storage/capabilities/access'
+import * as ProviderCapabilities from '@web3-storage/capabilities/provider'
+
 import { CID } from 'multiformats/cid'
 import { CarReader } from '@ipld/car'
 import { StoreConf } from '@web3-storage/access/stores/store-conf'
@@ -103,6 +106,36 @@ test('w3 space create', (t) => {
   const env = t.context.env.alice
   const { stdout } = execaSync('./bin.js', ['space', 'create'], { env })
   t.regex(stdout, /^did:key:/)
+})
+
+test('w3 space register', (t) => {
+  const env = t.context.env.alice
+  const { stdout } = execaSync('./bin.js', ['space', 'create'], { env })
+
+  const service = mockService({
+    provider: {
+      add: provide(ProviderCapabilities.add, () => ({
+      }))
+    },
+    access: {
+      delegate: provide(AccessCapabilities.delegate, ({ invocation }) => {
+        return {}
+      })
+    }
+  })
+
+  t.context.setService(service)
+
+  // TODO this will fail because we don't have any proofs for alice@example.com - we need to figure out how to test this stuff
+
+  execaSync('./bin.js', ['space', 'register', '--email', 'alice@example.com'], { env })
+
+  t.true(service.provider.add.called)
+  t.is(service.provider.add.callCount, 1)
+  t.true(service.access.delegate.called)
+  t.is(service.access.delegate.callCount, 1)
+
+  t.regex(stdout, /space registered to/)
 })
 
 test('w3 up', async (t) => {
