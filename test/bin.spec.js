@@ -319,7 +319,7 @@ test('w3 delegation create', async t => {
   const bob = await Signer.generate()
   const proofPath = path.join(os.tmpdir(), `w3cli-test-delegation-${Date.now()}`)
 
-  await execa('./bin.js', ['delegation', 'create', bob.did(), '-c', '*',  '--output', proofPath], { env })
+  await execa('./bin.js', ['delegation', 'create', bob.did(), '-c', '*', '--output', proofPath], { env })
 
   const reader = await CarReader.fromIterable(fs.createReadStream(proofPath))
   const blocks = []

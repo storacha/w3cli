@@ -280,7 +280,7 @@ export async function createDelegation (audienceDID, opts) {
   const audience = DID.parse(audienceDID)
   const abilities = opts.can ? [opts.can].flat() : []
   if (!abilities.length) {
-    console.error(`Error: missing capabilities for delegation`)
+    console.error('Error: missing capabilities for delegation')
     process.exit(1)
   }
   const audienceMeta = {}
