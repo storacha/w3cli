@@ -319,7 +319,7 @@ test('w3 delegation create', async t => {
   const bob = await Signer.generate()
   const proofPath = path.join(os.tmpdir(), `w3cli-test-delegation-${Date.now()}`)
 
-  await execa('./bin.js', ['delegation', 'create', bob.did(), '--output', proofPath], { env })
+  await execa('./bin.js', ['delegation', 'create', bob.did(), '-c', '*',  '--output', proofPath], { env })
 
   const reader = await CarReader.fromIterable(fs.createReadStream(proofPath))
   const blocks = []
@@ -334,6 +334,14 @@ test('w3 delegation create', async t => {
   t.is(delegation.capabilities[0].with, spaceDID)
 })
 
+test('w3 delegation create - no capabilities', async t => {
+  const env = t.context.env.alice
+  await execa('./bin.js', ['space', 'create'], { env })
+  const bob = await Signer.generate()
+  const err = await t.throwsAsync(() => execa('./bin.js', ['delegation', 'create', bob.did()], { env }))
+  t.true(err?.message.includes('Error: missing capabilities for delegation'))
+})
+
 test('w3 delegation ls', async t => {
   const env = t.context.env.alice
 
@@ -341,7 +349,7 @@ test('w3 delegation ls', async t => {
   const spaceDID = DID.parse(out0.stdout.trim()).did()
 
   const bob = await Signer.generate()
-  await execa('./bin.js', ['delegation', 'create', bob.did()], { env })
+  await execa('./bin.js', ['delegation', 'create', bob.did(), '-c', '*'], { env })
 
   const out1 = await execa('./bin.js', ['delegation', 'ls', '--json'], { env })
   const delegationData = JSON.parse(out1.stdout)
@@ -364,7 +372,7 @@ test('w3 space add', async t => {
 
   const proofPath = path.join(os.tmpdir(), `w3cli-test-delegation-${Date.now()}`)
 
-  await execa('./bin.js', ['delegation', 'create', bobDID, '--output', proofPath], { env: aliceEnv })
+  await execa('./bin.js', ['delegation', 'create', bobDID, '-c', '*', '--output', proofPath], { env: aliceEnv })
 
   const bobOut1 = await execa('./bin.js', ['space', 'ls'], { env: bobEnv })
   t.false(bobOut1.stdout.includes(spaceDID))
@@ -467,7 +475,7 @@ test('w3 proof add', async t => {
 
   const proofPath = path.join(os.tmpdir(), `w3cli-test-delegation-${Date.now()}`)
 
-  await execa('./bin.js', ['delegation', 'create', bobDID, '--output', proofPath], { env: aliceEnv })
+  await execa('./bin.js', ['delegation', 'create', bobDID, '-c', '*', '--output', proofPath], { env: aliceEnv })
 
   const bobOut1 = await execa('./bin.js', ['proof', 'ls'], { env: bobEnv })
   t.false(bobOut1.stdout.includes(spaceDID))
@@ -515,7 +523,7 @@ test('w3 proof ls', async t => {
 
   const proofPath = path.join(os.tmpdir(), `w3cli-test-proof-${Date.now()}`)
 
-  await execa('./bin.js', ['delegation', 'create', bobDID, '--output', proofPath], { env: aliceEnv })
+  await execa('./bin.js', ['delegation', 'create', '-c', '*', bobDID, '--output', proofPath], { env: aliceEnv })
   await execa('./bin.js', ['space', 'add', proofPath], { env: bobEnv })
 
   const bobOut1 = await execa('./bin.js', ['proof', 'ls', '--json'], { env: bobEnv })
