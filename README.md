@@ -210,6 +210,16 @@ List uploads in the current space.
 
 ### `w3 can upload rm <root-cid>`
 
+## FAQ
+
+### Where are my keys and delegations stored?
+
+In the system default user config directory:
+
+- macOS: `~/Library/Preferences/w3access`
+- Windows: `%APPDATA%\w3access\Config` (for example, `C:\Users\USERNAME\AppData\Roaming\w3access\Config`)
+- Linux: `~/.config/w3access` (or `$XDG_CONFIG_HOME/w3access`)
+
 ## Contributing
 
 Feel free to join in. All welcome. Please read our [contributing guidelines](https://github.com/web3-storage/w3cli/blob/main/CONTRIBUTING.md) and/or [open an issue](https://github.com/web3-storage/w3cli/issues)!
