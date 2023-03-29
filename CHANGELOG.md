@@ -1,5 +1,22 @@
 # Changelog
 
+## [3.0.0](https://github.com/web3-storage/w3cli/compare/v2.0.0...v3.0.0) (2023-03-29)
+
+
+### ⚠ BREAKING CHANGES
+
+* allow specifying capabilities to receive when authorizing ([#70](https://github.com/web3-storage/w3cli/issues/70))
+
+### Features
+
+* allow specifying capabilities to receive when authorizing ([#70](https://github.com/web3-storage/w3cli/issues/70)) ([40208f5](https://github.com/web3-storage/w3cli/commit/40208f5df9d58b8c6cd30810e22d1b039a2488bf))
+
+
+### Bug Fixes
+
+* permanent data warning more general ([b6b579e](https://github.com/web3-storage/w3cli/commit/b6b579e2832c481c97423a1e6408ab6e740b17e8))
+* typo in readme ([a623422](https://github.com/web3-storage/w3cli/commit/a623422a903e44987aed073e8c639258647fac77))
+
 ## [2.0.0](https://github.com/web3-storage/w3cli/compare/v1.2.2...v2.0.0) (2023-03-23)
 
 
