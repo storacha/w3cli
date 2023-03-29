@@ -37,7 +37,8 @@ cli
 cli.command('authorize <email>')
   .alias('auth')
   .example('authorize user@example.com')
-  .describe('Authorize this agent to interact with the w3up service with any capabilities granted to the given email.')
+  .describe('Authorize this agent to interact with the w3up service with capabilities granted to the given email.')
+  .option('-c, --can', 'One or more abilities to authorize.', '*')
   .action(authorize)
 
 cli.command('up <file>')

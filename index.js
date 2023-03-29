@@ -15,16 +15,19 @@ export async function accessClaim () {
 
 /**
  * @param {string} email
+ * @param {object} [opts]
+ * @param {string[]|string} [opts.can]
  */
-export async function authorize (email) {
+export async function authorize (email, opts = {}) {
   const client = await getClient()
+  const capabilities = (Array.isArray(opts.can) ? opts.can : [opts.can ?? '*']).map(can => ({ can }))
   /** @type {import('ora').Ora|undefined} */
   let spinner
   setTimeout(() => {
     spinner = ora(`🔗 please click the link we sent to ${email} to authorize this agent`).start()
   }, 1000)
   try {
-    await client.capability.access.authorize(email)
+    await client.capability.access.authorize(email, { capabilities })
   } catch (err) {
     if (spinner) spinner.stop()
     console.error(err)
