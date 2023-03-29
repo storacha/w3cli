@@ -15,16 +15,21 @@ export async function accessClaim () {
 
 /**
  * @param {string} email
+ * @param {object} [opts]
+ * @param {import('@ucanto/interface').Ability[]|import('@ucanto/interface').Ability} [opts.can]
  */
-export async function authorize (email) {
+export async function authorize (email, opts = {}) {
   const client = await getClient()
+  const capabilities = opts.can != null
+    ? [opts.can].flat().map(can => ({ can }))
+    : undefined
   /** @type {import('ora').Ora|undefined} */
   let spinner
   setTimeout(() => {
     spinner = ora(`🔗 please click the link we sent to ${email} to authorize this agent`).start()
   }, 1000)
   try {
-    await client.capability.access.authorize(email)
+    await client.authorize(email, { capabilities })
   } catch (err) {
     if (spinner) spinner.stop()
     console.error(err)
@@ -273,7 +278,11 @@ export async function createDelegation (audienceDID, opts) {
     throw new Error('no current space, use `w3 space register` to create one.')
   }
   const audience = DID.parse(audienceDID)
-  const abilities = Array.isArray(opts.can) ? opts.can : [opts.can]
+  const abilities = opts.can ? [opts.can].flat() : []
+  if (!abilities.length) {
+    console.error('Error: missing capabilities for delegation')
+    process.exit(1)
+  }
   const audienceMeta = {}
   if (opts.name) audienceMeta.name = opts.name
   if (opts.type) audienceMeta.type = opts.type
