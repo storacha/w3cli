@@ -156,10 +156,22 @@ Set the current space in use by the agent.
 
 Create a delegation to the passed audience for the given abilities with the _current_ space as the resource.
 
-* `--can` One or more abilities to delegate, default `*` (everything).
+* `--can` A capability to delegate. To specify more than one capability, use this option more than once.
 * `--name` Human readable name for the audience receiving the delegation.
 * `--type` Type of the audience receiving the delegation, one of: device, app, service.
 * `--output` Path of file to write the exported delegation data to.
+
+```bash
+# delegate space/info to did:key:z6MkrwtRceSo2bE6vAY4gi8xPNfNszSpvf8MpAHnxVfMYreN
+w3 delegation create did:key:z6MkrwtRceSo2bE6vAY4gi8xPNfNszSpvf8MpAHnxVfMYreN --can space/info
+
+# delegate store/* and upload/* to did:key:z6MkrwtRceSo2bE6vAY4gi8xPNfNszSpvf8MpAHnxVfMYreN
+w3 delegation create did:key:z6MkrwtRceSo2bE6vAY4gi8xPNfNszSpvf8MpAHnxVfMYreN --can 'store/*' --can 'upload/*'
+
+# delegate all capabilities to did:key:z6MkrwtRceSo2bE6vAY4gi8xPNfNszSpvf8MpAHnxVfMYreN
+# WARNING - this is bad practice and should generally only be done in testing and development
+w3 delegation create did:key:z6MkrwtRceSo2bE6vAY4gi8xPNfNszSpvf8MpAHnxVfMYreN --can '*'
+```
 
 ### `w3 delegation ls`
 
