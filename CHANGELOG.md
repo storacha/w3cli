@@ -1,5 +1,21 @@
 # Changelog
 
+## [4.0.0](https://github.com/web3-storage/w3cli/compare/v3.0.0...v4.0.0) (2023-07-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* update ucanto dependencies ([#80](https://github.com/web3-storage/w3cli/issues/80))
+
+### Features
+
+* update ucanto dependencies ([#80](https://github.com/web3-storage/w3cli/issues/80)) ([f2391bd](https://github.com/web3-storage/w3cli/commit/f2391bdf578c1dbe03a50d67b9f350653055fe83))
+
+
+### Bug Fixes
+
+* readme quickstart ([cc9640c](https://github.com/web3-storage/w3cli/commit/cc9640cda18da7d496f3c60521ae42e47e4ccb4f))
+
 ## [3.0.0](https://github.com/web3-storage/w3cli/compare/v2.0.0...v3.0.0) (2023-03-29)
 
 
