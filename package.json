@@ -35,7 +35,7 @@
   "devDependencies": {
     "@ucanto/principal": "^8.0.0",
     "@ucanto/server": "^8.0.1",
-    "@web3-storage/capabilities": "^6.0.1",
+    "@web3-storage/capabilities": "^7.0.0",
     "ava": "^5.1.0",
     "execa": "^6.1.0",
     "multiformats": "^12.0.1",
