@@ -4,10 +4,9 @@ import os from 'os'
 import path from 'path'
 import { execa, execaSync } from 'execa'
 import * as CAR from '@ucanto/transport/car'
-import * as CBOR from '@ucanto/transport/cbor'
 import * as Signer from '@ucanto/principal/ed25519'
 import { importDAG } from '@ucanto/core/delegation'
-import { create as createServer, provide } from '@ucanto/server'
+import { create as createServer, ok, provide } from '@ucanto/server'
 import * as DID from '@ipld/dag-ucan/did'
 import * as StoreCapabilities from '@web3-storage/capabilities/store'
 import * as UploadCapabilities from '@web3-storage/capabilities/upload'
@@ -38,8 +37,7 @@ test.beforeEach(async t => {
     const server = createServer({
       id: serviceSigner,
       service,
-      decoder: CAR,
-      encoder: CBOR
+      codec: CAR.inbound
     })
     setRequestListener(createHTTPListener(server))
   }
@@ -112,17 +110,17 @@ test('w3 up', async (t) => {
 
   const service = mockService({
     store: {
-      add: provide(StoreCapabilities.add, () => ({
+      add: provide(StoreCapabilities.add, () => (ok({
         status: 'upload',
         headers: { 'x-test': 'true' },
         url: 'http://localhost:9200'
-      }))
+      })))
     },
     upload: {
       add: provide(UploadCapabilities.add, ({ invocation }) => {
         const { nb } = invocation.capabilities[0]
         if (!nb) throw new Error('missing nb')
-        return nb
+        return ok(nb)
       })
     }
   })
@@ -130,7 +128,6 @@ test('w3 up', async (t) => {
   t.context.setService(service)
 
   const { stderr } = await execa('./bin.js', ['up', 'test/fixtures/pinpie.jpg'], { env })
-
   t.true(service.store.add.called)
   t.is(service.store.add.callCount, 1)
   t.true(service.upload.add.called)
@@ -146,11 +143,11 @@ test('w3 up --car', async (t) => {
 
   const service = mockService({
     store: {
-      add: provide(StoreCapabilities.add, () => ({
+      add: provide(StoreCapabilities.add, () => (ok({
         status: 'upload',
         headers: { 'x-test': 'true' },
         url: 'http://localhost:9200'
-      }))
+      })))
     },
     upload: {
       add: provide(UploadCapabilities.add, ({ invocation }) => {
@@ -158,7 +155,7 @@ test('w3 up --car', async (t) => {
         if (!nb) throw new Error('missing nb')
         t.assert(nb.shards)
         t.is(nb.shards[0]?.toString(), 'bagbaieracyt3l5gpf3ovcmedm6ktgvxzi6gpp7x42ffu43zrqh2qwm6q7peq')
-        return nb
+        return ok(nb)
       })
     }
   })
@@ -184,21 +181,21 @@ test('w3 ls', async (t) => {
 
   const service = mockService({
     store: {
-      add: provide(StoreCapabilities.add, () => ({
+      add: provide(StoreCapabilities.add, () => (ok({
         status: 'upload',
         headers: { 'x-test': 'true' },
         url: 'http://localhost:9200'
-      }))
+      })))
     },
     upload: {
       add: provide(UploadCapabilities.add, ({ invocation }) => {
         const { nb } = invocation.capabilities[0]
         if (!nb) throw new Error('missing nb')
         uploads.push(nb)
-        return nb
+        return ok(nb)
       }),
       list: provide(UploadCapabilities.list, () => {
-        return { results: uploads, size: uploads.length }
+        return ok({ results: uploads, size: uploads.length })
       })
     }
   })
@@ -223,7 +220,7 @@ test('w3 remove', async t => {
     upload: {
       remove: provide(UploadCapabilities.remove, ({ invocation }) => {
         const { nb } = invocation.capabilities[0]
-        return { root: nb.root }
+        return ok({ root: nb.root })
       })
     }
   })
@@ -245,7 +242,7 @@ test('w3 remove - no such upload', async t => {
 
   const service = mockService({
     upload: {
-      remove: provide(UploadCapabilities.remove, () => {})
+      remove: provide(UploadCapabilities.remove, () => ok({}))
     }
   })
   t.context.setService(service)
@@ -262,18 +259,18 @@ test('w3 remove --shards', async t => {
 
   const service = mockService({
     store: {
-      remove: provide(StoreCapabilities.remove, () => {})
+      remove: provide(StoreCapabilities.remove, () => ok({}))
     },
     upload: {
       remove: provide(UploadCapabilities.remove, ({ invocation }) => {
         const { nb } = invocation.capabilities[0]
-        return {
+        return ok({
           root: nb.root,
           shards: [
             CID.parse('bagbaiera7ciaeifwrn7oo35gxdalocfj23vkvqus2eup27wt2qcxlvta2wya'),
             CID.parse('bagbaiera7ciaeifwrn7oo35gxdalocfj23vkvqus2eup27wt2qcxlvta2wya')
           ]
-        }
+        })
       })
     }
   })
@@ -292,12 +289,12 @@ test('w3 remove --shards - no shards to remove', async t => {
 
   const service = mockService({
     store: {
-      remove: provide(StoreCapabilities.remove, () => {})
+      remove: provide(StoreCapabilities.remove, () => ok({}))
     },
     upload: {
       remove: provide(UploadCapabilities.remove, ({ invocation }) => {
         const { nb } = invocation.capabilities[0]
-        return { root: nb.root }
+        return ok({ root: nb.root })
       })
     }
   })
@@ -542,11 +539,11 @@ test('w3 can store add', async t => {
 
   const service = mockService({
     store: {
-      add: provide(StoreCapabilities.add, () => ({
+      add: provide(StoreCapabilities.add, () => (ok({
         status: 'upload',
         headers: { 'x-test': 'true' },
         url: 'http://localhost:9200'
-      }))
+      })))
     }
   })
 
@@ -567,11 +564,11 @@ test('w3 can upload add', async (t) => {
 
   const service = mockService({
     store: {
-      add: provide(StoreCapabilities.add, () => ({
+      add: provide(StoreCapabilities.add, () => (ok({
         status: 'upload',
         headers: { 'x-test': 'true' },
         url: 'http://localhost:9200'
-      }))
+      })))
     },
     upload: {
       add: provide(UploadCapabilities.add, ({ invocation }) => {
@@ -580,7 +577,7 @@ test('w3 can upload add', async (t) => {
         t.is(nb.root.toString(), root)
         t.is(nb.shards?.length, 1)
         t.is(nb.shards?.[0].toString(), shard)
-        return nb
+        return ok(nb)
       })
     }
   })
@@ -621,21 +618,21 @@ test('w3 can upload ls', async (t) => {
 
   const service = mockService({
     store: {
-      add: provide(StoreCapabilities.add, () => ({
+      add: provide(StoreCapabilities.add, () => (ok({
         status: 'upload',
         headers: { 'x-test': 'true' },
         url: 'http://localhost:9200'
-      }))
+      })))
     },
     upload: {
       add: provide(UploadCapabilities.add, ({ invocation }) => {
         const { nb } = invocation.capabilities[0]
         if (!nb) throw new Error('missing nb')
         uploads.push(nb)
-        return nb
+        return ok(nb)
       }),
       list: provide(UploadCapabilities.list, () => {
-        return { results: uploads, size: uploads.length }
+        return ok({ results: uploads, size: uploads.length })
       })
     }
   })
@@ -659,21 +656,21 @@ test('w3 can store ls', async (t) => {
     store: {
       add: provide(StoreCapabilities.add, ({ invocation }) => {
         cars.push({ link: invocation.root.cid })
-        return ({
+        return ok({
           status: 'upload',
           headers: { 'x-test': 'true' },
           url: 'http://localhost:9200'
         })
       }),
       list: provide(StoreCapabilities.list, () => {
-        return { results: cars, size: cars.length }
+        return ok({ results: cars, size: cars.length })
       })
     },
     upload: {
       add: provide(UploadCapabilities.add, ({ invocation }) => {
         const { nb } = invocation.capabilities[0]
         if (!nb) throw new Error('missing nb')
-        return nb
+        return ok(nb)
       })
     }
   })

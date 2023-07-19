@@ -129,7 +129,7 @@ export async function remove (rootCid, opts) {
   if (!opts.shards) {
     return
   }
-  if (!upload) {
+  if (!upload.root) {
     return console.log('⁂ upload not found. could not determine shards to remove.')
   }
   if (!upload.shards || !upload.shards.length) {
