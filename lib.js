@@ -5,9 +5,11 @@ import { importDAG } from '@ucanto/core/delegation'
 import { connect } from '@ucanto/client'
 import * as CAR from '@ucanto/transport/car'
 import * as HTTP from '@ucanto/transport/http'
+import { derive } from "@ucanto/principal/ed25519";
 import { parse } from '@ipld/dag-ucan/did'
-import { create } from '@web3-storage/w3up-client'
+import { Client, create } from '@web3-storage/w3up-client'
 import { StoreConf } from '@web3-storage/access/stores/store-conf'
+import { AgentData } from "@web3-storage/access";
 import { CarReader } from '@ipld/car'
 
 /**
@@ -44,8 +46,14 @@ export function filesize (bytes) {
  * Get a new API client configured from env vars.
  */
 export function getClient () {
+  if (process.env.W3_PRINCIPAL_KEY && process.env.W3_DELEGATION_PROOF) {
+    // use credentials from env variables
+    return createFromStatic(process.env.W3_PRINCIPAL_KEY, process.env.W3_DELEGATION_PROOF)
+  }
+  
+  // use stored credentials
   const store = new StoreConf({ profile: process.env.W3_STORE_NAME ?? 'w3cli' })
-
+  
   let serviceConf
   if (
     process.env.W3_ACCESS_SERVICE_DID &&
@@ -150,4 +158,28 @@ export function storeListResponseToString (res, opts = {}) {
   } else {
     return res.results.map(({ link }) => link.toString()).join('\n')
   }
+}
+
+async function createFromStatic(principalKey, delegationProof) {
+  // create a client with the UCAN private key
+  const principal = await derive(
+    Buffer.from(principalKey, "base64")
+  );
+  const data = await AgentData.create({ principal });
+  const client = new Client(data);
+
+  // create a space with the delegation proof
+  const blocks = [];
+  const reader = await CarReader.fromBytes(
+    Buffer.from(delegationProof, "base64")
+  );
+  for await (const block of reader.blocks()) {
+    blocks.push(block);
+  }
+  const proof = importDAG(blocks);
+
+  const space = await client.addSpace(proof);
+  await client.setCurrentSpace(space.did());
+
+  return client;
 }
