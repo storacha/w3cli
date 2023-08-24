@@ -10,6 +10,7 @@ import { create as createServer, ok, provide } from '@ucanto/server'
 import * as DID from '@ipld/dag-ucan/did'
 import * as StoreCapabilities from '@web3-storage/capabilities/store'
 import * as UploadCapabilities from '@web3-storage/capabilities/upload'
+import * as SpaceCapabilities from '@web3-storage/capabilities/space'
 import { CID } from 'multiformats/cid'
 import { CarReader } from '@ipld/car'
 import { StoreConf } from '@web3-storage/access/stores/store-conf'
@@ -458,6 +459,35 @@ test('w3 space use - space name not exists', async t => {
   const err = await t.throwsAsync(() => execa('./bin.js', ['space', 'use', name], { env }))
   // @ts-expect-error
   t.regex(err.stderr, /space not found/)
+})
+
+test('w3 space info', async t => {
+  const env = t.context.env.alice
+
+  await execa('./bin.js', ['space', 'create'], { env })
+
+  const spaceDID = 'did:key:abc123'
+  const provider = 'did:web:test.web3.storage'
+  const service = mockService({
+    space: {
+      info: provide(SpaceCapabilities.info, () => (ok({
+        did: spaceDID,
+        providers: [provider]
+      })))
+    }
+  })
+
+  t.context.setService(service)
+
+  const { stdout } = await execa('./bin.js', ['space', 'info'], { env })
+
+  t.true(service.space.info.called)
+  t.is(service.space.info.callCount, 1)
+
+  t.is(stdout, `
+DID: ${spaceDID}
+Providers: ${provider}
+`)
 })
 
 test('w3 proof add', async t => {

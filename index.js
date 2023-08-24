@@ -264,6 +264,32 @@ export async function useSpace (did) {
 }
 
 /**
+ * @param {object} opts
+ * @param {string} [opts.space]
+ * @param {string} [opts.json]
+ */
+export async function spaceInfo (opts) {
+  const client = await getClient()
+  const spaceDID = opts.space ?? client.currentSpace()?.did()
+  if (!spaceDID) {
+    throw new Error('no current space and no space given: please use --space to specify a space or select one using "space ls"')
+  }
+  try {
+    const info = await client.capability.space.info(spaceDID)
+    if (opts.json) {
+      console.log(JSON.stringify(info, null, 4))
+    } else {
+      console.log(`
+DID: ${info.did}
+Providers: ${info.providers?.join(', ') ?? ''}
+`)
+    }
+  } catch (e) {
+    console.log(`Error getting info about ${spaceDID}: ${e.message}`)
+  }
+}
+
+/**
  * @param {string} audienceDID
  * @param {object} opts
  * @param {string[]|string} opts.can
