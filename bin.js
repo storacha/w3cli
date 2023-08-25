@@ -11,6 +11,7 @@ import {
   addSpace,
   listSpaces,
   useSpace,
+  spaceInfo,
   createDelegation,
   listDelegations,
   addProof,
@@ -89,6 +90,12 @@ cli.command('space add <proof>')
 cli.command('space ls')
   .describe('List spaces known to the agent')
   .action(listSpaces)
+
+cli.command('space info')
+  .describe('Show information about a space. Defaults to the current space.')
+  .option('-s, --space', 'The space to print information about.')
+  .option('--json', 'Format as newline delimited JSON')
+  .action(spaceInfo)
 
 cli.command('space use <did>')
   .describe('Set the current space in use by the agent')

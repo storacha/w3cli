@@ -152,6 +152,14 @@ w3 space register --provider did:web:nft.storage
 
 Set the current space in use by the agent.
 
+### `w3 space info`
+
+Get information about a space (by default the current space) from the service, including
+which providers the space is currently registered with.
+
+* `--space` The space to get information about. Defaults to the current space.
+* `--json` Format as newline delimited JSON
+
 ### `w3 delegation create <audience-did>`
 
 Create a delegation to the passed audience for the given abilities with the _current_ space as the resource.
