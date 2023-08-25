@@ -35,7 +35,7 @@
   "devDependencies": {
     "@ucanto/principal": "^8.0.0",
     "@ucanto/server": "^8.0.1",
-    "@web3-storage/capabilities": "^7.0.0",
+    "@web3-storage/capabilities": "^9.2.0",
     "ava": "^5.1.0",
     "execa": "^6.1.0",
     "multiformats": "^12.0.1",
@@ -48,7 +48,7 @@
     "@ucanto/client": "^8.0.0",
     "@ucanto/core": "^8.0.0",
     "@ucanto/transport": "^8.0.0",
-    "@web3-storage/access": "^15.0.0",
+    "@web3-storage/access": "^15.1.1",
     "@web3-storage/w3up-client": "^8.0.1",
     "files-from-path": "^1.0.0",
     "open": "^8.4.0",
