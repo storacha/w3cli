@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.1.0](https://github.com/web3-storage/w3cli/compare/v4.0.0...v4.1.0) (2023-08-25)
+
+
+### Features
+
+* add `space info` command to w3cli ([#83](https://github.com/web3-storage/w3cli/issues/83)) ([a72701c](https://github.com/web3-storage/w3cli/commit/a72701c4443748b5e1aa4037d6d33c978f236475))
+* add ability to specify custom principal ([#84](https://github.com/web3-storage/w3cli/issues/84)) ([6115101](https://github.com/web3-storage/w3cli/commit/6115101fc62f66addf55ec9880ec77eccee9d435))
+* bump versions of `access` and `w3up-client` ([#81](https://github.com/web3-storage/w3cli/issues/81)) ([55de733](https://github.com/web3-storage/w3cli/commit/55de733d175509583781c3b29102ceb8ff78d21d))
+
 ## [4.0.0](https://github.com/web3-storage/w3cli/compare/v3.0.0...v4.0.0) (2023-07-19)
 
 
