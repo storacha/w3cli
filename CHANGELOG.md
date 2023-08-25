@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.1.2](https://github.com/web3-storage/w3cli/compare/v4.1.1...v4.1.2) (2023-08-25)
+
+
+### Bug Fixes
+
+* raise test timeout and bump package version ([#88](https://github.com/web3-storage/w3cli/issues/88)) ([cebeccc](https://github.com/web3-storage/w3cli/commit/cebecccaaac267fcf9cb35ddcd326d0085055c18))
+
 ## [4.1.1](https://github.com/web3-storage/w3cli/compare/v4.1.0...v4.1.1) (2023-08-25)
 
 
