@@ -61,6 +61,7 @@ w3 up recipies.txt
   * [`w3 space ls`](#w3-space-ls)
   * [`w3 space register`](#w3-space-register)
   * [`w3 space use`](#w3-space-use-did)
+  * [`w3 space info`](#w3-space-info)
 * Capability management
   * [`w3 delegation create`](#w3-delegation-create-audience-did)
   * [`w3 delegation ls`](#w3-delegation-ls)
