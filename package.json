@@ -12,7 +12,7 @@
     "lint": "standard",
     "lint:fix": "standard --fix",
     "test": "npm-run-all -p -r mock test:ava",
-    "test:ava": "ava --verbose",
+    "test:ava": "ava --verbose --timeout=1m",
     "test:watch": "ava --watch",
     "mock": "run-p mock:*",
     "mock:bucket-200": "PORT=9200 STATUS=200 node test/helpers/bucket-server.js"
