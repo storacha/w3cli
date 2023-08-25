@@ -4,8 +4,8 @@ import tree from 'pretty-tree'
 import { importDAG } from '@ucanto/core/delegation'
 import { connect } from '@ucanto/client'
 import * as CAR from '@ucanto/transport/car'
-import * as CBOR from '@ucanto/transport/cbor'
 import * as HTTP from '@ucanto/transport/http'
+import * as Signer from '@ucanto/principal/ed25519'
 import { parse } from '@ipld/dag-ucan/did'
 import { create } from '@web3-storage/w3up-client'
 import { StoreConf } from '@web3-storage/access/stores/store-conf'
@@ -58,8 +58,7 @@ export function getClient () {
     serviceConf = {
       access: connect({
         id: parse(process.env.W3_ACCESS_SERVICE_DID),
-        encoder: CAR,
-        decoder: CBOR,
+        codec: CAR.outbound,
         channel: HTTP.open({
           url: new URL(process.env.W3_ACCESS_SERVICE_URL),
           method: 'POST'
@@ -67,8 +66,7 @@ export function getClient () {
       }),
       upload: connect({
         id: parse(process.env.W3_UPLOAD_SERVICE_DID),
-        encoder: CAR,
-        decoder: CBOR,
+        codec: CAR.outbound,
         channel: HTTP.open({
           url: new URL(process.env.W3_UPLOAD_SERVICE_URL),
           method: 'POST'
@@ -77,7 +75,14 @@ export function getClient () {
     }
   }
 
-  return create({ store, serviceConf })
+  const createConfig = { store, serviceConf }
+
+  const principal = process.env.W3_PRINCIPAL
+  if (principal) {
+    createConfig.principal = Signer.parse(principal)
+  }
+
+  return create(createConfig)
 }
 
 /**
