@@ -272,7 +272,7 @@ export async function spaceInfo (opts) {
   const client = await getClient()
   const spaceDID = opts.space ?? client.currentSpace()?.did()
   if (!spaceDID) {
-    throw new Error('no current space and no space given: please use --space to specify a space or select one using "space ls"')
+    throw new Error('no current space and no space given: please use --space to specify a space or select one using "space use"')
   }
   try {
     const info = await client.capability.space.info(spaceDID)
@@ -284,8 +284,8 @@ DID: ${info.did}
 Providers: ${info.providers?.join(', ') ?? ''}
 `)
     }
-  } catch (e) {
-    console.log(`Error getting info about ${spaceDID}: ${e.message}`)
+  } catch (err) {
+    console.log(`Error getting info about ${spaceDID}: ${err.message}`)
   }
 }
 
