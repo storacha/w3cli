@@ -9,7 +9,6 @@ import { getClient, checkPathsExist, filesize, readProof, uploadListResponseToSt
 import * as ucanto from '@ucanto/core'
 import * as DidMailto from '@web3-storage/did-mailto'
 
-
 export async function accessClaim () {
   const client = await getClient()
   await client.capability.access.claim()
