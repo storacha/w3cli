@@ -14,7 +14,7 @@ questions!
 
 ## Getting started 
 
-Install the CLI from npm :
+Install the CLI from npm (**`w3up-client` requires Node 18 or higher**):
 
 ```console
 npm install -g @web3-storage/w3cli
@@ -26,12 +26,14 @@ Authorize this agent to act on behalf of the account associated with your email 
 w3 authorize alice@example.com
 ```
 
-Create a new space for storing your data and register it:
+Create a new Space for storing your data and register it:
 
 ```console
 w3 space create Documents # pick a good name!
 w3 space register # defaults to registering you with web3.storage
 ```
+
+If you'd like to learn more about what is going on under the hood with w3up and its use of Spaces, [UCANs](https://ucan.xyz/), and more, check out the `w3up-client` README [here](https://github.com/web3-storage/w3up/tree/main/packages/w3up-client#usage).
 
 > By registering your w3up beta Space with [web3.storage](http://web3.storage/), you agree to the w3up beta [Terms of Service](https://console.web3.storage/terms). Until the beta period is over and this migration occurs, uploads to w3up will not appear in your web3.storage account (and vice versa), even if you register with the same email.
 
