@@ -1,4 +1,7 @@
-/** @param {import('@ucanto/server').ServerView} server */
+/**
+ * @template {Record<string, any>} T
+ * @param {import('@ucanto/server').ServerView<T>} server
+ */
 export function createHTTPListener (server) {
   /** @type {import('http').RequestListener} */
   return async (request, response) => {
