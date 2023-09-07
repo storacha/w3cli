@@ -7,6 +7,7 @@ import { CarWriter } from '@ipld/car'
 import { filesFromPaths } from 'files-from-path'
 import { getClient, checkPathsExist, filesize, readProof, uploadListResponseToString } from './lib.js'
 import * as ucanto from '@ucanto/core'
+import * as DidMailto from '@web3-storage/did-mailto'
 
 export async function accessClaim () {
   const client = await getClient()
@@ -188,16 +189,6 @@ function findAccountsThatCanProviderAdd (client) {
 }
 
 /**
- * @param {string} did
- * @returns {`${string}@${string}`}
-*/
-// TODO: extract to external library along with its counterpart in https://github.com/web3-storage/w3protocol/blob/main/packages/access-client/src/utils/did-mailto.js
-function createEmailFromDidMailto (did) {
-  const parts = did.split(':')
-  return `${parts[3]}@${parts[2]}`
-}
-
-/**
  * @param {object} [opts]
  * @param {string} [opts.email]
  * @param {`did:web:${string}`} [opts.provider]
@@ -208,7 +199,7 @@ export async function registerSpace (opts) {
   if (!accountEmail) {
     const accounts = findAccountsThatCanProviderAdd(client)
     if (accounts.length === 1) {
-      accountEmail = createEmailFromDidMailto(accounts[0])
+      accountEmail = DidMailto.toEmail(accounts[0])
     } else {
       if (accounts.length > 1) {
         console.error('Error: you are authorized to use more than one account and have not specified which one you would like to use to register this space.')
