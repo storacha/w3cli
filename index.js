@@ -175,13 +175,14 @@ export async function createSpace (name) {
 
 /** @param {import('@web3-storage/w3up-client').Client} client */
 function findAccountsThatCanProviderAdd (client) {
+  /** @type {Array<ReturnType<DidMailto.fromString>>} */
   const accounts = []
   const proofs = client.proofs()
   for (const proof of proofs) {
     const allows = ucanto.Delegation.allows(proof)
     for (const resourceDID of Object.keys(allows)) {
       if (resourceDID.startsWith('did:mailto:') && allows[resourceDID]['provider/add']) {
-        accounts.push(resourceDID)
+        accounts.push(DidMailto.fromString(resourceDID))
       }
     }
   }
