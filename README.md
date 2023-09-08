@@ -7,14 +7,14 @@
 </p>
 
 > ### ⚠️❗ w3cli and the underlying APIs are currently beta preview features
-> Please read the beta Terms of Service ([web3.storage](https://console.web3.storage/terms), [NFT.Storage](https://console.nft.storage/terms)) for more details.
+> Please read the beta [Terms of Service](https://console.web3.storage/terms) for more details.
 >
 > Open an issue on the repo or reach out to the #web3-storage channel on [IPFS Discord](https://docs.ipfs.tech/community/chat/#discord) if you have any 
 questions!
 
 ## Getting started 
 
-Install the CLI from npm :
+Install the CLI from npm (**`w3up-client` requires Node 18 or higher**):
 
 ```console
 npm install -g @web3-storage/w3cli
@@ -26,16 +26,16 @@ Authorize this agent to act on behalf of the account associated with your email 
 w3 authorize alice@example.com
 ```
 
-Create a new space for storing your data and register it:
+Create a new Space for storing your data and register it:
 
 ```console
 w3 space create Documents # pick a good name!
 w3 space register # defaults to registering you with web3.storage
-# to use w3up nft.storage as a storage provider instead of default did:web:web3.storage
-# w3 space register --provider did:web:nft.storage
 ```
 
-> By registering your w3up beta Space with either [NFT.Storage](http://nft.storage/) or [web3.storage](http://web3.storage/), you agree to the relevant w3up beta Terms of Service ([web3.storage](https://console.web3.storage/terms), [NFT.Storage](https://console.nft.storage/terms)). If you have an existing non-w3up beta account with NFT.Storage or web3.storage and register for the w3up beta version of the same product (NFT.Storage or web3.storage) using the same email, then at the end of the beta period, these accounts will be combined. Until the beta period is over and this migration occurs, uploads to w3up will not appear in your NFT.Storage or web3.storage account (and vice versa), even if you register with the same email.
+If you'd like to learn more about what is going on under the hood with w3up and its use of Spaces, [UCANs](https://ucan.xyz/), and more, check out the `w3up-client` README [here](https://github.com/web3-storage/w3up/tree/main/packages/w3up-client#usage).
+
+> By registering your w3up beta Space with [web3.storage](http://web3.storage/), you agree to the w3up beta [Terms of Service](https://console.web3.storage/terms). Until the beta period is over and this migration occurs, uploads to w3up will not appear in your web3.storage account (and vice versa), even if you register with the same email.
 
 Upload a file or directory:
 
@@ -61,6 +61,7 @@ w3 up recipies.txt
   * [`w3 space ls`](#w3-space-ls)
   * [`w3 space register`](#w3-space-register)
   * [`w3 space use`](#w3-space-use-did)
+  * [`w3 space info`](#w3-space-info)
 * Capability management
   * [`w3 delegation create`](#w3-delegation-create-audience-did)
   * [`w3 delegation ls`](#w3-delegation-ls)
@@ -141,12 +142,8 @@ more than one account you'll need to pass the `--email` option to specify which 
 register the space with.
 
 * `--email` The email address of the account to associate this space with.
-* `--provider` The storage provider to associate with this space. The default is w3up web3.storage.
-```
-# to use w3up nft.storage as a storage provider instead of default did:web:web3.storage
-w3 space register --provider did:web:nft.storage
-```
-> By registering your w3up beta Space with either [NFT.Storage](http://nft.storage/) or [web3.storage](http://web3.storage/), you agree to the relevant w3up beta Terms of Service ([web3.storage](https://console.web3.storage/terms), [NFT.Storage](https://console.nft.storage/terms)). If you have an existing non-w3up beta account with NFT.Storage or web3.storage and register for the w3up beta version of the same product (NFT.Storage or web3.storage) using the same email, then at the end of the beta period, these accounts will be combined. Until the beta period is over and this migration occurs, uploads to w3up will not appear in your NFT.Storage or web3.storage account (and vice versa), even if you register with the same email.
+* `--provider` The storage provider to associate with this space.
+> By registering your w3up beta Space with [web3.storage](http://web3.storage/), you agree to the w3up beta [Terms of Service](https://console.web3.storage/terms). Until the beta period is over and this migration occurs, uploads to w3up will not appear in your web3.storage account (and vice versa), even if you register with the same email.
 
 ### `w3 space use <did>`
 

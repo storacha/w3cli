@@ -5,8 +5,10 @@ import { CID } from 'multiformats/cid'
 import * as DID from '@ipld/dag-ucan/did'
 import { CarWriter } from '@ipld/car'
 import { filesFromPaths } from 'files-from-path'
-import { getClient, checkPathsExist, filesize, readProof, uploadListResponseToString } from './lib.js'
+import { getClient, checkPathsExist, filesize, filesizeMB, readProof, uploadListResponseToString } from './lib.js'
 import * as ucanto from '@ucanto/core'
+import * as DidMailto from '@web3-storage/did-mailto'
+import chalk from 'chalk'
 
 export async function accessClaim () {
   const client = await getClient()
@@ -14,7 +16,7 @@ export async function accessClaim () {
 }
 
 /**
- * @param {string} email
+ * @param {`${string}@${string}`} email
  * @param {object} [opts]
  * @param {import('@ucanto/interface').Ability[]|import('@ucanto/interface').Ability} [opts.can]
  */
@@ -41,41 +43,46 @@ export async function authorize (email, opts = {}) {
 
 /**
  * @param {string} firstPath
- * @param {object} opts
- * @param {string[]} opts._
- * @param {boolean} [opts.hidden]
+ * @param {{
+ *   _: string[],
+ *   car?: boolean
+ *   hidden?: boolean
+ *   'no-wrap'?: boolean
+ *   'shard-size'?: number
+ *   'concurrent-requests'?: number
+ * }} [opts]
  */
 export async function upload (firstPath, opts) {
-  const paths = checkPathsExist([firstPath, ...opts._])
+  const paths = checkPathsExist([firstPath, ...(opts?._ ?? [])])
   const client = await getClient()
-  const hidden = !!opts.hidden
+  const hidden = !!opts?.hidden
   let totalSent = 0
   const spinner = ora('Reading files').start()
   const files = await filesFromPaths(paths, { hidden })
   const totalSize = files.reduce((total, f) => total + f.size, 0)
-  spinner.stopAndPersist({ text: `${files.length} file${files.length === 1 ? '' : 's'} (${filesize(totalSize)})` })
+  spinner.stopAndPersist({ text: `${files.length} file${files.length === 1 ? '' : 's'} ${chalk.dim(filesize(totalSize))}` })
 
-  if (opts.car && files.length > 1) {
+  if (opts?.car && files.length > 1) {
     console.error('Error: multiple CAR files not supported')
     process.exit(1)
   }
 
   spinner.start('Storing')
   /** @type {(o?: import('@web3-storage/w3up-client/src/types').UploadOptions) => Promise<import('@web3-storage/w3up-client/src/types').AnyLink>} */
-  const uploadFn = opts.car
+  const uploadFn = opts?.car
     ? client.uploadCAR.bind(client, files[0])
-    : files.length === 1 && opts['no-wrap']
+    : files.length === 1 && opts?.['no-wrap']
       ? client.uploadFile.bind(client, files[0])
       : client.uploadDirectory.bind(client, files)
 
   const root = await uploadFn({
     onShardStored: ({ cid, size }) => {
       totalSent += size
-      spinner.stopAndPersist({ text: cid.toString() })
+      spinner.stopAndPersist({ text: `${cid} ${chalk.dim(filesizeMB(size))}` })
       spinner.start(`Storing ${Math.round((totalSent / totalSize) * 100)}%`)
     },
-    shardSize: opts['shard-size'] && parseInt(opts['shard-size']),
-    concurrentRequests: opts['concurrent-requests'] && parseInt(opts['concurrent-requests'])
+    shardSize: opts?.['shard-size'] && parseInt(String(opts?.['shard-size'])),
+    concurrentRequests: opts?.['concurrent-requests'] && parseInt(String(opts?.['concurrent-requests']))
   })
   spinner.stopAndPersist({ symbol: '⁂', text: `Stored ${files.length} file${files.length === 1 ? '' : 's'}` })
   console.log(`⁂ https://w3s.link/ipfs/${root}`)
@@ -90,9 +97,11 @@ export async function upload (firstPath, opts) {
 export async function list (opts = {}) {
   const client = await getClient()
   let count = 0
+  /** @type {import('@web3-storage/w3up-client/types').UploadListOk|undefined} */
   let res
   do {
     res = await client.capability.upload.list({ cursor: res?.cursor })
+    if (!res) throw new Error('missing upload list response')
     count += res.results.length
     if (res.results.length) {
       console.log(uploadListResponseToString(res, opts))
@@ -113,7 +122,7 @@ export async function remove (rootCid, opts) {
   let root
   try {
     root = CID.parse(rootCid.trim())
-  } catch (err) {
+  } catch (/** @type {any} */err) {
     console.error(`Error: ${rootCid} is not a CID`)
     process.exit(1)
   }
@@ -121,7 +130,7 @@ export async function remove (rootCid, opts) {
   let upload
   try {
     upload = await client.capability.upload.remove(root)
-  } catch (err) {
+  } catch (/** @type {any} */err) {
     console.error(`Remove failed: ${err.message ?? err}`)
     console.error(err)
     process.exit(1)
@@ -139,6 +148,7 @@ export async function remove (rootCid, opts) {
   const { shards } = upload
   console.log(`⁂ removing ${shards.length} shard${shards.length === 1 ? '' : 's'}`)
 
+  /** @param {import('@web3-storage/w3up-client/types').CARLink} shard */
   function removeShard (shard) {
     return oraPromise(client.capability.store.remove(shard), {
       text: `${shard}`,
@@ -164,37 +174,34 @@ export async function createSpace (name) {
   console.log(space.did())
 }
 
+/** @param {import('@web3-storage/w3up-client').Client} client */
 function findAccountsThatCanProviderAdd (client) {
+  /** @type {Array<ReturnType<DidMailto.fromString>>} */
   const accounts = []
   const proofs = client.proofs()
   for (const proof of proofs) {
     const allows = ucanto.Delegation.allows(proof)
     for (const resourceDID of Object.keys(allows)) {
       if (resourceDID.startsWith('did:mailto:') && allows[resourceDID]['provider/add']) {
-        accounts.push(resourceDID)
+        accounts.push(DidMailto.fromString(resourceDID))
       }
     }
   }
   return accounts
 }
 
-// TODO: extract to external library along with its counterpart in https://github.com/web3-storage/w3protocol/blob/main/packages/access-client/src/utils/did-mailto.js
-function createEmailFromDidMailto (did) {
-  const parts = did.split(':')
-  return `${parts[3]}@${parts[2]}`
-}
-
 /**
+ * @param {object} [opts]
  * @param {string} [opts.email]
- * @param {string} [opts.provider]
+ * @param {`did:web:${string}`} [opts.provider]
  */
 export async function registerSpace (opts) {
   const client = await getClient()
-  let accountEmail = opts.email
+  let accountEmail = opts?.email
   if (!accountEmail) {
     const accounts = findAccountsThatCanProviderAdd(client)
     if (accounts.length === 1) {
-      accountEmail = createEmailFromDidMailto(accounts[0])
+      accountEmail = DidMailto.toEmail(accounts[0])
     } else {
       if (accounts.length > 1) {
         console.error('Error: you are authorized to use more than one account and have not specified which one you would like to use to register this space.')
@@ -213,8 +220,8 @@ export async function registerSpace (opts) {
   const spinner = ora('registering your space').start()
 
   try {
-    await client.registerSpace(accountEmail, { provider: opts.provider })
-  } catch (err) {
+    await client.registerSpace(accountEmail, { provider: opts?.provider })
+  } catch (/** @type {any} */err) {
     if (spinner) spinner.stop()
     if (err.message.startsWith('Space already registered')) {
       console.error('Error: space already registered.')
@@ -265,7 +272,7 @@ export async function useSpace (did) {
 
 /**
  * @param {object} opts
- * @param {string} [opts.space]
+ * @param {import('@web3-storage/w3up-client/types').DID} [opts.space]
  * @param {string} [opts.json]
  */
 export async function spaceInfo (opts) {
@@ -279,12 +286,14 @@ export async function spaceInfo (opts) {
     if (opts.json) {
       console.log(JSON.stringify(info, null, 4))
     } else {
+      // @ts-expect-error https://github.com/web3-storage/w3up/pull/911
+      const providers = info.providers?.join(', ') ?? ''
       console.log(`
 DID: ${info.did}
-Providers: ${info.providers?.join(', ') ?? ''}
+Providers: ${providers}
 `)
     }
-  } catch (err) {
+  } catch (/** @type {any} */err) {
     console.log(`Error getting info about ${spaceDID}: ${err.message}`)
   }
 }
@@ -376,23 +385,21 @@ export async function listDelegations (opts) {
 
 /**
  * @param {string} proofPath
- * @param {object} opts
- * @param {boolean} [opts.json]
- * @param {boolean} [opts.dry-run]
+ * @param {{ json?: boolean, 'dry-run'?: boolean }} [opts]
  */
 export async function addProof (proofPath, opts) {
   const client = await getClient()
   let proof
   try {
     proof = await readProof(proofPath)
-    if (!opts['dry-run']) {
+    if (!opts?.['dry-run']) {
       await client.addProof(proof)
     }
-  } catch (err) {
+  } catch (/** @type {any} */err) {
     console.log(`Error: ${err.message}`)
     process.exit(1)
   }
-  if (opts.json) {
+  if (opts?.json) {
     console.log(JSON.stringify(proof.toJSON()))
   } else {
     console.log(proof.cid.toString())
