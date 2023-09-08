@@ -8,6 +8,7 @@ import { filesFromPaths } from 'files-from-path'
 import { getClient, checkPathsExist, filesize, filesizeMB, readProof, uploadListResponseToString } from './lib.js'
 import * as ucanto from '@ucanto/core'
 import * as DidMailto from '@web3-storage/did-mailto'
+import chalk from 'chalk'
 
 export async function accessClaim () {
   const client = await getClient()
@@ -59,7 +60,7 @@ export async function upload (firstPath, opts) {
   const spinner = ora('Reading files').start()
   const files = await filesFromPaths(paths, { hidden })
   const totalSize = files.reduce((total, f) => total + f.size, 0)
-  spinner.stopAndPersist({ text: `${files.length} file${files.length === 1 ? '' : 's'} (${filesize(totalSize)})` })
+  spinner.stopAndPersist({ text: `${files.length} file${files.length === 1 ? '' : 's'} ${chalk.dim(filesize(totalSize))}` })
 
   if (opts?.car && files.length > 1) {
     console.error('Error: multiple CAR files not supported')
@@ -77,7 +78,7 @@ export async function upload (firstPath, opts) {
   const root = await uploadFn({
     onShardStored: ({ cid, size }) => {
       totalSent += size
-      spinner.stopAndPersist({ text: `${cid} (${filesizeMB(size)})` })
+      spinner.stopAndPersist({ text: `${cid} ${chalk.dim(filesizeMB(size))}` })
       spinner.start(`Storing ${Math.round((totalSent / totalSize) * 100)}%`)
     },
     shardSize: opts?.['shard-size'] && parseInt(String(opts?.['shard-size'])),
