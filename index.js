@@ -5,7 +5,7 @@ import { CID } from 'multiformats/cid'
 import * as DID from '@ipld/dag-ucan/did'
 import { CarWriter } from '@ipld/car'
 import { filesFromPaths } from 'files-from-path'
-import { getClient, checkPathsExist, filesize, readProof, uploadListResponseToString } from './lib.js'
+import { getClient, checkPathsExist, filesize, filesizeMB, readProof, uploadListResponseToString } from './lib.js'
 import * as ucanto from '@ucanto/core'
 import * as DidMailto from '@web3-storage/did-mailto'
 
@@ -77,7 +77,7 @@ export async function upload (firstPath, opts) {
   const root = await uploadFn({
     onShardStored: ({ cid, size }) => {
       totalSent += size
-      spinner.stopAndPersist({ text: cid.toString() })
+      spinner.stopAndPersist({ text: `${cid} (${filesizeMB(size)})` })
       spinner.start(`Storing ${Math.round((totalSent / totalSize) * 100)}%`)
     },
     shardSize: opts?.['shard-size'] && parseInt(String(opts?.['shard-size'])),
