@@ -43,6 +43,11 @@ export function filesize (bytes) {
   return `${(bytes / 1000 / 1000 / 1000).toFixed(1)}GB`
 }
 
+/** @param {number} bytes */
+export function filesizeMB (bytes) {
+  return `${(bytes / 1000 / 1000).toFixed(1)}MB`
+}
+
 /**
  * Get a new API client configured from env vars.
  */
