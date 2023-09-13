@@ -281,20 +281,30 @@ export async function spaceInfo (opts) {
   if (!spaceDID) {
     throw new Error('no current space and no space given: please use --space to specify a space or select one using "space use"')
   }
+
+  /** @type {import('@web3-storage/access/types').SpaceInfoResult} */
+  let info
   try {
-    const info = await client.capability.space.info(spaceDID)
-    if (opts.json) {
-      console.log(JSON.stringify(info, null, 4))
-    } else {
-      // @ts-expect-error https://github.com/web3-storage/w3up/pull/911
-      const providers = info.providers?.join(', ') ?? ''
-      console.log(`
-DID: ${info.did}
-Providers: ${providers}
-`)
-    }
+    info = await client.capability.space.info(spaceDID)
   } catch (/** @type {any} */err) {
-    console.log(`Error getting info about ${spaceDID}: ${err.message}`)
+    // if the space was not known to the service then that's ok, there's just
+    // no info to print about it. Don't make it look like something is wrong,
+    // just print the space DID since that's all we know.
+    if (err.name === 'SpaceUnknown') {
+      // @ts-expect-error spaceDID should be a did:key
+      info = { did: spaceDID }
+    } else {
+      return console.log(`Error getting info about ${spaceDID}: ${err.message}`)
+    }
+  }
+
+  if (opts.json) {
+    console.log(JSON.stringify(info, null, 4))
+  } else {
+    const providers = info.providers?.join(', ') ?? ''
+    console.log(`
+      DID: ${info.did}
+Providers: ${providers || chalk.dim('none')}`)
   }
 }
 
