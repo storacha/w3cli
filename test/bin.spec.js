@@ -479,6 +479,7 @@ test('w3 space info', async t => {
 
   /** @type {import('@web3-storage/w3up-client/types').DID<'key'>} */
   const spaceDID = 'did:key:abc123'
+  /** @type {import('@web3-storage/w3up-client/types').DID<'web'>} */
   const provider = 'did:web:test.web3.storage'
   const service = mockService({
     space: {
@@ -497,7 +498,7 @@ test('w3 space info', async t => {
   t.is(service.space.info.callCount, 1)
 
   t.is(stdout, `
-DID: ${spaceDID.toString()}
+      DID: ${spaceDID.toString()}
 Providers: ${provider}
 `)
 })
