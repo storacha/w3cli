@@ -160,7 +160,7 @@ cli.command('can upload ls')
 
 cli.command('ps')
   .describe('Start IPFS pinning service server')
-  .option('--port', 'Override the default port to listen on (:1337)', 1337)
+  .option('--port', 'Override the default port to listen on (:1337)', '1337')
   .option('--host', 'Override the default host to listen on (127.0.0.1)', '127.0.0.1')
   .option('--key', 'Override the default bearer token for api <w3cli agent did>')
   .action(startPinService)
