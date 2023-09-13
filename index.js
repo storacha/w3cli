@@ -304,8 +304,7 @@ export async function spaceInfo (opts) {
     const providers = info.providers?.join(', ') ?? ''
     console.log(`
       DID: ${info.did}
-Providers: ${providers || chalk.dim('none')}
-`)
+Providers: ${providers || chalk.dim('none')}`)
   }
 }
 
