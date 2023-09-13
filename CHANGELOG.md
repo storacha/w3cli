@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.2.1](https://github.com/web3-storage/w3cli/compare/v4.2.0...v4.2.1) (2023-09-13)
+
+
+### Bug Fixes
+
+* do not print error when space is unknown ([#95](https://github.com/web3-storage/w3cli/issues/95)) ([7f693d8](https://github.com/web3-storage/w3cli/commit/7f693d818de3580f855b0a573c87272f7fc2479d))
+
 ## [4.2.0](https://github.com/web3-storage/w3cli/compare/v4.1.2...v4.2.0) (2023-09-08)
 
 
