@@ -1,4 +1,4 @@
-import LRUMap from 'mnemonist/lru-map'
+import LRUMap from 'mnemonist/lru-map.js'
 import { CID } from 'multiformats'
 import http from 'node:http'
 import { getPkg, getClient } from './lib.js'
