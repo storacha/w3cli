@@ -27,6 +27,9 @@ import {
   uploadAdd,
   uploadList
 } from './can.js'
+import {
+  startPinService
+} from './pin.js'
 
 const cli = sade('w3')
 
@@ -154,6 +157,13 @@ cli.command('can upload ls')
   .option('--cursor', 'An opaque string included in a prior upload/list response that allows the service to provide the next "page" of results')
   .option('--pre', 'If true, return the page of results preceding the cursor')
   .action(uploadList)
+
+cli.command('ps')
+  .describe('Start IPFS pinning service server')
+  .option('--port', 'Override the default port to listen on (:1337)', '1337')
+  .option('--host', 'Override the default host to listen on (127.0.0.1)', '127.0.0.1')
+  .option('--key', 'Override the default bearer token for api <w3cli agent did>')
+  .action(startPinService)
 
 // show help text if no command provided
 cli.command('help [cmd]', 'Show help text', { default: true })
