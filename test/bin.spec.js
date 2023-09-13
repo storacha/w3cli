@@ -499,8 +499,7 @@ test('w3 space info', async t => {
 
   t.is(stdout, `
       DID: ${spaceDID.toString()}
-Providers: ${provider}
-`)
+Providers: ${provider}`)
 })
 
 test('w3 proof add', async t => {
