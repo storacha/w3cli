@@ -1,7 +1,4 @@
 import * as Server from '@ucanto/server'
-import { connect } from '@ucanto/client'
-import * as CAR from '@ucanto/transport/car'
-import * as CBOR from '@ucanto/transport/cbor'
 
 const notImplemented = () => {
   throw new Server.Failure('not implemented')
@@ -11,7 +8,6 @@ const notImplemented = () => {
  * @param {Partial<{
  *   store: Partial<import('@web3-storage/upload-client/types').Service['store']>
  *   upload: Partial<import('@web3-storage/upload-client/types').Service['upload']>
- *   voucher: Partial<import('@web3-storage/access/types').Service['voucher']>
  *   space: Partial<import('@web3-storage/access/types').Service['space']>
  * }>} impl
  */
@@ -28,8 +24,7 @@ export function mockService (impl) {
       remove: withCallCount(impl.upload?.remove ?? notImplemented)
     },
     space: {
-      info: withCallCount(impl.space?.info ?? notImplemented),
-      'recover-validation': withCallCount(impl.space?.['recover-validation'] ?? notImplemented)
+      info: withCallCount(impl.space?.info ?? notImplemented)
     }
   }
 }
@@ -48,17 +43,4 @@ function withCallCount (fn) {
   countedFn.called = false
   countedFn.callCount = 0
   return countedFn
-}
-
-/**
- * @param {import('@ucanto/interface').ServerView} server
- */
-export async function mockServiceConf (server) {
-  const connection = connect({
-    id: server.id,
-    encoder: CAR,
-    decoder: CBOR,
-    channel: server
-  })
-  return { access: connection, upload: connection }
 }

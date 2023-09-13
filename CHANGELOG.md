@@ -1,5 +1,76 @@
 # Changelog
 
+## [4.2.0](https://github.com/web3-storage/w3cli/compare/v4.1.2...v4.2.0) (2023-09-08)
+
+
+### Features
+
+* display shard size ([#94](https://github.com/web3-storage/w3cli/issues/94)) ([59e22cb](https://github.com/web3-storage/w3cli/commit/59e22cbc4cb6e946a943e7d3227c7f7e5f5670d0))
+
+
+### Bug Fixes
+
+* don't error when email address contains + ([#90](https://github.com/web3-storage/w3cli/issues/90)) ([8240ba5](https://github.com/web3-storage/w3cli/commit/8240ba5a429416144b1b3a4dcce95c69cdbe9a3c))
+* readme ([22a9312](https://github.com/web3-storage/w3cli/commit/22a9312321a4c9d21817c8e0ccda665c6ca41694))
+* readme node version and link to space explainer ([#92](https://github.com/web3-storage/w3cli/issues/92)) ([b63b220](https://github.com/web3-storage/w3cli/commit/b63b220bd64ea96ee2e3d55d8872cf41f6584e51))
+* various linting issues ([#93](https://github.com/web3-storage/w3cli/issues/93)) ([f829c42](https://github.com/web3-storage/w3cli/commit/f829c42ab1d4ca81b99489e109f668c1f5bab9ef))
+
+## [4.1.2](https://github.com/web3-storage/w3cli/compare/v4.1.1...v4.1.2) (2023-08-25)
+
+
+### Bug Fixes
+
+* raise test timeout and bump package version ([#88](https://github.com/web3-storage/w3cli/issues/88)) ([cebeccc](https://github.com/web3-storage/w3cli/commit/cebecccaaac267fcf9cb35ddcd326d0085055c18))
+
+## [4.1.1](https://github.com/web3-storage/w3cli/compare/v4.1.0...v4.1.1) (2023-08-25)
+
+
+### Bug Fixes
+
+* bump dependencies ([#86](https://github.com/web3-storage/w3cli/issues/86)) ([de2b037](https://github.com/web3-storage/w3cli/commit/de2b03750fc6d180547e75ef28fbd70c8db29c08))
+
+## [4.1.0](https://github.com/web3-storage/w3cli/compare/v4.0.0...v4.1.0) (2023-08-25)
+
+
+### Features
+
+* add `space info` command to w3cli ([#83](https://github.com/web3-storage/w3cli/issues/83)) ([a72701c](https://github.com/web3-storage/w3cli/commit/a72701c4443748b5e1aa4037d6d33c978f236475))
+* add ability to specify custom principal ([#84](https://github.com/web3-storage/w3cli/issues/84)) ([6115101](https://github.com/web3-storage/w3cli/commit/6115101fc62f66addf55ec9880ec77eccee9d435))
+* bump versions of `access` and `w3up-client` ([#81](https://github.com/web3-storage/w3cli/issues/81)) ([55de733](https://github.com/web3-storage/w3cli/commit/55de733d175509583781c3b29102ceb8ff78d21d))
+
+## [4.0.0](https://github.com/web3-storage/w3cli/compare/v3.0.0...v4.0.0) (2023-07-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* update ucanto dependencies ([#80](https://github.com/web3-storage/w3cli/issues/80))
+
+### Features
+
+* update ucanto dependencies ([#80](https://github.com/web3-storage/w3cli/issues/80)) ([f2391bd](https://github.com/web3-storage/w3cli/commit/f2391bdf578c1dbe03a50d67b9f350653055fe83))
+
+
+### Bug Fixes
+
+* readme quickstart ([cc9640c](https://github.com/web3-storage/w3cli/commit/cc9640cda18da7d496f3c60521ae42e47e4ccb4f))
+
+## [3.0.0](https://github.com/web3-storage/w3cli/compare/v2.0.0...v3.0.0) (2023-03-29)
+
+
+### ⚠ BREAKING CHANGES
+
+* allow specifying capabilities to receive when authorizing ([#70](https://github.com/web3-storage/w3cli/issues/70))
+
+### Features
+
+* allow specifying capabilities to receive when authorizing ([#70](https://github.com/web3-storage/w3cli/issues/70)) ([40208f5](https://github.com/web3-storage/w3cli/commit/40208f5df9d58b8c6cd30810e22d1b039a2488bf))
+
+
+### Bug Fixes
+
+* permanent data warning more general ([b6b579e](https://github.com/web3-storage/w3cli/commit/b6b579e2832c481c97423a1e6408ab6e740b17e8))
+* typo in readme ([a623422](https://github.com/web3-storage/w3cli/commit/a623422a903e44987aed073e8c639258647fac77))
+
 ## [2.0.0](https://github.com/web3-storage/w3cli/compare/v1.2.2...v2.0.0) (2023-03-23)
 
 

@@ -16,7 +16,7 @@ export async function storeAdd (carPath) {
   try {
     const data = await fs.promises.readFile(carPath)
     blob = new Blob([data])
-  } catch (err) {
+  } catch (/** @type {any} */err) {
     spinner.fail(`Error: failed to read CAR: ${err.message}`)
     process.exit(1)
   }
@@ -39,7 +39,7 @@ export async function storeList (opts = {}) {
   const client = await getClient()
   const listOptions = {}
   if (opts.size) {
-    listOptions.size = parseInt(opts.size)
+    listOptions.size = parseInt(String(opts.size))
   }
   if (opts.cursor) {
     listOptions.cursor = opts.cursor
@@ -66,7 +66,7 @@ export async function uploadAdd (root, shard, opts) {
   let rootCID
   try {
     rootCID = CID.parse(root)
-  } catch (err) {
+  } catch (/** @type {any} */err) {
     console.error(`Error: failed to parse root CID: ${root}: ${err.message}`)
     process.exit(1)
   }
@@ -77,7 +77,7 @@ export async function uploadAdd (root, shard, opts) {
     try {
       // @ts-expect-error may not be a CAR CID...
       shards.push(CID.parse(str))
-    } catch (err) {
+    } catch (/** @type {any} */err) {
       console.error(`Error: failed to parse shard CID: ${str}: ${err.message}`)
       process.exit(1)
     }
@@ -101,7 +101,7 @@ export async function uploadList (opts = {}) {
   const client = await getClient()
   const listOptions = {}
   if (opts.size) {
-    listOptions.size = parseInt(opts.size)
+    listOptions.size = parseInt(String(opts.size))
   }
   if (opts.cursor) {
     listOptions.cursor = opts.cursor

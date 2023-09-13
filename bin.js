@@ -11,6 +11,7 @@ import {
   addSpace,
   listSpaces,
   useSpace,
+  spaceInfo,
   createDelegation,
   listDelegations,
   addProof,
@@ -40,7 +41,8 @@ cli
 cli.command('authorize <email>')
   .alias('auth')
   .example('authorize user@example.com')
-  .describe('Authorize this agent to interact with the w3up service with any capabilities granted to the given email.')
+  .describe('Authorize this agent to interact with the w3up service with capabilities granted to the given email.')
+  .option('-c, --can', 'One or more abilities to authorize.')
   .action(authorize)
 
 cli.command('up <file>')
@@ -92,13 +94,19 @@ cli.command('space ls')
   .describe('List spaces known to the agent')
   .action(listSpaces)
 
+cli.command('space info')
+  .describe('Show information about a space. Defaults to the current space.')
+  .option('-s, --space', 'The space to print information about.')
+  .option('--json', 'Format as newline delimited JSON')
+  .action(spaceInfo)
+
 cli.command('space use <did>')
   .describe('Set the current space in use by the agent')
   .action(useSpace)
 
 cli.command('delegation create <audience-did>')
   .describe('Create a delegation to the passed audience for the given abilities with the _current_ space as the resource.')
-  .option('-c, --can', 'One or more abilities to delegate.', '*')
+  .option('-c, --can', 'One or more abilities to delegate.')
   .option('-n, --name', 'Human readable name for the audience receiving the delegation.')
   .option('-t, --type', 'Type of the audience receiving the delegation, one of: device, app, service.')
   .option('-e, --expiration', 'Unix timestamp when the delegation is no longer valid. Zero indicates no expiration.', 0)
