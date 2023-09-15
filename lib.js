@@ -8,6 +8,7 @@ import * as CAR from '@ucanto/transport/car'
 import * as HTTP from '@ucanto/transport/http'
 import * as Signer from '@ucanto/principal/ed25519'
 import { parse } from '@ipld/dag-ucan/did'
+import * as dagJSON from '@ipld/dag-json'
 import { create } from '@web3-storage/w3up-client'
 import { StoreConf } from '@web3-storage/access/stores/store-conf'
 import { CarReader } from '@ipld/car'
@@ -134,10 +135,7 @@ export async function readProof (path) {
  */
 export function uploadListResponseToString (res, opts = {}) {
   if (opts.json) {
-    return res.results.map(({ root, shards }) => JSON.stringify({
-      root: root.toString(),
-      shards: shards?.map(s => s.toString())
-    })).join('\n')
+    return res.results.map(({ root, shards }) => dagJSON.stringify({ root, shards })).join('\n')
   } else if (opts.shards) {
     return res.results.map(({ root, shards }) => tree({
       label: root.toString(),
@@ -160,10 +158,7 @@ export function uploadListResponseToString (res, opts = {}) {
  */
 export function storeListResponseToString (res, opts = {}) {
   if (opts.json) {
-    return res.results.map(({ link, size }) => JSON.stringify({
-      link: link.toString(),
-      size
-    })).join('\n')
+    return res.results.map(({ link, size }) => dagJSON.stringify({ link, size })).join('\n')
   } else {
     return res.results.map(({ link }) => link.toString()).join('\n')
   }
