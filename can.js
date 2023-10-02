@@ -2,7 +2,7 @@
 import fs from 'fs'
 import { CID } from 'multiformats'
 import ora from 'ora'
-import { getClient, uploadListResponseToString, storeListResponseToString } from './lib.js'
+import { getClient, uploadListResponseToString, storeListResponseToString, parseCarLink } from './lib.js'
 
 /**
  * @param {string} carPath
@@ -52,6 +52,24 @@ export async function storeList (opts = {}) {
   const res = await client.capability.store.list(listOptions)
   spinner.stop()
   console.log(storeListResponseToString(res, opts))
+}
+
+/**
+ * @param {string} cidStr
+ */
+export async function storeRemove (cidStr) {
+  const shard = parseCarLink(cidStr)
+  if (!shard) {
+    process.exit(1)
+  }
+  const client = await getClient()
+  try {
+    client.capability.store.remove(shard)
+  } catch (/** @type {any} */err) {
+    console.error(`Store remove failed: ${err.message ?? err}`)
+    console.error(err)
+    process.exit(1)
+  }
 }
 
 /**
@@ -114,4 +132,26 @@ export async function uploadList (opts = {}) {
   const res = await client.capability.upload.list(listOptions)
   spinner.stop()
   console.log(uploadListResponseToString(res, opts))
+}
+
+/**
+ * Remove the upload from the upload list.
+ * @param {string} rootCid
+ */
+export async function uploadRemove (rootCid) {
+  let root
+  try {
+    root = CID.parse(rootCid.trim())
+  } catch (/** @type {any} */err) {
+    console.error(`Error: ${rootCid} is not a CID`)
+    process.exit(1)
+  }
+  const client = await getClient()
+  try {
+    await client.capability.upload.remove(root)
+  } catch (/** @type {any} */err) {
+    console.error(`Upload remove failed: ${err.message ?? err}`)
+    console.error(err)
+    process.exit(1)
+  }
 }

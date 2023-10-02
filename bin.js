@@ -24,8 +24,10 @@ import {
 import {
   storeAdd,
   storeList,
+  storeRemove,
   uploadAdd,
-  uploadList
+  uploadList,
+  uploadRemove
 } from './can.js'
 
 const cli = sade('w3')
@@ -142,6 +144,10 @@ cli.command('can store ls')
   .option('--pre', 'If true, return the page of results preceding the cursor')
   .action(storeList)
 
+cli.command('can store rm <shard-cid>')
+  .describe('Remove a CAR shard from the store.')
+  .action(storeRemove)
+
 cli.command('can upload add <root-cid> <shard-cid>')
   .describe('Register an upload - a DAG with the given root data CID that is stored in the given CAR shard(s), identified by CAR CIDs.')
   .action(uploadAdd)
@@ -154,6 +160,10 @@ cli.command('can upload ls')
   .option('--cursor', 'An opaque string included in a prior upload/list response that allows the service to provide the next "page" of results')
   .option('--pre', 'If true, return the page of results preceding the cursor')
   .action(uploadList)
+
+cli.command('can upload rm <root-cid>')
+  .describe('Remove an upload from the uploads listing.')
+  .action(uploadRemove)
 
 // show help text if no command provided
 cli.command('help [cmd]', 'Show help text', { default: true })

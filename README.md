@@ -52,7 +52,7 @@ w3 up recipies.txt
   * [`w3 authorize`](#w3-authorize-email)
   * [`w3 up`](#w3-up-path-path)
   * [`w3 ls`](#w3-ls)
-  * [`w3 rm`](#w3-rm-root-cid) <sup>coming soon!</sup>
+  * [`w3 rm`](#w3-rm-root-cid)
   * [`w3 open`](#w3-open-cid)
   * [`w3 whoami`](#w3-whoami)
 * Space management
@@ -72,10 +72,10 @@ w3 up recipies.txt
   * [`w3 can space recover`](#w3-can-space-recover-email) <sup>coming soon!</sup>
   * [`w3 can store add`](#w3-can-store-add-car-path)
   * [`w3 can store ls`](#w3-can-store-ls)
-  * [`w3 can store rm`](#w3-can-store-rm-car-cid) <sup>coming soon!</sup>
+  * [`w3 can store rm`](#w3-can-store-rm-car-cid)
   * [`w3 can upload add`](#w3-can-upload-add-root-cid-shard-cid-shard-cid)
   * [`w3 can upload ls`](#w3-can-upload-ls)
-  * [`w3 can upload rm`](#w3-can-upload-rm-root-cid) <sup>coming soon!</sup>
+  * [`w3 can upload rm`](#w3-can-upload-rm-root-cid)
 
 ---
 
@@ -213,6 +213,8 @@ List CARs in the current space.
 
 ### `w3 can store rm <car-cid>`
 
+Remove a CAR from the store.
+
 ### `w3 can upload add <root-cid> <shard-cid> [shard-cid...]`
 
 Register an upload - a DAG with the given root data CID that is stored in the given CAR shard(s), identified by CAR CIDs.
@@ -228,6 +230,8 @@ List uploads in the current space.
 * `--pre` If true, return the page of results preceding the cursor
 
 ### `w3 can upload rm <root-cid>`
+
+Remove an upload from the current space's upload list. Does not remove CAR from the store.
 
 ## FAQ
 
