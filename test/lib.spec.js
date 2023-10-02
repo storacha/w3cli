@@ -113,16 +113,8 @@ test('asCarLink', (t) => {
 })
 
 test('parseCarLink', (t) => {
-  /** @type {string | undefined} */
-  let message
-  const error = (/** @type {string} */ msg) => { message = msg }
-
   const carLink = Link.parse('bagbaieraxkuzouwfuphnqlbbpobywmypb26stej5vbwkelrv7chdqoxfuuea')
-  t.deepEqual(parseCarLink(carLink.toString(), { error }), carLink)
-
-  t.is(parseCarLink('nope', { error }), undefined)
-  t.is(message, 'Error: nope is not a CID')
-
-  t.is(parseCarLink('bafybeiajdopsmspomlrpaohtzo5sdnpknbolqjpde6huzrsejqmvijrcea', { error }), undefined)
-  t.is(message, 'Error: bafybeiajdopsmspomlrpaohtzo5sdnpknbolqjpde6huzrsejqmvijrcea is not a CAR CID')
+  t.deepEqual(parseCarLink(carLink.toString()), carLink)
+  t.is(parseCarLink('nope'), undefined)
+  t.is(parseCarLink('bafybeiajdopsmspomlrpaohtzo5sdnpknbolqjpde6huzrsejqmvijrcea'), undefined)
 })

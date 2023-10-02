@@ -211,7 +211,7 @@ List CARs in the current space.
 * `--cursor` An opaque string included in a prior upload/list response that allows the service to provide the next "page" of results
 * `--pre` If true, return the page of results preceding the cursor
 
-### `w3 can store rm <car-cid>`
+### `w3 can store rm <shard-cid>`
 
 Remove a CAR from the store.
 

@@ -185,18 +185,9 @@ export function asCarLink (cid) {
 /**
  * Return validated CARLink type or exit the process with an error code and message
  * @param {string} cidStr
- * @param {object} console
- * @param {(msg: string) => void} console.error
  **/
-export function parseCarLink (cidStr, { error } = console) {
+export function parseCarLink (cidStr) {
   try {
-    const cid = CID.parse(cidStr.trim())
-    const car = asCarLink(cid)
-    if (car === undefined) {
-      error(`Error: ${cidStr} is not a CAR CID`)
-    }
-    return car
-  } catch (err) {
-    error(`Error: ${cidStr} is not a CID`)
-  }
+    return asCarLink(CID.parse(cidStr.trim()))
+  } catch {}
 }

@@ -60,6 +60,7 @@ export async function storeList (opts = {}) {
 export async function storeRemove (cidStr) {
   const shard = parseCarLink(cidStr)
   if (!shard) {
+    console.error(`Error: ${cidStr} is not a CAR CID`)
     process.exit(1)
   }
   const client = await getClient()

@@ -830,7 +830,7 @@ test('w3 can store rm', async (t) => {
   const shard = uploads[0].shards?.at(0)
   if (!shard) { return t.fail('mock shard should exist') }
   await t.throwsAsync(() => execa('./bin.js', ['can', 'store', 'rm'], { env }), { message: /Insufficient arguments/ })
-  await t.throwsAsync(() => execa('./bin.js', ['can', 'store', 'rm', 'foo'], { env }), { message: /not a CID/ })
+  await t.throwsAsync(() => execa('./bin.js', ['can', 'store', 'rm', 'foo'], { env }), { message: /not a CAR CID/ })
   await t.throwsAsync(() => execa('./bin.js', ['can', 'store', 'rm', uploads[0].root.toString()], { env }), { message: /not a CAR CID/ })
   await t.notThrowsAsync(() => execa('./bin.js', ['can', 'store', 'rm', shard.toString()], { env }))
 })
