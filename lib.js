@@ -12,6 +12,7 @@ import { parse } from '@ipld/dag-ucan/did'
 import { create } from '@web3-storage/w3up-client'
 import { StoreConf } from '@web3-storage/access/stores/store-conf'
 import { CarReader } from '@ipld/car'
+import chalk from 'chalk'
 
 /**
  * @typedef {import('@web3-storage/w3up-client/types').AnyLink} AnyLink
@@ -57,28 +58,40 @@ export function filesizeMB (bytes) {
 export function getClient () {
   const store = new StoreConf({ profile: process.env.W3_STORE_NAME ?? 'w3cli' })
 
+  if (process.env.W3_ACCESS_SERVICE_URL || process.env.W3_UPLOAD_SERVICE_URL) {
+    console.warn(chalk.dim('warning: the W3_ACCESS_SERVICE_URL and W3_UPLOAD_SERVICE_URL environment variables are deprecated and will be removed in a future release - please use W3UP_SERVICE_URL instead.'))
+  }
+
+  if (process.env.W3_ACCESS_SERVICE_DID || process.env.W3_UPLOAD_SERVICE_DID) {
+    console.warn(chalk.dim('warning: the W3_ACCESS_SERVICE_DID and W3_UPLOAD_SERVICE_DID environment variables are deprecated and will be removed in a future release - please use W3UP_SERVICE_DID instead.'))
+  }
+
+  const accessServiceDID = process.env.W3UP_SERVICE_DID || process.env.W3_ACCESS_SERVICE_DID
+  const accessServiceURL = process.env.W3UP_SERVICE_URL || process.env.W3_ACCESS_SERVICE_URL
+  const uploadServiceDID = process.env.W3UP_SERVICE_DID || process.env.W3_UPLOAD_SERVICE_DID
+  const uploadServiceURL = process.env.W3UP_SERVICE_URL || process.env.W3_UPLOAD_SERVICE_URL
   let serviceConf
   if (
-    process.env.W3_ACCESS_SERVICE_DID &&
-    process.env.W3_ACCESS_SERVICE_URL &&
-    process.env.W3_UPLOAD_SERVICE_DID &&
-    process.env.W3_UPLOAD_SERVICE_URL
+    accessServiceDID &&
+    accessServiceURL &&
+    uploadServiceDID &&
+    uploadServiceURL
   ) {
     /** @type {import('@web3-storage/w3up-client/types').ServiceConf} */
     serviceConf = {
       access: connect({
-        id: parse(process.env.W3_ACCESS_SERVICE_DID),
+        id: parse(accessServiceDID),
         codec: CAR.outbound,
         channel: HTTP.open({
-          url: new URL(process.env.W3_ACCESS_SERVICE_URL),
+          url: new URL(accessServiceURL),
           method: 'POST'
         })
       }),
       upload: connect({
-        id: parse(process.env.W3_UPLOAD_SERVICE_DID),
+        id: parse(uploadServiceDID),
         codec: CAR.outbound,
         channel: HTTP.open({
-          url: new URL(process.env.W3_UPLOAD_SERVICE_URL),
+          url: new URL(uploadServiceURL),
           method: 'POST'
         })
       })

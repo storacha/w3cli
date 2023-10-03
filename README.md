@@ -233,6 +233,12 @@ List uploads in the current space.
 
 Remove an upload from the current space's upload list. Does not remove CAR from the store.
 
+
+## Environment Variables
+
+By default, `w3` will use the w3up service at https://up.web3.storage. If you would like
+to use a different w3up-compatible service, you can use the `W3UP_SERVICE_DID` and `W3UP_SERVICE_URL` environment variables to set the service DID and URL endpoint.
+
 ## FAQ
 
 ### Where are my keys and delegations stored?
