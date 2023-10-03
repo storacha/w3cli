@@ -700,6 +700,51 @@ test('w3 can upload ls', async (t) => {
   t.notThrows(() => Link.parse(JSON.parse(list1.stdout).root))
 })
 
+test('w3 can upload rm', async (t) => {
+  const env = t.context.env.alice
+
+  await execa('./bin.js', ['space', 'create'], { env })
+
+  /** @type {Array<import('@web3-storage/capabilities/types').UploadAdd['nb']>} */
+  const uploads = []
+
+  const service = mockService({
+    store: {
+      add: provide(StoreCapabilities.add, ({ capability }) => {
+        return ok(/** @type {StoreAddOk} */({
+          status: 'upload',
+          headers: { 'x-test': 'true' },
+          url: 'http://localhost:9200',
+          with: capability.with,
+          link: capability.nb.link
+        }))
+      })
+    },
+    upload: {
+      add: provide(UploadCapabilities.add, ({ invocation }) => {
+        const { nb } = invocation.capabilities[0]
+        if (!nb) throw new Error('missing nb')
+        uploads.push(nb)
+        return ok(nb)
+      }),
+      list: provide(UploadCapabilities.list, () => {
+        return ok({ results: uploads, size: uploads.length })
+      }),
+      remove: provide(UploadCapabilities.remove, () => {
+        return ok({})
+      })
+    }
+  })
+
+  t.context.setService(service)
+
+  await execa('./bin.js', ['up', 'test/fixtures/pinpie.jpg'], { env })
+
+  await t.throwsAsync(() => execa('./bin.js', ['can', 'upload', 'rm'], { env }), { message: /Insufficient arguments/ })
+  await t.throwsAsync(() => execa('./bin.js', ['can', 'upload', 'rm', 'foo'], { env }), { message: /not a CID/ })
+  await t.notThrowsAsync(() => execa('./bin.js', ['can', 'upload', 'rm', uploads[0].root.toString()], { env }))
+})
+
 test('w3 can store ls', async (t) => {
   const env = t.context.env.alice
 
@@ -743,4 +788,49 @@ test('w3 can store ls', async (t) => {
 
   const list1 = await execa('./bin.js', ['can', 'store', 'ls', '--json'], { env })
   t.notThrows(() => Link.parse(JSON.parse(list1.stdout).link))
+})
+
+test('w3 can store rm', async (t) => {
+  const env = t.context.env.alice
+
+  await execa('./bin.js', ['space', 'create'], { env })
+
+  /** @type {Array<import('@web3-storage/capabilities/types').UploadAdd['nb']>} */
+  const uploads = []
+
+  const service = mockService({
+    store: {
+      add: provide(StoreCapabilities.add, ({ capability }) => {
+        return ok(/** @type {StoreAddOk} */({
+          status: 'upload',
+          headers: { 'x-test': 'true' },
+          url: 'http://localhost:9200',
+          with: capability.with,
+          link: capability.nb.link
+        }))
+      }),
+      remove: provide(StoreCapabilities.remove, () => {
+        return ok({})
+      })
+    },
+    upload: {
+      add: provide(UploadCapabilities.add, ({ invocation }) => {
+        const { nb } = invocation.capabilities[0]
+        if (!nb) throw new Error('missing nb')
+        uploads.push(nb)
+        return ok(nb)
+      })
+    }
+  })
+
+  t.context.setService(service)
+
+  await execa('./bin.js', ['up', 'test/fixtures/pinpie.jpg'], { env })
+
+  const shard = uploads[0].shards?.at(0)
+  if (!shard) { return t.fail('mock shard should exist') }
+  await t.throwsAsync(() => execa('./bin.js', ['can', 'store', 'rm'], { env }), { message: /Insufficient arguments/ })
+  await t.throwsAsync(() => execa('./bin.js', ['can', 'store', 'rm', 'foo'], { env }), { message: /not a CAR CID/ })
+  await t.throwsAsync(() => execa('./bin.js', ['can', 'store', 'rm', uploads[0].root.toString()], { env }), { message: /not a CAR CID/ })
+  await t.notThrowsAsync(() => execa('./bin.js', ['can', 'store', 'rm', shard.toString()], { env }))
 })

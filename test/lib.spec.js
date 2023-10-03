@@ -3,7 +3,9 @@ import * as Link from 'multiformats/link'
 import {
   filesize,
   uploadListResponseToString,
-  storeListResponseToString
+  storeListResponseToString,
+  asCarLink,
+  parseCarLink
 } from '../lib.js'
 
 /**
@@ -102,4 +104,17 @@ test('storeListResponseToString can return the CAR CIDs as newline delimited JSO
     `{"link":"bagbaierablvu5d2q5uoimuy2tlc3tcntahnw2j7s7jjaznawc23zgdgcisma","size":5336}
 {"link":"bagbaieracmkgwrw6rowsk5jse5eihyhszyrq5w23aqosajyckn2tfbotdcqq","size":3297}`
   )
+})
+
+test('asCarLink', (t) => {
+  t.is(asCarLink(Link.parse('bafybeiajdopsmspomlrpaohtzo5sdnpknbolqjpde6huzrsejqmvijrcea')), undefined)
+  const carLink = Link.parse('bagbaieraxkuzouwfuphnqlbbpobywmypb26stej5vbwkelrv7chdqoxfuuea')
+  t.deepEqual(asCarLink(carLink), carLink)
+})
+
+test('parseCarLink', (t) => {
+  const carLink = Link.parse('bagbaieraxkuzouwfuphnqlbbpobywmypb26stej5vbwkelrv7chdqoxfuuea')
+  t.deepEqual(parseCarLink(carLink.toString()), carLink)
+  t.is(parseCarLink('nope'), undefined)
+  t.is(parseCarLink('bafybeiajdopsmspomlrpaohtzo5sdnpknbolqjpde6huzrsejqmvijrcea'), undefined)
 })

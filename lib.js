@@ -7,6 +7,7 @@ import { connect } from '@ucanto/client'
 import * as CAR from '@ucanto/transport/car'
 import * as HTTP from '@ucanto/transport/http'
 import * as Signer from '@ucanto/principal/ed25519'
+import { CID } from 'multiformats/cid'
 import { parse } from '@ipld/dag-ucan/did'
 import { create } from '@web3-storage/w3up-client'
 import { StoreConf } from '@web3-storage/access/stores/store-conf'
@@ -14,6 +15,8 @@ import { CarReader } from '@ipld/car'
 import chalk from 'chalk'
 
 /**
+ * @typedef {import('@web3-storage/w3up-client/types').AnyLink} AnyLink
+ * @typedef {import('@web3-storage/w3up-client/types').CARLink} CARLink
  * @typedef {import('@web3-storage/w3up-client/types').FileLike & { size: number }} FileLike
  * @typedef {import('@web3-storage/w3up-client/types').StoreListOk} StoreListOk
  * @typedef {import('@web3-storage/w3up-client/types').UploadListOk} UploadListOk
@@ -180,4 +183,24 @@ export function storeListResponseToString (res, opts = {}) {
   } else {
     return res.results.map(({ link }) => link.toString()).join('\n')
   }
+}
+
+/**
+ * Return validated CARLink or undefined
+ * @param {AnyLink} cid
+ **/
+export function asCarLink (cid) {
+  if (cid.version === 1 && cid.code === CAR.codec.code) {
+    return /** @type {CARLink} */ (cid)
+  }
+}
+
+/**
+ * Return validated CARLink type or exit the process with an error code and message
+ * @param {string} cidStr
+ **/
+export function parseCarLink (cidStr) {
+  try {
+    return asCarLink(CID.parse(cidStr.trim()))
+  } catch {}
 }
