@@ -14,6 +14,7 @@ import {
   spaceInfo,
   createDelegation,
   listDelegations,
+  revokeDelegation,
   addProof,
   listProofs,
   upload,
@@ -116,6 +117,11 @@ cli.command('delegation ls')
   .describe('List delegations created by this agent for others.')
   .option('--json', 'Format as newline delimited JSON')
   .action(listDelegations)
+
+cli.command('delegation revoke <delegation-cid>')
+  .describe('Revoke a delegation by CID.')
+  .option('-p, --proof', 'Name of a file containing the delegation and any additional proofs needed to prove authority to revoke')
+  .action(revokeDelegation)
 
 cli.command('proof add <proof>')
   .describe('Add a proof delegated to this agent.')

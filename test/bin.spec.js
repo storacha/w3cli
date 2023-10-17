@@ -11,6 +11,7 @@ import * as DID from '@ipld/dag-ucan/did'
 import * as StoreCapabilities from '@web3-storage/capabilities/store'
 import * as UploadCapabilities from '@web3-storage/capabilities/upload'
 import * as SpaceCapabilities from '@web3-storage/capabilities/space'
+import * as UCANCapabilities from '@web3-storage/capabilities/ucan'
 import * as Link from 'multiformats/link'
 import { CarReader } from '@ipld/car'
 import { StoreConf } from '@web3-storage/access/stores/store-conf'
@@ -39,7 +40,8 @@ test.beforeEach(async t => {
     const server = createServer({
       id: serviceSigner,
       service,
-      codec: CAR.inbound
+      codec: CAR.inbound,
+      validateAuthorization: () => ok({})
     })
     setRequestListener(createHTTPListener(server))
   }
@@ -367,6 +369,35 @@ test('w3 delegation ls', async t => {
   t.is(delegationData.capabilities.length, 1)
   t.is(delegationData.capabilities[0].with, spaceDID)
   t.is(delegationData.capabilities[0].can, '*')
+})
+
+test.only('w3 delegation revoke', async t => {
+  const env = t.context.env.alice
+  const service = mockService({
+    ucan: {
+      revoke: provide(UCANCapabilities.revoke, () => {
+        return ok({ time: Date.now() })
+      })
+    }
+  })
+  t.context.setService(service)
+
+  await execa('./bin.js', ['space', 'create'], { env })
+
+  const bob = await Signer.generate()
+  await execa('./bin.js', ['delegation', 'create', bob.did(), '-c', '*'], { env })
+
+  const out1 = await execa('./bin.js', ['delegation', 'ls', '--json'], { env })
+  const delegationData = JSON.parse(out1.stdout)
+
+  // alice should be able to revoke the delegation she just created
+  const out2 = await execa('./bin.js', ['delegation', 'revoke', delegationData.cid], { env })
+  t.regex(out2.stdout, new RegExp(`delegation ${delegationData.cid} revoked`))
+
+  // but bob should not be able to revoke alice's delegation
+  /** @type {any} */
+  const out3 = await t.throwsAsync(() => execa('./bin.js', ['delegation', 'revoke', delegationData.cid], { env: t.context.env.bob }))
+  t.regex(out3.stderr, new RegExp(`error trying to revoke ${delegationData.cid}: could not find delegation ${delegationData.cid}`))
 })
 
 test('w3 space add', async t => {

@@ -184,6 +184,13 @@ List delegations created by this agent for others.
 
 * `--json` Format as newline delimited JSON
 
+
+### `w3 delegation revoke <delegation-cid>`
+
+Revoke a delegation by CID.
+
+* `--proof` Name of a file containing the delegation and any additional proofs needed to prove authority to revoke
+
 ### `w3 proof add <proof.ucan>`
 
 Add a proof delegated to this agent. The proof is a CAR encoded delegation to _this_ agent. Note: you probably want to use `w3 space add` unless you know the delegation you received targets a resource _other_ than a w3 space.

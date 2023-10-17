@@ -9,6 +9,7 @@ const notImplemented = () => {
  *   store: Partial<import('@web3-storage/upload-client/types').Service['store']>
  *   upload: Partial<import('@web3-storage/upload-client/types').Service['upload']>
  *   space: Partial<import('@web3-storage/access/types').Service['space']>
+ *   ucan: Partial<import('@web3-storage/access/types').Service['ucan']>
  * }>} impl
  */
 export function mockService (impl) {
@@ -25,6 +26,9 @@ export function mockService (impl) {
     },
     space: {
       info: withCallCount(impl.space?.info ?? notImplemented)
+    },
+    ucan: {
+      revoke: withCallCount(impl.ucan?.revoke ?? notImplemented)
     }
   }
 }
