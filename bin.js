@@ -2,6 +2,7 @@
 
 import sade from 'sade'
 import open from 'open'
+import updateNotifier from 'update-notifier'
 import { getPkg } from './lib.js'
 import {
   accessClaim,
@@ -30,10 +31,14 @@ import {
   uploadRemove
 } from './can.js'
 
+const pkg = getPkg()
+
+updateNotifier({ pkg }).notify()
+
 const cli = sade('w3')
 
 cli
-  .version(getPkg().version)
+  .version(pkg.version)
   .example('authorize user@example.com')
   .example('up path/to/files')
 
