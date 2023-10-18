@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.3.1](https://github.com/web3-storage/w3cli/compare/v4.3.0...v4.3.1) (2023-10-18)
+
+
+### Bug Fixes
+
+* update dependencies ([10c5502](https://github.com/web3-storage/w3cli/commit/10c5502b123766c4f1206e61aadb7b55a7051951))
+
 ## [4.3.0](https://github.com/web3-storage/w3cli/compare/v4.2.1...v4.3.0) (2023-10-18)
 
 
