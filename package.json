@@ -33,6 +33,7 @@
   },
   "homepage": "https://github.com/web3-storage/w3cli#readme",
   "devDependencies": {
+    "@types/update-notifier": "^6.0.5",
     "@ucanto/principal": "^9.0.0",
     "@ucanto/server": "^9.0.1",
     "@web3-storage/capabilities": "^10.0.0",
@@ -58,6 +59,7 @@
     "open": "^9.1.0",
     "ora": "^7.0.1",
     "pretty-tree": "^1.0.0",
-    "sade": "^1.8.1"
+    "sade": "^1.8.1",
+    "update-notifier": "^6.0.2"
   }
 }
