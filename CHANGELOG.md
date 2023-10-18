@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.4.0](https://github.com/web3-storage/w3cli/compare/v4.3.1...v4.4.0) (2023-10-18)
+
+
+### Features
+
+* add update notifier ([#108](https://github.com/web3-storage/w3cli/issues/108)) ([9bd4b78](https://github.com/web3-storage/w3cli/commit/9bd4b78f1d6952b699ca46c116bb0590922029f6))
+
 ## [4.3.1](https://github.com/web3-storage/w3cli/compare/v4.3.0...v4.3.1) (2023-10-18)
 
 
