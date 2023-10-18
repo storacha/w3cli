@@ -8,6 +8,7 @@ import * as Signer from '@ucanto/principal/ed25519'
 import { importDAG } from '@ucanto/core/delegation'
 import { create as createServer, ok, provide } from '@ucanto/server'
 import * as DID from '@ipld/dag-ucan/did'
+import * as dagJSON from '@ipld/dag-json'
 import * as StoreCapabilities from '@web3-storage/capabilities/store'
 import * as UploadCapabilities from '@web3-storage/capabilities/upload'
 import * as SpaceCapabilities from '@web3-storage/capabilities/space'
@@ -221,7 +222,7 @@ test('w3 ls', async (t) => {
   await execa('./bin.js', ['up', 'test/fixtures/pinpie.jpg'], { env })
 
   const list1 = await execa('./bin.js', ['ls', '--json'], { env })
-  t.notThrows(() => Link.parse(JSON.parse(list1.stdout).root))
+  t.notThrows(() => dagJSON.parse(list1.stdout))
 })
 
 test('w3 remove', async t => {
@@ -275,7 +276,6 @@ test('w3 remove --shards', async t => {
     },
     upload: {
       remove: provide(UploadCapabilities.remove, ({ capability }) => {
-        // @ts-expect-error https://github.com/web3-storage/w3up/pull/912
         return ok(/** @type {import('@web3-storage/w3up-client/types').UploadRemoveOk} */({
           root: capability.nb.root,
           shards: [
@@ -697,7 +697,7 @@ test('w3 can upload ls', async (t) => {
   await execa('./bin.js', ['up', 'test/fixtures/pinpie.jpg'], { env })
 
   const list1 = await execa('./bin.js', ['can', 'upload', 'ls', '--json'], { env })
-  t.notThrows(() => Link.parse(JSON.parse(list1.stdout).root))
+  t.notThrows(() => dagJSON.parse(list1.stdout))
 })
 
 test('w3 can upload rm', async (t) => {
@@ -787,7 +787,7 @@ test('w3 can store ls', async (t) => {
   await execa('./bin.js', ['up', 'test/fixtures/pinpie.jpg'], { env })
 
   const list1 = await execa('./bin.js', ['can', 'store', 'ls', '--json'], { env })
-  t.notThrows(() => Link.parse(JSON.parse(list1.stdout).link))
+  t.notThrows(() => dagJSON.parse(list1.stdout))
 })
 
 test('w3 can store rm', async (t) => {
