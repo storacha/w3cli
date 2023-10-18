@@ -30,7 +30,7 @@ test('filesize', t => {
   testdata.forEach(([size, str]) => t.is(filesize(size), str))
 })
 
-/** @type {import('@web3-storage/w3up-client/types').UploadListOk} */
+/** @type {import('@web3-storage/w3up-client/types').UploadListSuccess} */
 const uploadListResponse = {
   size: 2,
   cursor: 'bafybeibvbxjeodaa6hdqlgbwmv4qzdp3bxnwdoukay4dpl7aemkiwc2eje',
@@ -78,7 +78,7 @@ test('uploadListResponseToString can return the upload roots and shards as a tre
   )
 })
 
-/** @type {import('@web3-storage/w3up-client/types').StoreListOk} */
+/** @type {import('@web3-storage/w3up-client/types').StoreListSuccess} */
 const storeListResponse = {
   size: 2,
   cursor: 'bagbaieracmkgwrw6rowsk5jse5eihyhszyrq5w23aqosajyckn2tfbotdcqq',

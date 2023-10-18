@@ -105,7 +105,7 @@ export async function upload (firstPath, opts) {
 export async function list (opts = {}) {
   const client = await getClient()
   let count = 0
-  /** @type {import('@web3-storage/w3up-client/types').UploadListOk|undefined} */
+  /** @type {import('@web3-storage/w3up-client/types').UploadListSuccess|undefined} */
   let res
   do {
     res = await client.capability.upload.list({ cursor: res?.cursor })
