@@ -276,7 +276,6 @@ test('w3 remove --shards', async t => {
     },
     upload: {
       remove: provide(UploadCapabilities.remove, ({ capability }) => {
-        // @ts-expect-error https://github.com/web3-storage/w3up/pull/912
         return ok(/** @type {import('@web3-storage/w3up-client/types').UploadRemoveOk} */({
           root: capability.nb.root,
           shards: [
