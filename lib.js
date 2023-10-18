@@ -19,8 +19,8 @@ import chalk from 'chalk'
  * @typedef {import('@web3-storage/w3up-client/types').AnyLink} AnyLink
  * @typedef {import('@web3-storage/w3up-client/types').CARLink} CARLink
  * @typedef {import('@web3-storage/w3up-client/types').FileLike & { size: number }} FileLike
- * @typedef {import('@web3-storage/w3up-client/types').StoreListOk} StoreListOk
- * @typedef {import('@web3-storage/w3up-client/types').UploadListOk} UploadListOk
+ * @typedef {import('@web3-storage/w3up-client/types').StoreListSuccess} StoreListSuccess
+ * @typedef {import('@web3-storage/w3up-client/types').UploadListSuccess} UploadListSuccess
  */
 
 export function getPkg () {
@@ -142,7 +142,7 @@ export async function readProof (path) {
 }
 
 /**
- * @param {UploadListOk} res
+ * @param {UploadListSuccess} res
  * @param {object} [opts]
  * @param {boolean} [opts.raw]
  * @param {boolean} [opts.json]
@@ -166,7 +166,7 @@ export function uploadListResponseToString (res, opts = {}) {
 }
 
 /**
- * @param {StoreListOk} res
+ * @param {StoreListSuccess} res
  * @param {object} [opts]
  * @param {boolean} [opts.raw]
  * @param {boolean} [opts.json]
