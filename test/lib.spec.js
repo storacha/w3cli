@@ -30,7 +30,7 @@ test('filesize', t => {
   testdata.forEach(([size, str]) => t.is(filesize(size), str))
 })
 
-/** @type {import('@web3-storage/w3up-client/types').UploadListOk} */
+/** @type {import('@web3-storage/w3up-client/types').UploadListSuccess} */
 const uploadListResponse = {
   size: 2,
   cursor: 'bafybeibvbxjeodaa6hdqlgbwmv4qzdp3bxnwdoukay4dpl7aemkiwc2eje',
@@ -73,12 +73,12 @@ bafybeibvbxjeodaa6hdqlgbwmv4qzdp3bxnwdoukay4dpl7aemkiwc2eje
 test('uploadListResponseToString can return the upload roots and shards as a tree', (t) => {
   t.is(
     uploadListResponseToString(uploadListResponse, { json: true }),
-    `{"root":"bafybeia7tr4dgyln7zeyyyzmkppkcts6azdssykuluwzmmswysieyadcbm","shards":["bagbaierantza4rfjnhqksp2stcnd2tdjrn3f2kgi2wrvaxmayeuolryi66fq"]}
-{"root":"bafybeibvbxjeodaa6hdqlgbwmv4qzdp3bxnwdoukay4dpl7aemkiwc2eje","shards":["bagbaieraxqbkzwvx5on6an4br5hagfgesdfc6adchy3hf5qt34pupfjd3rbq"]}`
+    `{"root":{"/":"bafybeia7tr4dgyln7zeyyyzmkppkcts6azdssykuluwzmmswysieyadcbm"},"shards":[{"/":"bagbaierantza4rfjnhqksp2stcnd2tdjrn3f2kgi2wrvaxmayeuolryi66fq"}]}
+{"root":{"/":"bafybeibvbxjeodaa6hdqlgbwmv4qzdp3bxnwdoukay4dpl7aemkiwc2eje"},"shards":[{"/":"bagbaieraxqbkzwvx5on6an4br5hagfgesdfc6adchy3hf5qt34pupfjd3rbq"}]}`
   )
 })
 
-/** @type {import('@web3-storage/w3up-client/types').StoreListOk} */
+/** @type {import('@web3-storage/w3up-client/types').StoreListSuccess} */
 const storeListResponse = {
   size: 2,
   cursor: 'bagbaieracmkgwrw6rowsk5jse5eihyhszyrq5w23aqosajyckn2tfbotdcqq',
@@ -101,8 +101,8 @@ bagbaieracmkgwrw6rowsk5jse5eihyhszyrq5w23aqosajyckn2tfbotdcqq`
 test('storeListResponseToString can return the CAR CIDs as newline delimited JSON', (t) => {
   t.is(
     storeListResponseToString(storeListResponse, { json: true }),
-    `{"link":"bagbaierablvu5d2q5uoimuy2tlc3tcntahnw2j7s7jjaznawc23zgdgcisma","size":5336}
-{"link":"bagbaieracmkgwrw6rowsk5jse5eihyhszyrq5w23aqosajyckn2tfbotdcqq","size":3297}`
+    `{"link":{"/":"bagbaierablvu5d2q5uoimuy2tlc3tcntahnw2j7s7jjaznawc23zgdgcisma"},"size":5336}
+{"link":{"/":"bagbaieracmkgwrw6rowsk5jse5eihyhszyrq5w23aqosajyckn2tfbotdcqq"},"size":3297}`
   )
 })
 

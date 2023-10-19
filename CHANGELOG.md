@@ -1,5 +1,28 @@
 # Changelog
 
+## [4.4.0](https://github.com/web3-storage/w3cli/compare/v4.3.1...v4.4.0) (2023-10-18)
+
+
+### Features
+
+* add update notifier ([#108](https://github.com/web3-storage/w3cli/issues/108)) ([9bd4b78](https://github.com/web3-storage/w3cli/commit/9bd4b78f1d6952b699ca46c116bb0590922029f6))
+
+## [4.3.1](https://github.com/web3-storage/w3cli/compare/v4.3.0...v4.3.1) (2023-10-18)
+
+
+### Bug Fixes
+
+* update dependencies ([10c5502](https://github.com/web3-storage/w3cli/commit/10c5502b123766c4f1206e61aadb7b55a7051951))
+
+## [4.3.0](https://github.com/web3-storage/w3cli/compare/v4.2.1...v4.3.0) (2023-10-18)
+
+
+### Features
+
+* add --verbose --json option to upload command and print piece CID ([#97](https://github.com/web3-storage/w3cli/issues/97)) ([775d1db](https://github.com/web3-storage/w3cli/commit/775d1db336ae3879f116af254b90407eb2af68e5))
+* add `can store rm` & `can upload rm` commands ([#101](https://github.com/web3-storage/w3cli/issues/101)) ([a7bda04](https://github.com/web3-storage/w3cli/commit/a7bda049ca9d1c5c1ec16de81e72cb5506a86ca9))
+* introduce unified service config ([#99](https://github.com/web3-storage/w3cli/issues/99)) ([f3b6220](https://github.com/web3-storage/w3cli/commit/f3b6220317dbb5b6a55ad2690e80bdac454651e4))
+
 ## [4.2.1](https://github.com/web3-storage/w3cli/compare/v4.2.0...v4.2.1) (2023-09-13)
 
 

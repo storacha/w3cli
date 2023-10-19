@@ -3,6 +3,7 @@ import ora, { oraPromise } from 'ora'
 import { Readable } from 'stream'
 import { CID } from 'multiformats/cid'
 import * as DID from '@ipld/dag-ucan/did'
+import * as dagJSON from '@ipld/dag-json'
 import { CarWriter } from '@ipld/car'
 import { filesFromPaths } from 'files-from-path'
 import { getClient, checkPathsExist, filesize, filesizeMB, readProof, uploadListResponseToString } from './lib.js'
@@ -47,6 +48,8 @@ export async function authorize (email, opts = {}) {
  *   _: string[],
  *   car?: boolean
  *   hidden?: boolean
+ *   json?: boolean
+ *   verbose?: boolean
  *   'no-wrap'?: boolean
  *   'shard-size'?: number
  *   'concurrent-requests'?: number
@@ -57,7 +60,7 @@ export async function upload (firstPath, opts) {
   const client = await getClient()
   const hidden = !!opts?.hidden
   let totalSent = 0
-  const spinner = ora('Reading files').start()
+  const spinner = ora({ text: 'Reading files', isSilent: opts?.json }).start()
   const files = await filesFromPaths(paths, { hidden })
   const totalSize = files.reduce((total, f) => total + f.size, 0)
   spinner.stopAndPersist({ text: `${files.length} file${files.length === 1 ? '' : 's'} ${chalk.dim(filesize(totalSize))}` })
@@ -76,16 +79,21 @@ export async function upload (firstPath, opts) {
       : client.uploadDirectory.bind(client, files)
 
   const root = await uploadFn({
-    onShardStored: ({ cid, size }) => {
+    onShardStored: ({ cid, size, piece }) => {
       totalSent += size
-      spinner.stopAndPersist({ text: `${cid} ${chalk.dim(filesizeMB(size))}` })
-      spinner.start(`Storing ${Math.round((totalSent / totalSize) * 100)}%`)
+      if (opts?.verbose) {
+        spinner.stopAndPersist({ text: `${cid} ${chalk.dim(filesizeMB(size))}\n${chalk.dim('   └── ')}Piece CID: ${piece}` })
+        spinner.start(`Storing ${Math.round((totalSent / totalSize) * 100)}%`)
+      } else {
+        spinner.text = `Storing ${Math.round((totalSent / totalSize) * 100)}%`
+      }
+      opts?.json && opts?.verbose && console.log(dagJSON.stringify({ shard: cid, size, piece }))
     },
     shardSize: opts?.['shard-size'] && parseInt(String(opts?.['shard-size'])),
     concurrentRequests: opts?.['concurrent-requests'] && parseInt(String(opts?.['concurrent-requests']))
   })
   spinner.stopAndPersist({ symbol: '⁂', text: `Stored ${files.length} file${files.length === 1 ? '' : 's'}` })
-  console.log(`⁂ https://w3s.link/ipfs/${root}`)
+  console.log(opts?.json ? dagJSON.stringify({ root }) : `⁂ https://w3s.link/ipfs/${root}`)
 }
 
 /**
@@ -97,7 +105,7 @@ export async function upload (firstPath, opts) {
 export async function list (opts = {}) {
   const client = await getClient()
   let count = 0
-  /** @type {import('@web3-storage/w3up-client/types').UploadListOk|undefined} */
+  /** @type {import('@web3-storage/w3up-client/types').UploadListSuccess|undefined} */
   let res
   do {
     res = await client.capability.upload.list({ cursor: res?.cursor })

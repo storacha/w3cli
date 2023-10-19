@@ -8,6 +8,7 @@ import * as Signer from '@ucanto/principal/ed25519'
 import { importDAG } from '@ucanto/core/delegation'
 import { create as createServer, ok, provide } from '@ucanto/server'
 import * as DID from '@ipld/dag-ucan/did'
+import * as dagJSON from '@ipld/dag-json'
 import * as StoreCapabilities from '@web3-storage/capabilities/store'
 import * as UploadCapabilities from '@web3-storage/capabilities/upload'
 import * as SpaceCapabilities from '@web3-storage/capabilities/space'
@@ -26,7 +27,7 @@ import { createEnv } from './helpers/env.js'
  *   env: { alice: Record<string, string>, bob: Record<string, string> }
  *   setService: (svc: Record<string, any>) => void
  * }} TestCtx
- * @typedef {import('@web3-storage/w3up-client/types').StoreAddOk} StoreAddOk
+ * @typedef {import('@web3-storage/w3up-client/types').StoreAddSuccess} StoreAddSuccess
  */
 
 const test = /** @type {import('ava').TestFn<TestCtx>} */ (anyTest)
@@ -115,7 +116,7 @@ test('w3 up', async (t) => {
   const service = mockService({
     store: {
       add: provide(StoreCapabilities.add, ({ capability }) => {
-        return ok(/** @type {StoreAddOk} */({
+        return ok(/** @type {StoreAddSuccess} */({
           status: 'upload',
           headers: { 'x-test': 'true' },
           url: 'http://localhost:9200',
@@ -152,7 +153,7 @@ test('w3 up --car', async (t) => {
   const service = mockService({
     store: {
       add: provide(StoreCapabilities.add, ({ capability }) => {
-        return ok(/** @type {StoreAddOk} */({
+        return ok(/** @type {StoreAddSuccess} */({
           status: 'upload',
           headers: { 'x-test': 'true' },
           url: 'http://localhost:9200',
@@ -193,7 +194,7 @@ test('w3 ls', async (t) => {
   const service = mockService({
     store: {
       add: provide(StoreCapabilities.add, ({ capability }) => {
-        return ok(/** @type {StoreAddOk} */({
+        return ok(/** @type {StoreAddSuccess} */({
           status: 'upload',
           headers: { 'x-test': 'true' },
           url: 'http://localhost:9200',
@@ -223,7 +224,7 @@ test('w3 ls', async (t) => {
   await execa('./bin.js', ['up', 'test/fixtures/pinpie.jpg'], { env })
 
   const list1 = await execa('./bin.js', ['ls', '--json'], { env })
-  t.notThrows(() => Link.parse(JSON.parse(list1.stdout).root))
+  t.notThrows(() => dagJSON.parse(list1.stdout))
 })
 
 test('w3 remove', async t => {
@@ -273,12 +274,11 @@ test('w3 remove --shards', async t => {
 
   const service = mockService({
     store: {
-      remove: provide(StoreCapabilities.remove, () => ok({}))
+      remove: provide(StoreCapabilities.remove, () => ok({ size: 1337 }))
     },
     upload: {
       remove: provide(UploadCapabilities.remove, ({ capability }) => {
-        // @ts-expect-error https://github.com/web3-storage/w3up/pull/912
-        return ok(/** @type {import('@web3-storage/w3up-client/types').UploadRemoveOk} */({
+        return ok(/** @type {import('@web3-storage/w3up-client/types').UploadRemoveSuccess} */({
           root: capability.nb.root,
           shards: [
             Link.parse('bagbaiera7ciaeifwrn7oo35gxdalocfj23vkvqus2eup27wt2qcxlvta2wya'),
@@ -303,7 +303,7 @@ test('w3 remove --shards - no shards to remove', async t => {
 
   const service = mockService({
     store: {
-      remove: provide(StoreCapabilities.remove, () => ok({}))
+      remove: provide(StoreCapabilities.remove, () => ok({ size: 1337 }))
     },
     upload: {
       remove: provide(UploadCapabilities.remove, ({ capability }) => {
@@ -613,7 +613,7 @@ test('w3 can store add', async t => {
   const service = mockService({
     store: {
       add: provide(StoreCapabilities.add, ({ capability }) => {
-        return ok(/** @type {StoreAddOk} */({
+        return ok(/** @type {StoreAddSuccess} */({
           status: 'upload',
           headers: { 'x-test': 'true' },
           url: 'http://localhost:9200',
@@ -642,7 +642,7 @@ test('w3 can upload add', async (t) => {
   const service = mockService({
     store: {
       add: provide(StoreCapabilities.add, ({ capability }) => {
-        return ok(/** @type {StoreAddOk} */({
+        return ok(/** @type {StoreAddSuccess} */({
           status: 'upload',
           headers: { 'x-test': 'true' },
           url: 'http://localhost:9200',
@@ -701,7 +701,7 @@ test('w3 can upload ls', async (t) => {
   const service = mockService({
     store: {
       add: provide(StoreCapabilities.add, ({ capability }) => {
-        return ok(/** @type {StoreAddOk} */({
+        return ok(/** @type {StoreAddSuccess} */({
           status: 'upload',
           headers: { 'x-test': 'true' },
           url: 'http://localhost:9200',
@@ -728,7 +728,7 @@ test('w3 can upload ls', async (t) => {
   await execa('./bin.js', ['up', 'test/fixtures/pinpie.jpg'], { env })
 
   const list1 = await execa('./bin.js', ['can', 'upload', 'ls', '--json'], { env })
-  t.notThrows(() => Link.parse(JSON.parse(list1.stdout).root))
+  t.notThrows(() => dagJSON.parse(list1.stdout))
 })
 
 test('w3 can upload rm', async (t) => {
@@ -742,7 +742,7 @@ test('w3 can upload rm', async (t) => {
   const service = mockService({
     store: {
       add: provide(StoreCapabilities.add, ({ capability }) => {
-        return ok(/** @type {StoreAddOk} */({
+        return ok(/** @type {StoreAddSuccess} */({
           status: 'upload',
           headers: { 'x-test': 'true' },
           url: 'http://localhost:9200',
@@ -781,18 +781,17 @@ test('w3 can store ls', async (t) => {
 
   await execa('./bin.js', ['space', 'create'], { env })
 
-  /** @type {import('@web3-storage/w3up-client/types').StoreListOk['results']} */
+  /** @type {import('@web3-storage/w3up-client/types').StoreListSuccess['results']} */
   const cars = []
 
   const service = mockService({
     store: {
       add: provide(StoreCapabilities.add, ({ capability }) => {
         cars.push({
-          // @ts-expect-error not a CAR link
           link: capability.nb.link,
           size: capability.nb.size
         })
-        return ok(/** @type {StoreAddOk} */({
+        return ok(/** @type {StoreAddSuccess} */({
           status: 'upload',
           headers: { 'x-test': 'true' },
           url: 'http://localhost:9200',
@@ -818,7 +817,7 @@ test('w3 can store ls', async (t) => {
   await execa('./bin.js', ['up', 'test/fixtures/pinpie.jpg'], { env })
 
   const list1 = await execa('./bin.js', ['can', 'store', 'ls', '--json'], { env })
-  t.notThrows(() => Link.parse(JSON.parse(list1.stdout).link))
+  t.notThrows(() => dagJSON.parse(list1.stdout))
 })
 
 test('w3 can store rm', async (t) => {
@@ -832,7 +831,7 @@ test('w3 can store rm', async (t) => {
   const service = mockService({
     store: {
       add: provide(StoreCapabilities.add, ({ capability }) => {
-        return ok(/** @type {StoreAddOk} */({
+        return ok(/** @type {StoreAddSuccess} */({
           status: 'upload',
           headers: { 'x-test': 'true' },
           url: 'http://localhost:9200',
@@ -841,7 +840,7 @@ test('w3 can store rm', async (t) => {
         }))
       }),
       remove: provide(StoreCapabilities.remove, () => {
-        return ok({})
+        return ok({ size: 1337 })
       })
     },
     upload: {
