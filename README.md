@@ -65,6 +65,7 @@ w3 up recipies.txt
 * Capability management
   * [`w3 delegation create`](#w3-delegation-create-audience-did)
   * [`w3 delegation ls`](#w3-delegation-ls)
+  * [`w3 delegation revoke`](#w3-delegation-revoke-delegation-cid)
   * [`w3 proof add`](#w3-proof-add-proofucan)
   * [`w3 proof ls`](#w3-proof-ls)
 * Advanced usage
