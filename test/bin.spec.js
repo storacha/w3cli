@@ -188,7 +188,7 @@ test('w3 ls', async (t) => {
 
   await execa('./bin.js', ['space', 'create'], { env })
 
-  /** @type {Array<import('@web3-storage/capabilities/types').UploadAdd['nb']>} */
+  /** @type {Array<import('@web3-storage/capabilities/types').UploadListItem>} */
   const uploads = []
 
   const service = mockService({
@@ -207,11 +207,18 @@ test('w3 ls', async (t) => {
       add: provide(UploadCapabilities.add, ({ invocation }) => {
         const { nb } = invocation.capabilities[0]
         if (!nb) throw new Error('missing nb')
-        uploads.push(nb)
+        uploads.push({
+          ...nb,
+          insertedAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        })
         return ok(nb)
       }),
       list: provide(UploadCapabilities.list, () => {
-        return ok({ results: uploads, size: uploads.length })
+        return ok({
+          results: uploads,
+          size: uploads.length
+        })
       })
     }
   })
@@ -359,13 +366,13 @@ test('w3 delegation ls', async t => {
   const out0 = await execa('./bin.js', ['space', 'create'], { env })
   const spaceDID = DID.parse(out0.stdout.trim()).did()
 
-  const bob = await Signer.generate()
-  await execa('./bin.js', ['delegation', 'create', bob.did(), '-c', '*'], { env })
+  const mallory = await Signer.generate()
+  await execa('./bin.js', ['delegation', 'create', mallory.did(), '-c', '*'], { env })
 
   const out1 = await execa('./bin.js', ['delegation', 'ls', '--json'], { env })
   const delegationData = JSON.parse(out1.stdout)
 
-  t.is(delegationData.audience, bob.did())
+  t.is(delegationData.audience, mallory.did())
   t.is(delegationData.capabilities.length, 1)
   t.is(delegationData.capabilities[0].with, spaceDID)
   t.is(delegationData.capabilities[0].can, '*')
@@ -376,7 +383,7 @@ test('w3 delegation revoke', async t => {
   const service = mockService({
     ucan: {
       revoke: provide(UCANCapabilities.revoke, () => {
-        return ok({ time: Date.now() })
+        return ok({ time: Date.now() / 1000 })
       })
     }
   })
@@ -384,8 +391,8 @@ test('w3 delegation revoke', async t => {
 
   await execa('./bin.js', ['space', 'create'], { env })
 
-  const bob = await Signer.generate()
-  await execa('./bin.js', ['delegation', 'create', bob.did(), '-c', '*'], { env })
+  const mallory = await Signer.generate()
+  await execa('./bin.js', ['delegation', 'create', mallory.did(), '-c', '*'], { env })
 
   const out1 = await execa('./bin.js', ['delegation', 'ls', '--json'], { env })
   const delegationData = JSON.parse(out1.stdout)
@@ -397,7 +404,7 @@ test('w3 delegation revoke', async t => {
   // but bob should not be able to revoke alice's delegation
   /** @type {any} */
   const out3 = await t.throwsAsync(() => execa('./bin.js', ['delegation', 'revoke', delegationData.cid], { env: t.context.env.bob }))
-  t.regex(out3.stderr, new RegExp(`error trying to revoke ${delegationData.cid}: could not find delegation ${delegationData.cid}`))
+  t.regex(out3.stderr, new RegExp(`Error: revoking ${delegationData.cid}: could not find delegation ${delegationData.cid}`))
 })
 
 test('w3 space add', async t => {
@@ -695,7 +702,7 @@ test('w3 can upload ls', async (t) => {
 
   await execa('./bin.js', ['space', 'create'], { env })
 
-  /** @type {Array<import('@web3-storage/capabilities/types').UploadAdd['nb']>} */
+  /** @type {Array<import('@web3-storage/capabilities/types').UploadListItem>} */
   const uploads = []
 
   const service = mockService({
@@ -714,7 +721,11 @@ test('w3 can upload ls', async (t) => {
       add: provide(UploadCapabilities.add, ({ invocation }) => {
         const { nb } = invocation.capabilities[0]
         if (!nb) throw new Error('missing nb')
-        uploads.push(nb)
+        uploads.push({
+          ...nb,
+          updatedAt: new Date().toISOString(),
+          insertedAt: new Date().toISOString()
+        })
         return ok(nb)
       }),
       list: provide(UploadCapabilities.list, () => {
@@ -789,7 +800,8 @@ test('w3 can store ls', async (t) => {
       add: provide(StoreCapabilities.add, ({ capability }) => {
         cars.push({
           link: capability.nb.link,
-          size: capability.nb.size
+          size: capability.nb.size,
+          insertedAt: new Date().toISOString()
         })
         return ok(/** @type {StoreAddSuccess} */({
           status: 'upload',

@@ -404,18 +404,17 @@ export async function revokeDelegation (delegationCid, opts) {
   }
   let cid
   try {
-    // TODO: we should valiate that this is a UCANLink
+    // TODO: we should validate that this is a UCANLink
     cid = ucanto.parseLink(delegationCid.trim())
   } catch (/** @type {any} */err) {
     console.error(`Error: invalid CID: ${delegationCid}: ${err.message}`)
     process.exit(1)
   }
-  try {
-    await client.revokeDelegation(/** @type {import('@ucanto/interface').UCANLink} */(cid), { proofs: proof ? [proof] : [] })
+  const result = await client.revokeDelegation(/** @type {import('@ucanto/interface').UCANLink} */(cid), { proofs: proof ? [proof] : [] })
+  if (result.ok) {
     console.log(`⁂ delegation ${delegationCid} revoked`)
-  } catch (/** @type {any} */err) {
-    console.error(`Error: revoking ${delegationCid}: ${err.message}`)
-    console.error(err)
+  } else {
+    console.error(`Error: revoking ${delegationCid}: ${result.error?.message}`)
     process.exit(1)
   }
 }
