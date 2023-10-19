@@ -378,7 +378,7 @@ test('w3 delegation ls', async t => {
   t.is(delegationData.capabilities[0].can, '*')
 })
 
-test('w3 delegation revoke', async t => {
+test.only('w3 delegation revoke', async t => {
   const env = t.context.env.alice
   const service = mockService({
     ucan: {
@@ -392,7 +392,8 @@ test('w3 delegation revoke', async t => {
   await execa('./bin.js', ['space', 'create'], { env })
 
   const mallory = await Signer.generate()
-  await execa('./bin.js', ['delegation', 'create', mallory.did(), '-c', '*'], { env })
+  const delegationPath = `${os.tmpdir()}/delegation-${Date.now()}.ucan`
+  await execa('./bin.js', ['delegation', 'create', mallory.did(), '-c', '*', '-o', delegationPath], { env })
 
   const out1 = await execa('./bin.js', ['delegation', 'ls', '--json'], { env })
   const delegationData = JSON.parse(out1.stdout)
@@ -401,10 +402,18 @@ test('w3 delegation revoke', async t => {
   const out2 = await execa('./bin.js', ['delegation', 'revoke', delegationData.cid], { env })
   t.regex(out2.stdout, new RegExp(`delegation ${delegationData.cid} revoked`))
 
-  // but bob should not be able to revoke alice's delegation
+  await execa('./bin.js', ['space', 'create'], { env: t.context.env.bob })
+
+  // bob should not be able to because he doesn't have a copy of the delegation
   /** @type {any} */
   const out3 = await t.throwsAsync(() => execa('./bin.js', ['delegation', 'revoke', delegationData.cid], { env: t.context.env.bob }))
   t.regex(out3.stderr, new RegExp(`Error: revoking ${delegationData.cid}: could not find delegation ${delegationData.cid}`))
+
+  // but if bob passes the delegation manually, it should succeed - we don't validate that bob is able to issue the revocation,
+  // it simply won't apply if it's not legitimate
+  /** @type {any} */
+  const out4 = await execa('./bin.js', ['delegation', 'revoke', delegationData.cid, '-p', delegationPath], { env: t.context.env.bob })
+  t.regex(out4.stdout, new RegExp(`delegation ${delegationData.cid} revoked`))
 })
 
 test('w3 space add', async t => {
