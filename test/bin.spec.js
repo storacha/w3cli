@@ -371,7 +371,7 @@ test('w3 delegation ls', async t => {
   t.is(delegationData.capabilities[0].can, '*')
 })
 
-test.only('w3 delegation revoke', async t => {
+test('w3 delegation revoke', async t => {
   const env = t.context.env.alice
   const service = mockService({
     ucan: {

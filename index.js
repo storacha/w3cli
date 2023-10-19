@@ -391,7 +391,7 @@ export async function revokeDelegation (delegationCid, opts) {
       proof = await readProof(opts.proof)
     }
   } catch (/** @type {any} */err) {
-    console.log(`Error: ${err.message}`)
+    console.log(`Error: reading proof: ${err.message}`)
     process.exit(1)
   }
   let cid
@@ -399,14 +399,14 @@ export async function revokeDelegation (delegationCid, opts) {
     // TODO: we should valiate that this is a UCANLink
     cid = ucanto.parseLink(delegationCid.trim())
   } catch (/** @type {any} */err) {
-    console.error(`Error: ${delegationCid} is not a CID`)
+    console.error(`Error: invalid CID: ${delegationCid}: ${err.message}`)
     process.exit(1)
   }
   try {
     await client.revokeDelegation(/** @type {import('@ucanto/interface').UCANLink} */(cid), { proofs: proof ? [proof] : [] })
     console.log(`⁂ delegation ${delegationCid} revoked`)
   } catch (/** @type {any} */err) {
-    console.error(`error trying to revoke ${delegationCid}: ${err.message}`)
+    console.error(`Error: revoking ${delegationCid}: ${err.message}`)
     console.error(err)
     process.exit(1)
   }
