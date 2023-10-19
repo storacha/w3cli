@@ -756,7 +756,7 @@ test('w3 can upload rm', async (t) => {
 
   await execa('./bin.js', ['space', 'create'], { env })
 
-  /** @type {Array<import('@web3-storage/capabilities/types').UploadAdd['nb']>} */
+  /** @type {Array<import('@web3-storage/capabilities/types').UploadListItem>} */
   const uploads = []
 
   const service = mockService({
@@ -775,7 +775,11 @@ test('w3 can upload rm', async (t) => {
       add: provide(UploadCapabilities.add, ({ invocation }) => {
         const { nb } = invocation.capabilities[0]
         if (!nb) throw new Error('missing nb')
-        uploads.push(nb)
+        uploads.push({
+          ...nb,
+          insertedAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        })
         return ok(nb)
       }),
       list: provide(UploadCapabilities.list, () => {
