@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.5.0](https://github.com/web3-storage/w3cli/compare/v4.4.0...v4.5.0) (2023-10-20)
+
+
+### Features
+
+* add `delegation revoke` command ([#106](https://github.com/web3-storage/w3cli/issues/106)) ([3c8f3bc](https://github.com/web3-storage/w3cli/commit/3c8f3bc65c3a6455b5970a9685b854a51f626c7c))
+
 ## [4.4.0](https://github.com/web3-storage/w3cli/compare/v4.3.1...v4.4.0) (2023-10-18)
 
 
