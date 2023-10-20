@@ -65,6 +65,7 @@ w3 up recipies.txt
 * Capability management
   * [`w3 delegation create`](#w3-delegation-create-audience-did)
   * [`w3 delegation ls`](#w3-delegation-ls)
+  * [`w3 delegation revoke`](#w3-delegation-revoke-delegation-cid)
   * [`w3 proof add`](#w3-proof-add-proofucan)
   * [`w3 proof ls`](#w3-proof-ls)
 * Advanced usage
@@ -183,6 +184,13 @@ w3 delegation create did:key:z6MkrwtRceSo2bE6vAY4gi8xPNfNszSpvf8MpAHnxVfMYreN --
 List delegations created by this agent for others.
 
 * `--json` Format as newline delimited JSON
+
+
+### `w3 delegation revoke <delegation-cid>`
+
+Revoke a delegation by CID.
+
+* `--proof` Name of a file containing the delegation and any additional proofs needed to prove authority to revoke
 
 ### `w3 proof add <proof.ucan>`
 
