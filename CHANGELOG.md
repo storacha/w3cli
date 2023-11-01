@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.6.0](https://github.com/web3-storage/w3cli/compare/v4.5.0...v4.6.0) (2023-11-01)
+
+
+### Features
+
+* upgrade @web3-storage/access to 16.4.0 to fix bug with sessionProof selection with `w3 register space` ([#114](https://github.com/web3-storage/w3cli/issues/114)) ([8ed3c90](https://github.com/web3-storage/w3cli/commit/8ed3c90d1e10c8df4c5769761f362e1dbf372f43))
+
 ## [4.5.0](https://github.com/web3-storage/w3cli/compare/v4.4.0...v4.5.0) (2023-10-20)
 
 
