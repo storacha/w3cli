@@ -2,12 +2,17 @@
 import fs from 'fs'
 import { CID } from 'multiformats'
 import ora from 'ora'
-import { getClient, uploadListResponseToString, storeListResponseToString, parseCarLink } from './lib.js'
+import {
+  getClient,
+  uploadListResponseToString,
+  storeListResponseToString,
+  parseCarLink,
+} from './lib.js'
 
 /**
  * @param {string} carPath
  */
-export async function storeAdd (carPath) {
+export async function storeAdd(carPath) {
   const client = await getClient()
 
   const spinner = ora('Reading CAR').start()
@@ -16,7 +21,7 @@ export async function storeAdd (carPath) {
   try {
     const data = await fs.promises.readFile(carPath)
     blob = new Blob([data])
-  } catch (/** @type {any} */err) {
+  } catch (/** @type {any} */ err) {
     spinner.fail(`Error: failed to read CAR: ${err.message}`)
     process.exit(1)
   }
@@ -29,13 +34,14 @@ export async function storeAdd (carPath) {
 
 /**
  * Print out all the CARs in the current space.
+ *
  * @param {object} opts
  * @param {boolean} [opts.json]
  * @param {string} [opts.cursor]
  * @param {number} [opts.size]
  * @param {boolean} [opts.pre]
  */
-export async function storeList (opts = {}) {
+export async function storeList(opts = {}) {
   const client = await getClient()
   const listOptions = {}
   if (opts.size) {
@@ -57,7 +63,7 @@ export async function storeList (opts = {}) {
 /**
  * @param {string} cidStr
  */
-export async function storeRemove (cidStr) {
+export async function storeRemove(cidStr) {
   const shard = parseCarLink(cidStr)
   if (!shard) {
     console.error(`Error: ${cidStr} is not a CAR CID`)
@@ -66,7 +72,7 @@ export async function storeRemove (cidStr) {
   const client = await getClient()
   try {
     client.capability.store.remove(shard)
-  } catch (/** @type {any} */err) {
+  } catch (/** @type {any} */ err) {
     console.error(`Store remove failed: ${err.message ?? err}`)
     console.error(err)
     process.exit(1)
@@ -79,24 +85,24 @@ export async function storeRemove (cidStr) {
  * @param {object} opts
  * @param {string[]} opts._
  */
-export async function uploadAdd (root, shard, opts) {
+export async function uploadAdd(root, shard, opts) {
   const client = await getClient()
 
   let rootCID
   try {
     rootCID = CID.parse(root)
-  } catch (/** @type {any} */err) {
+  } catch (/** @type {any} */ err) {
     console.error(`Error: failed to parse root CID: ${root}: ${err.message}`)
     process.exit(1)
   }
 
-  /** @type {import('@web3-storage/upload-client/types').CARLink[]} */
+  /** @type {import('@web3-storage/w3up-client/types').CARLink[]} */
   const shards = []
   for (const str of [shard, ...opts._]) {
     try {
       // @ts-expect-error may not be a CAR CID...
       shards.push(CID.parse(str))
-    } catch (/** @type {any} */err) {
+    } catch (/** @type {any} */ err) {
       console.error(`Error: failed to parse shard CID: ${str}: ${err.message}`)
       process.exit(1)
     }
@@ -109,6 +115,7 @@ export async function uploadAdd (root, shard, opts) {
 
 /**
  * Print out all the uploads in the current space.
+ *
  * @param {object} opts
  * @param {boolean} [opts.json]
  * @param {boolean} [opts.shards]
@@ -116,7 +123,7 @@ export async function uploadAdd (root, shard, opts) {
  * @param {number} [opts.size]
  * @param {boolean} [opts.pre]
  */
-export async function uploadList (opts = {}) {
+export async function uploadList(opts = {}) {
   const client = await getClient()
   const listOptions = {}
   if (opts.size) {
@@ -137,20 +144,21 @@ export async function uploadList (opts = {}) {
 
 /**
  * Remove the upload from the upload list.
+ *
  * @param {string} rootCid
  */
-export async function uploadRemove (rootCid) {
+export async function uploadRemove(rootCid) {
   let root
   try {
     root = CID.parse(rootCid.trim())
-  } catch (/** @type {any} */err) {
+  } catch (/** @type {any} */ err) {
     console.error(`Error: ${rootCid} is not a CID`)
     process.exit(1)
   }
   const client = await getClient()
   try {
     await client.capability.upload.remove(root)
-  } catch (/** @type {any} */err) {
+  } catch (/** @type {any} */ err) {
     console.error(`Upload remove failed: ${err.message ?? err}`)
     console.error(err)
     process.exit(1)

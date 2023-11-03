@@ -9,8 +9,10 @@
     "w3up": "shim.js"
   },
   "scripts": {
-    "lint": "standard && tsc",
-    "lint:fix": "standard --fix",
+    "lint": "eslint '**/*.{js,ts}'",
+    "lint:fix": "eslint --fix '**/*.{js,ts}'",
+    "check": "tsc --build",
+    "format": "prettier --write '**/*.{js,ts,yml,json}' --ignore-path .gitignore",
     "test": "npm-run-all -p -r mock test:ava",
     "test:ava": "ava --verbose --timeout=1m",
     "test:watch": "ava --watch",
@@ -36,13 +38,16 @@
     "@types/update-notifier": "^6.0.5",
     "@ucanto/principal": "^9.0.0",
     "@ucanto/server": "^9.0.1",
+    "@ucanto/interface": "^9.0.0",
     "@web3-storage/capabilities": "^10.2.0",
+    "@web3-storage/upload-client": "^11.1.0",
     "ava": "^5.1.0",
     "execa": "^8.0.1",
     "multiformats": "^12.0.1",
     "npm-run-all": "^4.1.5",
-    "standard": "^17.0.0",
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "prettier": "^3.0.3",
+    "@web3-storage/eslint-config-w3up": "^1.0.0"
   },
   "dependencies": {
     "@ipld/car": "^5.2.4",
@@ -61,5 +66,31 @@
     "pretty-tree": "^1.0.0",
     "sade": "^1.8.1",
     "update-notifier": "^6.0.2"
+  },
+  "eslintConfig": {
+    "extends": [
+      "@web3-storage/eslint-config-w3up"
+    ],
+    "parserOptions": {
+      "project": "./tsconfig.json"
+    },
+    "env": {
+      "es2022": true,
+      "mocha": true,
+      "browser": true,
+      "node": true
+    },
+    "ignorePatterns": [
+      "dist",
+      "coverage",
+      "src/types.js",
+      "test/types.js"
+    ]
+  },
+  "prettier": {
+    "trailingComma": "es5",
+    "tabWidth": 2,
+    "semi": false,
+    "singleQuote": true
   }
 }

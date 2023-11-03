@@ -11,7 +11,7 @@ jobs:
         id: release
         with:
           release-type: node
-          package-name: "@web3-storage/w3cli"
+          package-name: '@web3-storage/w3cli'
       - uses: actions/checkout@v3
       - uses: ./.github/actions/test
       - run: npm publish
