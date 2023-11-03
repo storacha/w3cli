@@ -2,7 +2,7 @@
  * @template {Record<string, any>} T
  * @param {import('@ucanto/server').ServerView<T>} server
  */
-export function createHTTPListener (server) {
+export function createHTTPListener(server) {
   /** @type {import('http').RequestListener} */
   return async (request, response) => {
     const chunks = []
@@ -13,7 +13,7 @@ export function createHTTPListener (server) {
     const { headers, body } = await server.request({
       // @ts-ignore
       headers: request.headers,
-      body: Buffer.concat(chunks)
+      body: Buffer.concat(chunks),
     })
 
     response.writeHead(200, headers)

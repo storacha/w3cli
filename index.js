@@ -6,12 +6,22 @@ import * as DID from '@ipld/dag-ucan/did'
 import * as dagJSON from '@ipld/dag-json'
 import { CarWriter } from '@ipld/car'
 import { filesFromPaths } from 'files-from-path'
-import { getClient, checkPathsExist, filesize, filesizeMB, readProof, uploadListResponseToString } from './lib.js'
+import {
+  getClient,
+  checkPathsExist,
+  filesize,
+  filesizeMB,
+  readProof,
+  uploadListResponseToString,
+} from './lib.js'
 import * as ucanto from '@ucanto/core'
 import * as DidMailto from '@web3-storage/did-mailto'
 import chalk from 'chalk'
 
-export async function accessClaim () {
+/**
+ *
+ */
+export async function accessClaim() {
   const client = await getClient()
   await client.capability.access.claim()
 }
@@ -21,15 +31,16 @@ export async function accessClaim () {
  * @param {object} [opts]
  * @param {import('@ucanto/interface').Ability[]|import('@ucanto/interface').Ability} [opts.can]
  */
-export async function authorize (email, opts = {}) {
+export async function authorize(email, opts = {}) {
   const client = await getClient()
-  const capabilities = opts.can != null
-    ? [opts.can].flat().map(can => ({ can }))
-    : undefined
+  const capabilities =
+    opts.can != null ? [opts.can].flat().map((can) => ({ can })) : undefined
   /** @type {import('ora').Ora|undefined} */
   let spinner
   setTimeout(() => {
-    spinner = ora(`🔗 please click the link we sent to ${email} to authorize this agent`).start()
+    spinner = ora(
+      `🔗 please click the link we sent to ${email} to authorize this agent`
+    ).start()
   }, 1000)
   try {
     await client.authorize(email, { capabilities })
@@ -55,7 +66,7 @@ export async function authorize (email, opts = {}) {
  *   'concurrent-requests'?: number
  * }} [opts]
  */
-export async function upload (firstPath, opts) {
+export async function upload(firstPath, opts) {
   const paths = checkPathsExist([firstPath, ...(opts?._ ?? [])])
   const client = await getClient()
   const hidden = !!opts?.hidden
@@ -63,7 +74,11 @@ export async function upload (firstPath, opts) {
   const spinner = ora({ text: 'Reading files', isSilent: opts?.json }).start()
   const files = await filesFromPaths(paths, { hidden })
   const totalSize = files.reduce((total, f) => total + f.size, 0)
-  spinner.stopAndPersist({ text: `${files.length} file${files.length === 1 ? '' : 's'} ${chalk.dim(filesize(totalSize))}` })
+  spinner.stopAndPersist({
+    text: `${files.length} file${files.length === 1 ? '' : 's'} ${chalk.dim(
+      filesize(totalSize)
+    )}`,
+  })
 
   if (opts?.car && files.length > 1) {
     console.error('Error: multiple CAR files not supported')
@@ -75,34 +90,48 @@ export async function upload (firstPath, opts) {
   const uploadFn = opts?.car
     ? client.uploadCAR.bind(client, files[0])
     : files.length === 1 && opts?.['no-wrap']
-      ? client.uploadFile.bind(client, files[0])
-      : client.uploadDirectory.bind(client, files)
+    ? client.uploadFile.bind(client, files[0])
+    : client.uploadDirectory.bind(client, files)
 
   const root = await uploadFn({
     onShardStored: ({ cid, size, piece }) => {
       totalSent += size
       if (opts?.verbose) {
-        spinner.stopAndPersist({ text: `${cid} ${chalk.dim(filesizeMB(size))}\n${chalk.dim('   └── ')}Piece CID: ${piece}` })
+        spinner.stopAndPersist({
+          text: `${cid} ${chalk.dim(filesizeMB(size))}\n${chalk.dim(
+            '   └── '
+          )}Piece CID: ${piece}`,
+        })
         spinner.start(`Storing ${Math.round((totalSent / totalSize) * 100)}%`)
       } else {
         spinner.text = `Storing ${Math.round((totalSent / totalSize) * 100)}%`
       }
-      opts?.json && opts?.verbose && console.log(dagJSON.stringify({ shard: cid, size, piece }))
+      opts?.json &&
+        opts?.verbose &&
+        console.log(dagJSON.stringify({ shard: cid, size, piece }))
     },
     shardSize: opts?.['shard-size'] && parseInt(String(opts?.['shard-size'])),
-    concurrentRequests: opts?.['concurrent-requests'] && parseInt(String(opts?.['concurrent-requests']))
+    concurrentRequests:
+      opts?.['concurrent-requests'] &&
+      parseInt(String(opts?.['concurrent-requests'])),
   })
-  spinner.stopAndPersist({ symbol: '⁂', text: `Stored ${files.length} file${files.length === 1 ? '' : 's'}` })
-  console.log(opts?.json ? dagJSON.stringify({ root }) : `⁂ https://w3s.link/ipfs/${root}`)
+  spinner.stopAndPersist({
+    symbol: '⁂',
+    text: `Stored ${files.length} file${files.length === 1 ? '' : 's'}`,
+  })
+  console.log(
+    opts?.json ? dagJSON.stringify({ root }) : `⁂ https://w3s.link/ipfs/${root}`
+  )
 }
 
 /**
  * Print out all the uploads in the current space.
+ *
  * @param {object} opts
  * @param {boolean} [opts.json]
  * @param {boolean} [opts.shards]
  */
-export async function list (opts = {}) {
+export async function list(opts = {}) {
   const client = await getClient()
   let count = 0
   /** @type {import('@web3-storage/w3up-client/types').UploadListSuccess|undefined} */
@@ -126,11 +155,11 @@ export async function list (opts = {}) {
  * @param {object} opts
  * @param {boolean} [opts.shards]
  */
-export async function remove (rootCid, opts) {
+export async function remove(rootCid, opts) {
   let root
   try {
     root = CID.parse(rootCid.trim())
-  } catch (/** @type {any} */err) {
+  } catch (/** @type {any} */ err) {
     console.error(`Error: ${rootCid} is not a CID`)
     process.exit(1)
   }
@@ -138,7 +167,7 @@ export async function remove (rootCid, opts) {
   let upload
   try {
     upload = await client.capability.upload.remove(root)
-  } catch (/** @type {any} */err) {
+  } catch (/** @type {any} */ err) {
     console.error(`Remove failed: ${err.message ?? err}`)
     console.error(err)
     process.exit(1)
@@ -147,27 +176,31 @@ export async function remove (rootCid, opts) {
     return
   }
   if (!upload.root) {
-    return console.log('⁂ upload not found. could not determine shards to remove.')
+    return console.log(
+      '⁂ upload not found. could not determine shards to remove.'
+    )
   }
   if (!upload.shards || !upload.shards.length) {
     return console.log('⁂ no shards to remove.')
   }
 
   const { shards } = upload
-  console.log(`⁂ removing ${shards.length} shard${shards.length === 1 ? '' : 's'}`)
+  console.log(
+    `⁂ removing ${shards.length} shard${shards.length === 1 ? '' : 's'}`
+  )
 
   /** @param {import('@web3-storage/w3up-client/types').CARLink} shard */
-  function removeShard (shard) {
+  function removeShard(shard) {
     return oraPromise(client.capability.store.remove(shard), {
       text: `${shard}`,
       successText: `${shard} removed`,
-      failText: `${shard} failed`
+      failText: `${shard} failed`,
     })
   }
 
   const results = await Promise.allSettled(shards.map(removeShard))
 
-  if (results.some(res => res.status === 'rejected')) {
+  if (results.some((res) => res.status === 'rejected')) {
     process.exit(1)
   }
 }
@@ -175,7 +208,7 @@ export async function remove (rootCid, opts) {
 /**
  * @param {string} name
  */
-export async function createSpace (name) {
+export async function createSpace(name) {
   const client = await getClient()
   const space = await client.createSpace(name)
   await client.setCurrentSpace(space.did())
@@ -183,14 +216,17 @@ export async function createSpace (name) {
 }
 
 /** @param {import('@web3-storage/w3up-client').Client} client */
-function findAccountsThatCanProviderAdd (client) {
+function findAccountsThatCanProviderAdd(client) {
   /** @type {Array<ReturnType<DidMailto.fromString>>} */
   const accounts = []
   const proofs = client.proofs()
   for (const proof of proofs) {
     const allows = ucanto.Delegation.allows(proof)
     for (const resourceDID of Object.keys(allows)) {
-      if (resourceDID.startsWith('did:mailto:') && allows[resourceDID]['provider/add']) {
+      if (
+        resourceDID.startsWith('did:mailto:') &&
+        allows[resourceDID]['provider/add']
+      ) {
         accounts.push(DidMailto.fromString(resourceDID))
       }
     }
@@ -203,7 +239,7 @@ function findAccountsThatCanProviderAdd (client) {
  * @param {string} [opts.email]
  * @param {`did:web:${string}`} [opts.provider]
  */
-export async function registerSpace (opts) {
+export async function registerSpace(opts) {
   const client = await getClient()
   let accountEmail = opts?.email
   if (!accountEmail) {
@@ -212,7 +248,9 @@ export async function registerSpace (opts) {
       accountEmail = DidMailto.toEmail(accounts[0])
     } else {
       if (accounts.length > 1) {
-        console.error('Error: you are authorized to use more than one account and have not specified which one you would like to use to register this space.')
+        console.error(
+          'Error: you are authorized to use more than one account and have not specified which one you would like to use to register this space.'
+        )
       } else {
         console.error('Error: please authorize before registering spaces')
       }
@@ -229,7 +267,7 @@ export async function registerSpace (opts) {
 
   try {
     await client.registerSpace(accountEmail, { provider: opts?.provider })
-  } catch (/** @type {any} */err) {
+  } catch (/** @type {any} */ err) {
     if (spinner) spinner.stop()
     if (err.message.startsWith('Space already registered')) {
       console.error('Error: space already registered.')
@@ -247,14 +285,17 @@ export async function registerSpace (opts) {
 /**
  * @param {string} proofPath
  */
-export async function addSpace (proofPath) {
+export async function addSpace(proofPath) {
   const client = await getClient()
   const delegation = await readProof(proofPath)
   const space = await client.addSpace(delegation)
   console.log(space.did())
 }
 
-export async function listSpaces () {
+/**
+ *
+ */
+export async function listSpaces() {
   const client = await getClient()
   const current = client.currentSpace()
   for (const space of client.spaces()) {
@@ -266,10 +307,11 @@ export async function listSpaces () {
 /**
  * @param {string} did
  */
-export async function useSpace (did) {
+export async function useSpace(did) {
   const client = await getClient()
   const spaces = client.spaces()
-  const space = spaces.find(s => s.did() === did) ?? spaces.find(s => s.name() === did)
+  const space =
+    spaces.find((s) => s.did() === did) ?? spaces.find((s) => s.name() === did)
   if (!space) {
     console.error(`Error: space not found: ${did}`)
     process.exit(1)
@@ -283,18 +325,20 @@ export async function useSpace (did) {
  * @param {import('@web3-storage/w3up-client/types').DID} [opts.space]
  * @param {string} [opts.json]
  */
-export async function spaceInfo (opts) {
+export async function spaceInfo(opts) {
   const client = await getClient()
   const spaceDID = opts.space ?? client.currentSpace()?.did()
   if (!spaceDID) {
-    throw new Error('no current space and no space given: please use --space to specify a space or select one using "space use"')
+    throw new Error(
+      'no current space and no space given: please use --space to specify a space or select one using "space use"'
+    )
   }
 
   /** @type {import('@web3-storage/access/types').SpaceInfoResult} */
   let info
   try {
     info = await client.capability.space.info(spaceDID)
-  } catch (/** @type {any} */err) {
+  } catch (/** @type {any} */ err) {
     // if the space was not known to the service then that's ok, there's just
     // no info to print about it. Don't make it look like something is wrong,
     // just print the space DID since that's all we know.
@@ -325,7 +369,7 @@ Providers: ${providers || chalk.dim('none')}`)
  * @param {number} [opts.expiration]
  * @param {string} [opts.output]
  */
-export async function createDelegation (audienceDID, opts) {
+export async function createDelegation(audienceDID, opts) {
   const client = await getClient()
   if (client.currentSpace() == null) {
     throw new Error('no current space, use `w3 space register` to create one.')
@@ -344,7 +388,7 @@ export async function createDelegation (audienceDID, opts) {
   // @ts-expect-error createDelegation should validate abilities
   const delegation = await client.createDelegation(audience, abilities, {
     expiration,
-    audienceMeta
+    audienceMeta,
   })
 
   const { writer, out } = CarWriter.create()
@@ -363,16 +407,21 @@ export async function createDelegation (audienceDID, opts) {
  * @param {object} opts
  * @param {boolean} [opts.json]
  */
-export async function listDelegations (opts) {
+export async function listDelegations(opts) {
   const client = await getClient()
   const delegations = client.delegations()
   if (opts.json) {
     for (const delegation of delegations) {
-      console.log(JSON.stringify({
-        cid: delegation.cid.toString(),
-        audience: delegation.audience.did(),
-        capabilities: delegation.capabilities.map(c => ({ with: c.with, can: c.can }))
-      }))
+      console.log(
+        JSON.stringify({
+          cid: delegation.cid.toString(),
+          audience: delegation.audience.did(),
+          capabilities: delegation.capabilities.map((c) => ({
+            with: c.with,
+            can: c.can,
+          })),
+        })
+      )
     }
   } else {
     for (const delegation of delegations) {
@@ -391,14 +440,14 @@ export async function listDelegations (opts) {
  * @param {object} opts
  * @param {string} [opts.proof]
  */
-export async function revokeDelegation (delegationCid, opts) {
+export async function revokeDelegation(delegationCid, opts) {
   const client = await getClient()
   let proof
   try {
     if (opts.proof) {
       proof = await readProof(opts.proof)
     }
-  } catch (/** @type {any} */err) {
+  } catch (/** @type {any} */ err) {
     console.log(`Error: reading proof: ${err.message}`)
     process.exit(1)
   }
@@ -406,11 +455,14 @@ export async function revokeDelegation (delegationCid, opts) {
   try {
     // TODO: we should validate that this is a UCANLink
     cid = ucanto.parseLink(delegationCid.trim())
-  } catch (/** @type {any} */err) {
+  } catch (/** @type {any} */ err) {
     console.error(`Error: invalid CID: ${delegationCid}: ${err.message}`)
     process.exit(1)
   }
-  const result = await client.revokeDelegation(/** @type {import('@ucanto/interface').UCANLink} */(cid), { proofs: proof ? [proof] : [] })
+  const result = await client.revokeDelegation(
+    /** @type {import('@ucanto/interface').UCANLink} */ (cid),
+    { proofs: proof ? [proof] : [] }
+  )
   if (result.ok) {
     console.log(`⁂ delegation ${delegationCid} revoked`)
   } else {
@@ -423,7 +475,7 @@ export async function revokeDelegation (delegationCid, opts) {
  * @param {string} proofPath
  * @param {{ json?: boolean, 'dry-run'?: boolean }} [opts]
  */
-export async function addProof (proofPath, opts) {
+export async function addProof(proofPath, opts) {
   const client = await getClient()
   let proof
   try {
@@ -431,7 +483,7 @@ export async function addProof (proofPath, opts) {
     if (!opts?.['dry-run']) {
       await client.addProof(proof)
     }
-  } catch (/** @type {any} */err) {
+  } catch (/** @type {any} */ err) {
     console.log(`Error: ${err.message}`)
     process.exit(1)
   }
@@ -451,16 +503,21 @@ export async function addProof (proofPath, opts) {
  * @param {object} opts
  * @param {boolean} [opts.json]
  */
-export async function listProofs (opts) {
+export async function listProofs(opts) {
   const client = await getClient()
   const proofs = client.proofs()
   if (opts.json) {
     for (const proof of proofs) {
-      console.log(JSON.stringify({
-        cid: proof.cid.toString(),
-        issuer: proof.issuer.did(),
-        capabilities: proof.capabilities.map(c => ({ with: c.with, can: c.can }))
-      }))
+      console.log(
+        JSON.stringify({
+          cid: proof.cid.toString(),
+          issuer: proof.issuer.did(),
+          capabilities: proof.capabilities.map((c) => ({
+            with: c.with,
+            can: c.can,
+          })),
+        })
+      )
     }
   } else {
     for (const proof of proofs) {
@@ -475,7 +532,10 @@ export async function listProofs (opts) {
   }
 }
 
-export async function whoami () {
+/**
+ *
+ */
+export async function whoami() {
   const client = await getClient()
   const who = client.agent()
   console.log(who.did())
