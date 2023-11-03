@@ -1,6 +1,6 @@
 /**
  * @template {Record<string, any>} T
- * @param {import('@ucanto/server').ServerView<T>} server
+ * @param {import('@ucanto/server').Transport.Channel<T>} server
  */
 export function createHTTPListener(server) {
   /** @type {import('http').RequestListener} */

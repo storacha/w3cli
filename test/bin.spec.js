@@ -3,29 +3,24 @@ import fs from 'fs'
 import os from 'os'
 import path from 'path'
 import { execa, execaSync } from 'execa'
-import * as CAR from '@ucanto/transport/car'
 import * as Signer from '@ucanto/principal/ed25519'
 import { importDAG } from '@ucanto/core/delegation'
-import { create as createServer, ok, provide } from '@ucanto/server'
+import { parseLink } from '@ucanto/server'
 import * as DID from '@ipld/dag-ucan/did'
 import * as dagJSON from '@ipld/dag-json'
-import * as StoreCapabilities from '@web3-storage/capabilities/store'
-import * as UploadCapabilities from '@web3-storage/capabilities/upload'
-import * as SpaceCapabilities from '@web3-storage/capabilities/space'
-import * as UCANCapabilities from '@web3-storage/capabilities/ucan'
-import * as Link from 'multiformats/link'
+import { SpaceDID } from '@web3-storage/capabilities/utils'
 import { CarReader } from '@ipld/car'
 import { StoreConf } from '@web3-storage/access/stores/store-conf'
-import { mockService } from './helpers/mocks.js'
 import { createServer as createHTTPServer } from './helpers/http-server.js'
 import { createHTTPListener } from './helpers/ucanto.js'
 import { createEnv } from './helpers/env.js'
+import * as Test from './helpers/context.js'
+import { pattern } from './helpers/util.js'
 
 /**
- * @typedef {{
+ * @typedef {Test.Context & {
  *   server: import('./helpers/http-server').TestingServer['server']
  *   env: { alice: Record<string, string>, bob: Record<string, string> }
- *   setService: (svc: Record<string, any>) => void
  * }} TestCtx
  * @typedef {import('@web3-storage/w3up-client/types').StoreAddSuccess} StoreAddSuccess
  */
@@ -34,34 +29,29 @@ const test = /** @type {import('ava').TestFn<TestCtx>} */ (anyTest)
 
 test.beforeEach(async (t) => {
   const { server, serverURL, setRequestListener } = await createHTTPServer()
-  t.context.server = server
 
-  const serviceSigner = await Signer.generate()
-  t.context.setService = (service) => {
-    const server = createServer({
-      id: serviceSigner,
-      service,
-      codec: CAR.inbound,
-      validateAuthorization: () => ok({}),
-    })
-    setRequestListener(createHTTPListener(server))
-  }
+  const context = await Test.createContext()
+  setRequestListener(createHTTPListener(context.connection.channel))
 
-  t.context.env = {
-    alice: createEnv({
-      storeName: `w3cli-test-alice-${serviceSigner.did()}`,
-      servicePrincipal: serviceSigner,
-      serviceURL: serverURL,
-    }),
-    bob: createEnv({
-      storeName: `w3cli-test-bob-${serviceSigner.did()}`,
-      servicePrincipal: serviceSigner,
-      serviceURL: serverURL,
-    }),
-  }
+  t.context = Object.assign(context, {
+    server,
+    env: {
+      alice: createEnv({
+        storeName: `w3cli-test-alice-${context.service.did()}`,
+        servicePrincipal: context.service,
+        serviceURL: serverURL,
+      }),
+      bob: createEnv({
+        storeName: `w3cli-test-bob-${context.service.did()}`,
+        servicePrincipal: context.service,
+        serviceURL: serverURL,
+      }),
+    },
+  })
 })
 
 test.afterEach(async (t) => {
+  await Test.cleanupContext(t.context)
   t.context.server.close()
   const stores = [
     t.context.env.alice.W3_STORE_NAME,
@@ -116,136 +106,65 @@ test('w3 space create', (t) => {
 test('w3 up', async (t) => {
   const env = t.context.env.alice
 
-  await execa('./bin.js', ['space', 'create'], { env })
+  const create = await execa('./bin.js', ['space', 'create'], { env })
+  const space = SpaceDID.from(create.stdout)
 
-  const service = mockService({
-    store: {
-      add: provide(StoreCapabilities.add, ({ capability }) => {
-        return ok(
-          /** @type {StoreAddSuccess} */ ({
-            status: 'upload',
-            headers: { 'x-test': 'true' },
-            url: 'http://localhost:9200',
-            with: capability.with,
-            link: capability.nb.link,
-          })
-        )
-      }),
-    },
-    upload: {
-      add: provide(UploadCapabilities.add, ({ invocation }) => {
-        const { nb } = invocation.capabilities[0]
-        if (!nb) throw new Error('missing nb')
-        return ok(nb)
-      }),
-    },
+  // provision space
+  await Test.provisionSpace(t.context, {
+    space,
+    provider: t.context.service.did(),
+    account: 'did:mailto:web.mail:alice',
   })
 
-  t.context.setService(service)
+  const output = await execa('./bin.js', ['up', 'test/fixtures/pinpie.jpg'], {
+    env,
+  })
 
-  const { stderr } = await execa(
-    './bin.js',
-    ['up', 'test/fixtures/pinpie.jpg'],
-    { env }
+  t.regex(
+    output.stdout,
+    /bafybeiajdopsmspomlrpaohtzo5sdnpknbolqjpde6huzrsejqmvijrcea/
   )
-  t.true(service.store.add.called)
-  t.is(service.store.add.callCount, 1)
-  t.true(service.upload.add.called)
-  t.is(service.upload.add.callCount, 1)
-
-  t.regex(stderr, /Stored 1 file/)
+  t.regex(output.stderr, /Stored 1 file/)
 })
 
 test('w3 up --car', async (t) => {
   const env = t.context.env.alice
 
-  await execa('./bin.js', ['space', 'create'], { env })
+  const create = await execa('./bin.js', ['space', 'create'], { env })
+  const space = SpaceDID.from(create.stdout)
 
-  const service = mockService({
-    store: {
-      add: provide(StoreCapabilities.add, ({ capability }) => {
-        return ok(
-          /** @type {StoreAddSuccess} */ ({
-            status: 'upload',
-            headers: { 'x-test': 'true' },
-            url: 'http://localhost:9200',
-            with: capability.with,
-            link: capability.nb.link,
-          })
-        )
-      }),
-    },
-    upload: {
-      add: provide(UploadCapabilities.add, ({ capability }) => {
-        t.assert(capability.nb.shards)
-        t.is(
-          String(capability.nb.shards?.[0]),
-          'bagbaieracyt3l5gpf3ovcmedm6ktgvxzi6gpp7x42ffu43zrqh2qwm6q7peq'
-        )
-        return ok(capability.nb)
-      }),
-    },
+  // provision space
+  await Test.provisionSpace(t.context, {
+    space,
+    provider: t.context.service.did(),
+    account: 'did:mailto:web.mail:alice',
   })
 
-  t.context.setService(service)
-
-  const { stderr } = await execa(
+  const output = await execa(
     './bin.js',
     ['up', '--car', 'test/fixtures/pinpie.car'],
     { env }
   )
 
-  t.true(service.store.add.called)
-  t.is(service.store.add.callCount, 1)
-  t.true(service.upload.add.called)
-  t.is(service.upload.add.callCount, 1)
-
-  t.regex(stderr, /Stored 1 file/)
+  t.regex(
+    output.stdout,
+    /bafkreiajkbmpugz75eg2tmocmp3e33sg5kuyq2amzngslahgn6ltmqxxfa/
+  )
+  t.regex(output.stderr, /Stored 1 file/)
 })
 
 test('w3 ls', async (t) => {
   const env = t.context.env.alice
 
-  await execa('./bin.js', ['space', 'create'], { env })
+  const create = await execa('./bin.js', ['space', 'create'], { env })
+  const space = SpaceDID.from(create.stdout)
 
-  /** @type {Array<import('@web3-storage/capabilities/types').UploadListItem>} */
-  const uploads = []
-
-  const service = mockService({
-    store: {
-      add: provide(StoreCapabilities.add, ({ capability }) => {
-        return ok(
-          /** @type {StoreAddSuccess} */ ({
-            status: 'upload',
-            headers: { 'x-test': 'true' },
-            url: 'http://localhost:9200',
-            with: capability.with,
-            link: capability.nb.link,
-          })
-        )
-      }),
-    },
-    upload: {
-      add: provide(UploadCapabilities.add, ({ invocation }) => {
-        const { nb } = invocation.capabilities[0]
-        if (!nb) throw new Error('missing nb')
-        uploads.push({
-          ...nb,
-          insertedAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        })
-        return ok(nb)
-      }),
-      list: provide(UploadCapabilities.list, () => {
-        return ok({
-          results: uploads,
-          size: uploads.length,
-        })
-      }),
-    },
+  // provision space
+  await Test.provisionSpace(t.context, {
+    space,
+    provider: t.context.service.did(),
+    account: 'did:mailto:web.mail:alice',
   })
-
-  t.context.setService(service)
 
   const list0 = await execa('./bin.js', ['ls'], { env })
   t.regex(list0.stdout, /No uploads in space/)
@@ -259,16 +178,15 @@ test('w3 ls', async (t) => {
 test('w3 remove', async (t) => {
   const env = t.context.env.alice
 
-  await execa('./bin.js', ['space', 'create'], { env })
+  const create = await execa('./bin.js', ['space', 'create'], { env })
+  const space = SpaceDID.from(create.stdout)
 
-  const service = mockService({
-    upload: {
-      remove: provide(UploadCapabilities.remove, ({ capability }) => {
-        return ok({ root: capability.nb.root })
-      }),
-    },
+  // provision space
+  await Test.provisionSpace(t.context, {
+    space,
+    provider: t.context.service.did(),
+    account: 'did:mailto:web.mail:alice',
   })
-  t.context.setService(service)
 
   t.throwsAsync(() => execa('./bin.js', ['rm', 'nope'], { env }), {
     message: /not a CID/,
@@ -279,23 +197,23 @@ test('w3 remove', async (t) => {
     ['rm', 'bafybeih2k7ughhfwedltjviunmn3esueijz34snyay77zmsml5w24tqamm'],
     { env }
   )
+
   t.is(rm.exitCode, 0)
-  t.is(service.upload.remove.callCount, 1)
-  t.is(service.store.remove.callCount, 0)
   t.is(rm.stdout, '')
 })
 
 test('w3 remove - no such upload', async (t) => {
   const env = t.context.env.alice
 
-  await execa('./bin.js', ['space', 'create'], { env })
+  const create = await execa('./bin.js', ['space', 'create'], { env })
+  const space = SpaceDID.from(create.stdout)
 
-  const service = mockService({
-    upload: {
-      remove: provide(UploadCapabilities.remove, () => ok({})),
-    },
+  // provision space
+  await Test.provisionSpace(t.context, {
+    space,
+    provider: t.context.service.did(),
+    account: 'did:mailto:web.mail:alice',
   })
-  t.context.setService(service)
 
   const rm = await execa(
     './bin.js',
@@ -313,86 +231,83 @@ test('w3 remove - no such upload', async (t) => {
 test('w3 remove --shards', async (t) => {
   const env = t.context.env.alice
 
-  await execa('./bin.js', ['space', 'create'], { env })
+  const create = await execa('./bin.js', ['space', 'create'], { env })
+  const space = SpaceDID.from(create.stdout)
 
-  const service = mockService({
-    store: {
-      remove: provide(StoreCapabilities.remove, () => ok({ size: 1337 })),
-    },
-    upload: {
-      remove: provide(UploadCapabilities.remove, ({ capability }) => {
-        return ok(
-          /** @type {import('@web3-storage/w3up-client/types').UploadRemoveSuccess} */ ({
-            root: capability.nb.root,
-            shards: [
-              Link.parse(
-                'bagbaiera7ciaeifwrn7oo35gxdalocfj23vkvqus2eup27wt2qcxlvta2wya'
-              ),
-              Link.parse(
-                'bagbaiera7ciaeifwrn7oo35gxdalocfj23vkvqus2eup27wt2qcxlvta2wya'
-              ),
-            ],
-          })
-        )
-      }),
-    },
+  // provision space
+  await Test.provisionSpace(t.context, {
+    space,
+    provider: t.context.service.did(),
+    account: 'did:mailto:web.mail:alice',
   })
-  t.context.setService(service)
+
+  const output = await execa('./bin.js', ['up', 'test/fixtures/pinpie.jpg'], {
+    env,
+  })
+
+  t.regex(
+    output.stdout,
+    /bafybeiajdopsmspomlrpaohtzo5sdnpknbolqjpde6huzrsejqmvijrcea/
+  )
 
   const rm = await execa(
     './bin.js',
     [
       'rm',
-      'bafybeih2k7ughhfwedltjviunmn3esueijz34snyay77zmsml5w24tqamm',
+      'bafybeiajdopsmspomlrpaohtzo5sdnpknbolqjpde6huzrsejqmvijrcea',
       '--shards',
     ],
     { env }
   )
   t.is(rm.exitCode, 0)
-  t.is(service.upload.remove.callCount, 1)
-  t.is(service.store.remove.callCount, 2)
+
+  t.regex(rm.stdout, /1 shard/)
+  t.regex(
+    rm.stderr,
+    /bagbaieraxkuzouwfuphnqlbbpobywmypb26stej5vbwkelrv7chdqoxfuuea removed/
+  )
 })
 
 test('w3 remove --shards - no shards to remove', async (t) => {
   const env = t.context.env.alice
 
-  await execa('./bin.js', ['space', 'create'], { env })
+  const create = await execa('./bin.js', ['space', 'create'], { env })
+  const space = SpaceDID.from(create.stdout)
 
-  const service = mockService({
-    store: {
-      remove: provide(StoreCapabilities.remove, () => ok({ size: 1337 })),
-    },
-    upload: {
-      remove: provide(UploadCapabilities.remove, ({ capability }) => {
-        const { nb } = capability
-        return ok({ root: nb.root })
-      }),
-    },
+  // provision space
+  await Test.provisionSpace(t.context, {
+    space,
+    provider: t.context.service.did(),
+    account: 'did:mailto:web.mail:alice',
   })
-  t.context.setService(service)
 
-  const rm = await execa(
-    './bin.js',
-    [
-      'rm',
-      'bafybeih2k7ughhfwedltjviunmn3esueijz34snyay77zmsml5w24tqamm',
-      '--shards',
-    ],
-    { env }
+  const root = parseLink(
+    'bafybeih2k7ughhfwedltjviunmn3esueijz34snyay77zmsml5w24tqamm'
   )
+
+  // store upload without any shards
+  t.context.uploadTable.insert({
+    space,
+    root,
+    shards: [],
+    issuer: Test.alice.did(),
+    invocation: parseLink('bafkqaaa'),
+  })
+
+  const rm = await execa('./bin.js', ['rm', root.toString(), '--shards'], {
+    env,
+  })
   t.is(rm.exitCode, 0)
-  t.is(service.upload.remove.callCount, 1)
-  t.is(service.store.remove.callCount, 0)
   t.is(rm.stdout, '⁂ no shards to remove.')
 })
 
 test('w3 delegation create', async (t) => {
   const env = t.context.env.alice
+  const { bob } = Test
 
-  const { stdout } = await execa('./bin.js', ['space', 'create'], { env })
-  const spaceDID = DID.parse(stdout.trim()).did()
+  const create = await execa('./bin.js', ['space', 'create'], { env })
+  const spaceDID = SpaceDID.from(create.stdout)
 
-  const bob = await Signer.generate()
   const proofPath = path.join(
     os.tmpdir(),
     `w3cli-test-delegation-${Date.now()}`
@@ -419,8 +334,10 @@ test('w3 delegation create', async (t) => {
 
 test('w3 delegation create - no capabilities', async (t) => {
   const env = t.context.env.alice
+  const { bob } = Test
+
   await execa('./bin.js', ['space', 'create'], { env })
-  const bob = await Signer.generate()
+
   const err = await t.throwsAsync(() =>
     execa('./bin.js', ['delegation', 'create', bob.did()], { env })
   )
@@ -430,10 +347,11 @@ test('w3 delegation create - no capabilities', async (t) => {
 test('w3 delegation ls', async (t) => {
   const env = t.context.env.alice
 
-  const out0 = await execa('./bin.js', ['space', 'create'], { env })
-  const spaceDID = DID.parse(out0.stdout.trim()).did()
+  const { mallory } = Test
 
-  const mallory = await Signer.generate()
+  const create = await execa('./bin.js', ['space', 'create'], { env })
+  const spaceDID = SpaceDID.from(create.stdout)
+
   await execa('./bin.js', ['delegation', 'create', mallory.did(), '-c', '*'], {
     env,
   })
@@ -449,18 +367,9 @@ test('w3 delegation ls', async (t) => {
 
 test('w3 delegation revoke', async (t) => {
   const env = t.context.env.alice
-  const service = mockService({
-    ucan: {
-      revoke: provide(UCANCapabilities.revoke, () => {
-        return ok({ time: Date.now() / 1000 })
-      }),
-    },
-  })
-  t.context.setService(service)
-
+  const { mallory } = Test
   await execa('./bin.js', ['space', 'create'], { env })
 
-  const mallory = await Signer.generate()
   const delegationPath = `${os.tmpdir()}/delegation-${Date.now()}.ucan`
   await execa(
     './bin.js',
@@ -479,7 +388,9 @@ test('w3 delegation revoke', async (t) => {
   )
   t.regex(out2.stdout, new RegExp(`delegation ${delegationData.cid} revoked`))
 
-  await execa('./bin.js', ['space', 'create'], { env: t.context.env.bob })
+  await execa('./bin.js', ['space', 'create'], {
+    env: t.context.env.bob,
+  })
 
   // bob should not be able to because he doesn't have a copy of the delegation
   /** @type {any} */
@@ -513,10 +424,10 @@ test('w3 space add', async (t) => {
   const aliceOut0 = await execa('./bin.js', ['space', 'create'], {
     env: aliceEnv,
   })
-  const spaceDID = DID.parse(aliceOut0.stdout.trim()).did()
+  const spaceDID = SpaceDID.from(aliceOut0.stdout.trim())
 
   const bobOut0 = await execa('./bin.js', ['whoami'], { env: bobEnv })
-  const bobDID = DID.parse(bobOut0.stdout.trim()).did()
+  const bobDID = SpaceDID.from(bobOut0.stdout.trim())
 
   const proofPath = path.join(
     os.tmpdir(),
@@ -586,7 +497,7 @@ test('w3 space use', async (t) => {
   const env = t.context.env.alice
 
   const aliceOut0 = await execa('./bin.js', ['space', 'create'], { env })
-  const spaceDID = DID.parse(aliceOut0.stdout.trim()).did()
+  const spaceDID = SpaceDID.from(aliceOut0.stdout.trim())
 
   const aliceOut1 = await execa('./bin.js', ['space', 'ls'], { env })
   t.true(aliceOut1.stdout.includes(`* ${spaceDID}`))
@@ -595,7 +506,7 @@ test('w3 space use', async (t) => {
   const aliceOut2 = await execa('./bin.js', ['space', 'create', spaceName], {
     env,
   })
-  const namedSpaceDID = DID.parse(aliceOut2.stdout.trim()).did()
+  const namedSpaceDID = SpaceDID.from(aliceOut2.stdout.trim())
 
   const aliceOut3 = await execa('./bin.js', ['space', 'ls'], { env })
   t.false(aliceOut3.stdout.includes(`* ${spaceDID}`))
@@ -635,35 +546,37 @@ test('w3 space use - space name not exists', async (t) => {
 test('w3 space info', async (t) => {
   const env = t.context.env.alice
 
-  await execa('./bin.js', ['space', 'create'], { env })
+  const create = await execa('./bin.js', ['space', 'create'], { env })
 
-  /** @type {import('@web3-storage/w3up-client/types').DID<'key'>} */
-  const spaceDID = 'did:key:abc123'
+  const spaceDID = SpaceDID.from(create.stdout)
+
+  t.true(SpaceDID.is(spaceDID), 'prints space did')
+
   /** @type {import('@web3-storage/w3up-client/types').DID<'web'>} */
-  const provider = 'did:web:test.web3.storage'
-  const service = mockService({
-    space: {
-      info: provide(SpaceCapabilities.info, () =>
-        ok({
-          did: spaceDID,
-          providers: [provider],
-        })
-      ),
-    },
+  const providerDID = 'did:web:test.web3.storage'
+
+  const noprovider = await execa('./bin.js', ['space', 'info'], { env })
+
+  t.regex(
+    noprovider.stdout,
+    pattern`DID: ${spaceDID}
+Providers: none`,
+    'space has no providers'
+  )
+
+  Test.provisionSpace(t.context, {
+    space: spaceDID,
+    account: 'did:mailto:web.mail:alice',
+    provider: providerDID,
   })
 
-  t.context.setService(service)
+  const withProvider = await execa('./bin.js', ['space', 'info'], { env })
 
-  const { stdout } = await execa('./bin.js', ['space', 'info'], { env })
-
-  t.true(service.space.info.called)
-  t.is(service.space.info.callCount, 1)
-
-  t.is(
-    stdout,
-    `
-      DID: ${spaceDID.toString()}
-Providers: ${provider}`
+  t.regex(
+    withProvider.stdout,
+    pattern`DID: ${spaceDID}
+Providers: ${providerDID}`,
+    'added provider shows up in the space info'
   )
 })
 
@@ -767,25 +680,15 @@ test('w3 proof ls', async (t) => {
 test('w3 can store add', async (t) => {
   const env = t.context.env.alice
 
-  await execa('./bin.js', ['space', 'create'], { env })
+  const create = await execa('./bin.js', ['space', 'create'], { env })
+  const space = SpaceDID.from(create.stdout)
 
-  const service = mockService({
-    store: {
-      add: provide(StoreCapabilities.add, ({ capability }) => {
-        return ok(
-          /** @type {StoreAddSuccess} */ ({
-            status: 'upload',
-            headers: { 'x-test': 'true' },
-            url: 'http://localhost:9200',
-            with: capability.with,
-            link: capability.nb.link,
-          })
-        )
-      }),
-    },
+  // provision space
+  await Test.provisionSpace(t.context, {
+    space,
+    provider: t.context.service.did(),
+    account: 'did:mailto:web.mail:alice',
   })
-
-  t.context.setService(service)
 
   const { stderr } = await execa(
     './bin.js',
@@ -793,44 +696,21 @@ test('w3 can store add', async (t) => {
     { env }
   )
 
-  t.true(service.store.add.called)
-  t.is(service.store.add.callCount, 1)
-
   t.regex(stderr, /Stored bag/)
 })
 
 test('w3 can upload add', async (t) => {
   const env = t.context.env.alice
 
-  await execa('./bin.js', ['space', 'create'], { env })
+  const create = await execa('./bin.js', ['space', 'create'], { env })
+  const space = SpaceDID.from(create.stdout)
 
-  const service = mockService({
-    store: {
-      add: provide(StoreCapabilities.add, ({ capability }) => {
-        return ok(
-          /** @type {StoreAddSuccess} */ ({
-            status: 'upload',
-            headers: { 'x-test': 'true' },
-            url: 'http://localhost:9200',
-            with: capability.with,
-            link: capability.nb.link,
-          })
-        )
-      }),
-    },
-    upload: {
-      add: provide(UploadCapabilities.add, ({ invocation }) => {
-        const { nb } = invocation.capabilities[0]
-        if (!nb) throw new Error('missing nb')
-        t.is(nb.root.toString(), root)
-        t.is(nb.shards?.length, 1)
-        t.is(nb.shards?.[0].toString(), shard)
-        return ok(nb)
-      }),
-    },
+  // provision space
+  await Test.provisionSpace(t.context, {
+    space,
+    provider: t.context.service.did(),
+    account: 'did:mailto:web.mail:alice',
   })
-
-  t.context.setService(service)
 
   const carPath = 'test/fixtures/pinpie.car'
   const reader = await CarReader.fromBytes(await fs.promises.readFile(carPath))
@@ -841,11 +721,6 @@ test('w3 can upload add', async (t) => {
     env,
   })
 
-  t.true(service.store.add.called)
-  t.is(service.store.add.callCount, 1)
-  t.false(service.upload.add.called)
-  t.is(service.upload.add.callCount, 0)
-
   t.regex(out0.stderr, /Stored bag/)
 
   const shard = out0.stdout.trim()
@@ -853,54 +728,21 @@ test('w3 can upload add', async (t) => {
     env,
   })
 
-  t.true(service.store.add.called)
-  t.is(service.store.add.callCount, 1)
-  t.true(service.upload.add.called)
-  t.is(service.upload.add.callCount, 1)
-
   t.regex(out1.stderr, /Upload added/)
 })
 
 test('w3 can upload ls', async (t) => {
   const env = t.context.env.alice
 
-  await execa('./bin.js', ['space', 'create'], { env })
+  const create = await execa('./bin.js', ['space', 'create'], { env })
+  const space = SpaceDID.from(create.stdout)
 
-  /** @type {Array<import('@web3-storage/capabilities/types').UploadListItem>} */
-  const uploads = []
-
-  const service = mockService({
-    store: {
-      add: provide(StoreCapabilities.add, ({ capability }) => {
-        return ok(
-          /** @type {StoreAddSuccess} */ ({
-            status: 'upload',
-            headers: { 'x-test': 'true' },
-            url: 'http://localhost:9200',
-            with: capability.with,
-            link: capability.nb.link,
-          })
-        )
-      }),
-    },
-    upload: {
-      add: provide(UploadCapabilities.add, ({ invocation }) => {
-        const { nb } = invocation.capabilities[0]
-        if (!nb) throw new Error('missing nb')
-        uploads.push({
-          ...nb,
-          updatedAt: new Date().toISOString(),
-          insertedAt: new Date().toISOString(),
-        })
-        return ok(nb)
-      }),
-      list: provide(UploadCapabilities.list, () => {
-        return ok({ results: uploads, size: uploads.length })
-      }),
-    },
+  // provision space
+  await Test.provisionSpace(t.context, {
+    space,
+    provider: t.context.service.did(),
+    account: 'did:mailto:web.mail:alice',
   })
-
-  t.context.setService(service)
 
   await execa('./bin.js', ['up', 'test/fixtures/pinpie.jpg'], { env })
 
@@ -913,48 +755,24 @@ test('w3 can upload ls', async (t) => {
 test('w3 can upload rm', async (t) => {
   const env = t.context.env.alice
 
-  await execa('./bin.js', ['space', 'create'], { env })
+  const create = await execa('./bin.js', ['space', 'create'], { env })
+  const space = SpaceDID.from(create.stdout)
 
-  /** @type {Array<import('@web3-storage/capabilities/types').UploadListItem>} */
-  const uploads = []
-
-  const service = mockService({
-    store: {
-      add: provide(StoreCapabilities.add, ({ capability }) => {
-        return ok(
-          /** @type {StoreAddSuccess} */ ({
-            status: 'upload',
-            headers: { 'x-test': 'true' },
-            url: 'http://localhost:9200',
-            with: capability.with,
-            link: capability.nb.link,
-          })
-        )
-      }),
-    },
-    upload: {
-      add: provide(UploadCapabilities.add, ({ invocation }) => {
-        const { nb } = invocation.capabilities[0]
-        if (!nb) throw new Error('missing nb')
-        uploads.push({
-          ...nb,
-          insertedAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        })
-        return ok(nb)
-      }),
-      list: provide(UploadCapabilities.list, () => {
-        return ok({ results: uploads, size: uploads.length })
-      }),
-      remove: provide(UploadCapabilities.remove, () => {
-        return ok({})
-      }),
-    },
+  // provision space
+  await Test.provisionSpace(t.context, {
+    space,
+    provider: t.context.service.did(),
+    account: 'did:mailto:web.mail:alice',
   })
 
-  t.context.setService(service)
+  const output = await execa('./bin.js', ['up', 'test/fixtures/pinpie.jpg'], {
+    env,
+  })
 
-  await execa('./bin.js', ['up', 'test/fixtures/pinpie.jpg'], { env })
+  t.regex(
+    output.stdout,
+    /bafybeiajdopsmspomlrpaohtzo5sdnpknbolqjpde6huzrsejqmvijrcea/
+  )
 
   await t.throwsAsync(
     () => execa('./bin.js', ['can', 'upload', 'rm'], { env }),
@@ -965,52 +783,33 @@ test('w3 can upload rm', async (t) => {
     { message: /not a CID/ }
   )
   await t.notThrowsAsync(() =>
-    execa('./bin.js', ['can', 'upload', 'rm', uploads[0].root.toString()], {
-      env,
-    })
+    execa(
+      './bin.js',
+      [
+        'can',
+        'upload',
+        'rm',
+        'bafybeiajdopsmspomlrpaohtzo5sdnpknbolqjpde6huzrsejqmvijrcea',
+      ],
+      {
+        env,
+      }
+    )
   )
 })
 
 test('w3 can store ls', async (t) => {
   const env = t.context.env.alice
 
-  await execa('./bin.js', ['space', 'create'], { env })
+  const create = await execa('./bin.js', ['space', 'create'], { env })
+  const space = SpaceDID.from(create.stdout)
 
-  /** @type {import('@web3-storage/w3up-client/types').StoreListSuccess['results']} */
-  const cars = []
-
-  const service = mockService({
-    store: {
-      add: provide(StoreCapabilities.add, ({ capability }) => {
-        cars.push({
-          link: capability.nb.link,
-          size: capability.nb.size,
-          insertedAt: new Date().toISOString(),
-        })
-        return ok(
-          /** @type {StoreAddSuccess} */ ({
-            status: 'upload',
-            headers: { 'x-test': 'true' },
-            url: 'http://localhost:9200',
-            with: capability.with,
-            link: capability.nb.link,
-          })
-        )
-      }),
-      list: provide(StoreCapabilities.list, () => {
-        return ok({ results: cars, size: cars.length })
-      }),
-    },
-    upload: {
-      add: provide(UploadCapabilities.add, ({ invocation }) => {
-        const { nb } = invocation.capabilities[0]
-        if (!nb) throw new Error('missing nb')
-        return ok(nb)
-      }),
-    },
+  // provision space
+  await Test.provisionSpace(t.context, {
+    space,
+    provider: t.context.service.did(),
+    account: 'did:mailto:web.mail:alice',
   })
-
-  t.context.setService(service)
 
   await execa('./bin.js', ['up', 'test/fixtures/pinpie.jpg'], { env })
 
@@ -1023,43 +822,22 @@ test('w3 can store ls', async (t) => {
 test('w3 can store rm', async (t) => {
   const env = t.context.env.alice
 
-  await execa('./bin.js', ['space', 'create'], { env })
+  const create = await execa('./bin.js', ['space', 'create'], { env })
+  const space = SpaceDID.from(create.stdout)
 
-  /** @type {Array<import('@web3-storage/capabilities/types').UploadAdd['nb']>} */
-  const uploads = []
-
-  const service = mockService({
-    store: {
-      add: provide(StoreCapabilities.add, ({ capability }) => {
-        return ok(
-          /** @type {StoreAddSuccess} */ ({
-            status: 'upload',
-            headers: { 'x-test': 'true' },
-            url: 'http://localhost:9200',
-            with: capability.with,
-            link: capability.nb.link,
-          })
-        )
-      }),
-      remove: provide(StoreCapabilities.remove, () => {
-        return ok({ size: 1337 })
-      }),
-    },
-    upload: {
-      add: provide(UploadCapabilities.add, ({ invocation }) => {
-        const { nb } = invocation.capabilities[0]
-        if (!nb) throw new Error('missing nb')
-        uploads.push(nb)
-        return ok(nb)
-      }),
-    },
+  // provision space
+  await Test.provisionSpace(t.context, {
+    space,
+    provider: t.context.service.did(),
+    account: 'did:mailto:web.mail:alice',
   })
-
-  t.context.setService(service)
 
   await execa('./bin.js', ['up', 'test/fixtures/pinpie.jpg'], { env })
 
-  const shard = uploads[0].shards?.at(0)
+  const uploads = await t.context.uploadTable.list(space)
+  const upload = uploads.results[0]
+
+  const shard = upload.shards?.at(0)
   if (!shard) {
     return t.fail('mock shard should exist')
   }
@@ -1073,7 +851,7 @@ test('w3 can store rm', async (t) => {
   )
   await t.throwsAsync(
     () =>
-      execa('./bin.js', ['can', 'store', 'rm', uploads[0].root.toString()], {
+      execa('./bin.js', ['can', 'store', 'rm', upload.root.toString()], {
         env,
       }),
     { message: /not a CAR CID/ }
