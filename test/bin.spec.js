@@ -97,6 +97,45 @@ test('w3 whoami', (t) => {
   t.regex(stdout, /^did:key:/)
 })
 
+test('w3 account ls', async (t) => {
+  const { stdout } = execaSync('./bin.js', ['account ls'])
+  t.regex(stdout, /has not been authorized yet/)
+})
+
+test('w3 login', async (t) => {
+  const env = t.context.env.alice
+  const task = execa('./bin.js', ['login', 'alice@web.mail'], { env })
+  await new Promise((wake) => setTimeout(wake, 1000))
+  // receive authorization request
+  const mail = await t.context.mail.take()
+
+  // confirm authorization
+  await t.context.grantAccess(mail)
+
+  const { stdout } = await task
+  t.regex(stdout, /authorized by did:mailto:web.mail:alice/)
+})
+
+test.only('w3 account list', async (t) => {
+  const env = t.context.env.alice
+  const { stdout: noaccount } = execaSync('./bin.js', ['account list'], { env })
+  t.regex(noaccount, /has not been authorized yet/)
+
+  const task = execa('./bin.js', ['login', 'alice@web.mail'], { env })
+  await new Promise((wake) => setTimeout(wake, 1000))
+  // receive authorization request
+  const mail = await t.context.mail.take()
+
+  // confirm authorization
+  await t.context.grantAccess(mail)
+
+  const { stdout } = await task
+  t.regex(stdout, /authorized by did:mailto:web.mail:alice/)
+
+  const { stdout: ls } = execaSync('./bin.js', ['account list'], { env })
+  t.regex(ls, /did:mailto:web.mail:alice/)
+})
+
 test('w3 space create', (t) => {
   const env = t.context.env.alice
   const { stdout } = execaSync('./bin.js', ['space', 'create'], { env })

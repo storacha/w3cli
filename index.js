@@ -6,6 +6,7 @@ import * as DID from '@ipld/dag-ucan/did'
 import * as dagJSON from '@ipld/dag-json'
 import { CarWriter } from '@ipld/car'
 import { filesFromPaths } from 'files-from-path'
+import * as Account from './account.js'
 import {
   getClient,
   checkPathsExist,
@@ -17,6 +18,8 @@ import {
 import * as ucanto from '@ucanto/core'
 import * as DidMailto from '@web3-storage/did-mailto'
 import chalk from 'chalk'
+
+export { Account }
 
 /**
  *
@@ -537,6 +540,5 @@ export async function listProofs(opts) {
  */
 export async function whoami() {
   const client = await getClient()
-  const who = client.agent()
-  console.log(who.did())
+  console.log(client.did())
 }

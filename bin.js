@@ -5,8 +5,8 @@ import open from 'open'
 import updateNotifier from 'update-notifier'
 import { getPkg } from './lib.js'
 import {
+  Account,
   accessClaim,
-  authorize,
   createSpace,
   registerSpace,
   addSpace,
@@ -40,18 +40,22 @@ const cli = sade('w3')
 
 cli
   .version(pkg.version)
-  .example('authorize user@example.com')
+  .example('login user@example.com')
   .example('up path/to/files')
 
 cli
-  .command('authorize <email>')
-  .alias('auth')
-  .example('authorize user@example.com')
+  .command('login <email>')
+  .example('login user@example.com')
   .describe(
-    'Authorize this agent to interact with the w3up service with capabilities granted to the given email.'
+    'Authenticate this agent with your email address to get access to all capabilities that had been delegated to it.'
   )
-  .option('-c, --can', 'One or more abilities to authorize.')
-  .action(authorize)
+  .action(Account.login)
+
+cli
+  .command('account ls')
+  .alias('account list')
+  .describe('List accounts this agent has been authorized to act on behalf of.')
+  .action(Account.list)
 
 cli
   .command('up <file>')
