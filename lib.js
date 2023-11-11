@@ -126,19 +126,11 @@ export function getClient() {
 }
 
 /**
- * @param {string} path Path to the proof file.
+ * @param {CarReader} reader
  */
-export async function readProof(path) {
-  try {
-    await fs.promises.access(path, fs.constants.R_OK)
-  } catch (/** @type {any} */ err) {
-    console.error(`Error: failed to read proof: ${err.message}`)
-    process.exit(1)
-  }
-
+export async function proofFromCar(reader) {
   const blocks = []
   try {
-    const reader = await CarReader.fromIterable(fs.createReadStream(path))
     for await (const block of reader.blocks()) {
       blocks.push(block)
     }
@@ -152,6 +144,25 @@ export async function readProof(path) {
     return importDAG(blocks)
   } catch (/** @type {any} */ err) {
     console.error(`Error: failed to import proof: ${err.message}`)
+    process.exit(1)
+  }
+}
+
+/** @param {string} data Base64 encoded CAR file */
+export async function proofFromString (data) {
+  const bytes = Buffer.from(data, 'base64')
+  const reader = await CarReader.fromBytes(bytes)
+  return proofFromCar(reader)
+}
+
+/** @param {string} path Path to the proof file. */
+export async function proofFromPath (path) {
+  try {
+    await fs.promises.access(path, fs.constants.R_OK)
+    const reader = await CarReader.fromIterable(fs.createReadStream(path))
+    return proofFromCar(reader)
+  } catch (/** @type {any} */ err) {
+    console.error(`Error: failed to read proof: ${err.message}`)
     process.exit(1)
   }
 }

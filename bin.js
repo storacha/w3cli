@@ -121,7 +121,8 @@ cli
   .action(registerSpace)
 
 cli
-  .command('space add <proof>')
+  .command('space add [proof]')
+  .option('--base64', 'provide proof as base64 encoded string')
   .describe(
     'Add a space to the agent. The proof is a CAR encoded delegation to _this_ agent.'
   )

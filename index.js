@@ -11,8 +11,9 @@ import {
   checkPathsExist,
   filesize,
   filesizeMB,
-  readProof,
   uploadListResponseToString,
+  proofFromString,
+  proofFromPath
 } from './lib.js'
 import * as ucanto from '@ucanto/core'
 import * as DidMailto from '@web3-storage/did-mailto'
@@ -284,11 +285,16 @@ export async function registerSpace(opts) {
 
 /**
  * @param {string} proofPath
+ * @param {object} opts
+ * @param {string} opts.base64
  */
-export async function addSpace(proofPath) {
+export async function addSpace(proofPath, opts) {
   const client = await getClient()
-  const delegation = await readProof(proofPath)
-  const space = await client.addSpace(delegation)
+  const proof = opts.base64 
+    ? await proofFromString(opts.base64)
+    : await proofFromPath(proofPath)
+  const space = await client.addSpace(proof)
+  await client.setCurrentSpace(space.did())
   console.log(space.did())
 }
 
@@ -445,7 +451,7 @@ export async function revokeDelegation(delegationCid, opts) {
   let proof
   try {
     if (opts.proof) {
-      proof = await readProof(opts.proof)
+      proof = await proofFromPath(opts.proof)
     }
   } catch (/** @type {any} */ err) {
     console.log(`Error: reading proof: ${err.message}`)
@@ -479,7 +485,7 @@ export async function addProof(proofPath, opts) {
   const client = await getClient()
   let proof
   try {
-    proof = await readProof(proofPath)
+    proof = await proofFromPath(proofPath)
     if (!opts?.['dry-run']) {
       await client.addProof(proof)
     }
