@@ -135,10 +135,9 @@ export async function proofFromCar(reader) {
       blocks.push(block)
     }
   } catch (/** @type {any} */ err) {
-    console.error(`Error: failed to parse proof: ${err.message}`)
+    console.error(`Error: failed to iterate proof: ${err.message}`)
     process.exit(1)
   }
-
   try {
     // @ts-expect-error
     return importDAG(blocks)
@@ -150,8 +149,14 @@ export async function proofFromCar(reader) {
 
 /** @param {string} data Base64 encoded CAR file */
 export async function proofFromString (data) {
-  const bytes = Buffer.from(data, 'base64')
-  const reader = await CarReader.fromBytes(bytes)
+  let reader
+  try {
+    const bytes = Buffer.from(data, 'base64')
+    reader = await CarReader.fromBytes(bytes)
+  } catch (/** @type {any} */ err) {
+    console.error(`Error: failed to parse proof: ${err.message}`)
+    process.exit(1)
+  }
   return proofFromCar(reader)
 }
 
@@ -159,12 +164,18 @@ export async function proofFromString (data) {
 export async function proofFromPath (path) {
   try {
     await fs.promises.access(path, fs.constants.R_OK)
-    const reader = await CarReader.fromIterable(fs.createReadStream(path))
-    return proofFromCar(reader)
   } catch (/** @type {any} */ err) {
     console.error(`Error: failed to read proof: ${err.message}`)
     process.exit(1)
   }
+  let reader
+  try {
+    reader = await CarReader.fromIterable(fs.createReadStream(path))
+  } catch (/** @type {any} */ err) {
+    console.error(`Error: failed to parse proof: ${err.message}`)
+    process.exit(1)
+  }
+  return proofFromCar(reader)
 }
 
 /**
