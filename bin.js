@@ -6,9 +6,8 @@ import updateNotifier from 'update-notifier'
 import { getPkg } from './lib.js'
 import {
   Account,
+  Space,
   accessClaim,
-  createSpace,
-  registerSpace,
   addSpace,
   listSpaces,
   useSpace,
@@ -109,20 +108,23 @@ cli
 cli
   .command('space create [name]')
   .describe('Create a new w3 space')
-  .action(createSpace)
+  .option('-nr, --no-recovery', 'Skips recovery key setup')
+  .option('-n --no-caution', 'Prints out recovery key without confirmation')
+  .option('-nc --no-customer', 'Skip billing setup')
+  .option('-c --customer <email>', 'Billing account email')
+  .option('-na --no-account', 'Skip account setup')
+  .option('-a --account <email>', 'Managing account email')
+  .action(Space.create)
 
 cli
-  .command('space register')
-  .describe('Claim the space by associating it with your email address')
-  .option(
-    '-e, --email',
-    'The email address of the account to associate this space with.'
-  )
+  .command('space provision [name]')
+  .describe('Associating space with a billing account')
+  .option('-c, --customer', 'The email address of the billing account')
   .option(
     '-p, --provider',
     'The storage provider to associate with this space.'
   )
-  .action(registerSpace)
+  .action(Space.provision)
 
 cli
   .command('space add <proof>')

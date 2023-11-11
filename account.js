@@ -2,13 +2,23 @@ import * as Account from '@web3-storage/w3up-client/account'
 import * as Result from '@web3-storage/w3up-client/result'
 import * as DidMailto from '@web3-storage/did-mailto'
 import { getClient } from './lib.js'
-import ora, { oraPromise } from 'ora'
+import ora from 'ora'
+
+/**
+ * @typedef {Awaited<ReturnType<Account.login>>['ok']&{}} View
+ */
 
 /**
  * @param {DidMailto.EmailAddress} email
  */
-export const login = async (email) => {
-  const client = await getClient()
+export const login = async (email) => loginWithClient(email, await getClient())
+
+/**
+ * @param {DidMailto.EmailAddress} email
+ * @param {import('@web3-storage/w3up-client').Client} client
+ * @returns {Promise<View>}
+ */
+export const loginWithClient = async (email, client) => {
   /** @type {import('ora').Ora|undefined} */
   let spinner
   setTimeout(() => {
@@ -18,9 +28,12 @@ export const login = async (email) => {
   }, 1000)
   try {
     const account = Result.try(await Account.login(client, email))
+
     Result.try(await account.save())
+
     if (spinner) spinner.stop()
     console.log(`⁂ agent was authorized by ${account.did()}`)
+    return account
   } catch (err) {
     if (spinner) spinner.stop()
     console.error(err)

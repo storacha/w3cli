@@ -7,6 +7,7 @@ import * as dagJSON from '@ipld/dag-json'
 import { CarWriter } from '@ipld/car'
 import { filesFromPaths } from 'files-from-path'
 import * as Account from './account.js'
+import * as Space from './space.js'
 import {
   getClient,
   checkPathsExist,
@@ -16,10 +17,9 @@ import {
   uploadListResponseToString,
 } from './lib.js'
 import * as ucanto from '@ucanto/core'
-import * as DidMailto from '@web3-storage/did-mailto'
 import chalk from 'chalk'
 
-export { Account }
+export { Account, Space }
 
 /**
  *
@@ -218,73 +218,6 @@ export async function createSpace(name) {
   console.log(space.did())
 }
 
-/** @param {import('@web3-storage/w3up-client').Client} client */
-function findAccountsThatCanProviderAdd(client) {
-  /** @type {Array<ReturnType<DidMailto.fromString>>} */
-  const accounts = []
-  const proofs = client.proofs()
-  for (const proof of proofs) {
-    const allows = ucanto.Delegation.allows(proof)
-    for (const resourceDID of Object.keys(allows)) {
-      if (
-        resourceDID.startsWith('did:mailto:') &&
-        allows[resourceDID]['provider/add']
-      ) {
-        accounts.push(DidMailto.fromString(resourceDID))
-      }
-    }
-  }
-  return accounts
-}
-
-/**
- * @param {object} [opts]
- * @param {string} [opts.email]
- * @param {`did:web:${string}`} [opts.provider]
- */
-export async function registerSpace(opts) {
-  const client = await getClient()
-  let accountEmail = opts?.email
-  if (!accountEmail) {
-    const accounts = findAccountsThatCanProviderAdd(client)
-    if (accounts.length === 1) {
-      accountEmail = DidMailto.toEmail(accounts[0])
-    } else {
-      if (accounts.length > 1) {
-        console.error(
-          'Error: you are authorized to use more than one account and have not specified which one you would like to use to register this space.'
-        )
-      } else {
-        console.error('Error: please authorize before registering spaces')
-      }
-      process.exit(1)
-    }
-  }
-  let space = client.currentSpace()
-  if (space === undefined) {
-    space = await client.createSpace()
-    await client.setCurrentSpace(space.did())
-  }
-  /** @type {import('ora').Ora|undefined} */
-  const spinner = ora('registering your space').start()
-
-  try {
-    await client.registerSpace(accountEmail, { provider: opts?.provider })
-  } catch (/** @type {any} */ err) {
-    if (spinner) spinner.stop()
-    if (err.message.startsWith('Space already registered')) {
-      console.error('Error: space already registered.')
-    } else if (err.message.startsWith('no proofs available')) {
-      console.error(`Error: you are not authorized as ${accountEmail}`)
-    } else {
-      console.error(err)
-    }
-    process.exit(1)
-  }
-  if (spinner) spinner.stop()
-  console.log(`⁂ space registered to ${accountEmail}`)
-}
-
 /**
  * @param {string} proofPath
  */
@@ -303,7 +236,7 @@ export async function listSpaces() {
   const current = client.currentSpace()
   for (const space of client.spaces()) {
     const prefix = current && current.did() === space.did() ? '* ' : '  '
-    console.log(`${prefix}${space.did()} ${space.name() ?? ''}`)
+    console.log(`${prefix}${space.did()} ${space.name ?? ''}`)
   }
 }
 
@@ -314,7 +247,7 @@ export async function useSpace(did) {
   const client = await getClient()
   const spaces = client.spaces()
   const space =
-    spaces.find((s) => s.did() === did) ?? spaces.find((s) => s.name() === did)
+    spaces.find((s) => s.did() === did) ?? spaces.find((s) => s.name === did)
   if (!space) {
     console.error(`Error: space not found: ${did}`)
     process.exit(1)
