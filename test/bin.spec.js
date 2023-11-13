@@ -96,7 +96,7 @@ export const testSpace = {
 
     const line = await command.output.take(1).text()
 
-    assert.match(line, /What would you like to call this space \?/)
+    assert.match(line, /What would you like to call this space/)
 
     await command.terminate().join().catch()
   }),
