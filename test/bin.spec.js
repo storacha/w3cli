@@ -215,7 +215,7 @@ export const testSpace = {
         .catch()
 
       assert.match(output, /billing account/)
-      assert.match(output, /Skip billing setup/)
+      assert.match(output, /Skipped billing setup/)
       assert.match(error, /not authorized by unknown@web\.mail/)
     }),
 
