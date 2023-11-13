@@ -46,7 +46,7 @@ cli
   .command('login <email>')
   .example('login user@example.com')
   .describe(
-    'Authenticate this agent with your email address to get access to all capabilities that had been delegated to it.'
+    'Authenticate this agent with your email address to gain access to all capabilities that have been delegated to it.'
   )
   .action(Account.login)
 
@@ -109,11 +109,11 @@ cli
   .command('space create [name]')
   .describe('Create a new w3 space')
   .option('-nr, --no-recovery', 'Skips recovery key setup')
-  .option('-n --no-caution', 'Prints out recovery key without confirmation')
-  .option('-nc --no-customer', 'Skip billing setup')
-  .option('-c --customer <email>', 'Billing account email')
-  .option('-na --no-account', 'Skip account setup')
-  .option('-a --account <email>', 'Managing account email')
+  .option('-n, --no-caution', 'Prints out recovery key without confirmation')
+  .option('-nc, --no-customer', 'Skip billing setup')
+  .option('-c, --customer <email>', 'Billing account email')
+  .option('-na, --no-account', 'Skip account setup')
+  .option('-a, --account <email>', 'Managing account email')
   .action(Space.create)
 
 cli

@@ -48,11 +48,11 @@ export const create = async (name, options) => {
     if (setup.error) {
       if (setup.error.reason === 'abort') {
         console.log(
-          '⏭️ Skip billing setup. You can do it later using `w3 space provision`'
+          '⏭️ Skipped billing setup. You can do it later using `w3 space provision`'
         )
       } else {
         console.error(
-          '⚠️ Failed to to set billing account. You can retry later using `w3 space provision`'
+          '⚠️ Failed to to set billing account. You can retry using `w3 space provision`'
         )
         console.error(setup.error.cause.message)
       }
@@ -72,7 +72,7 @@ export const create = async (name, options) => {
   // Unless user opted-out we go through an account authorization flow
   if (options.account !== false) {
     console.log(
-      `⛓️ To manage space across devices we need to authorized an account`
+      `⛓️ To manage space across devices we need to authorize an account`
     )
 
     const account = options.account
@@ -104,7 +104,7 @@ export const create = async (name, options) => {
     }
   }
 
-  console.log(`⁂ ${space.did()}`)
+  console.log(`⁂ Space created: ${space.did()}`)
 
   return space
 }
@@ -231,12 +231,12 @@ export const setupRecovery = async (space, options = {}) => {
     const verified = await mnemonic({
       secret: recoveryKey.split(/\s+/g),
       message:
-        'You need to save following "secret recovery key" somewhere safe. For example write it down on piece of paper and put it inside your favorite book.',
+        'You need to save the following secret recovery key somewhere safe! For example write it down on a piece of paper and put it inside your favorite book.',
       revealMessage:
         '🤫 Make sure no one is eavesdropping and hit enter to reveal the key',
       submitMessage: '📝 Once you have saved the key hit enter to continue',
       validateMessage:
-        '🔒 Please type or paste recovery key to make sure it is correct',
+        '🔒 Please type or paste your recovery key to make sure it is correct',
       exitMessage: '🔐 Secret recovery key is correct!',
     }).catch(() => null)
 
@@ -248,7 +248,7 @@ export const setupRecovery = async (space, options = {}) => {
  * @param {string} key
  */
 const formatRecoveryInstruction = (key) =>
-  `🔑 You need to save following "secret recovery key" somewhere safe. For example write it down on piece of paper and put it inside your favorite book.
+  `🔑 You need to save following secret recovery key somewhere safe! For example write it down on a piece of paper and put it inside your favorite book.
 
   ${key}
 
@@ -263,9 +263,9 @@ const chooseName = async (name, spaces) => {
   const space = spaces.find((space) => String(space.name) === name)
   const message =
     name === ''
-      ? 'What would you like to call this space ?'
+      ? 'What would you like to call this space?'
       : space
-      ? `Name "${space.name}" is already taken, choose another`
+      ? `Name "${space.name}" is already taken, please choose a different one`
       : null
 
   if (message == null) {
@@ -327,7 +327,7 @@ export const selectAccount = async (client) => {
  */
 export const setupAccount = async (client) => {
   const email = await input({
-    message: `📧 Please enter email address to setup an account`,
+    message: `📧 Please enter an email address to setup an account`,
     validate: (input) => parseEmail(input).ok != null,
   }).catch(() => null)
 

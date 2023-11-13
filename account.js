@@ -32,7 +32,7 @@ export const loginWithClient = async (email, client) => {
     Result.try(await account.save())
 
     if (spinner) spinner.stop()
-    console.log(`⁂ agent was authorized by ${account.did()}`)
+    console.log(`⁂ Agent was authorized by ${account.did()}`)
     return account
   } catch (err) {
     if (spinner) spinner.stop()

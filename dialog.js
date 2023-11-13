@@ -101,8 +101,8 @@ export const mnemonic = createPrompt(
 const parseInput = (input) => input.trim().split(/[\n\s]+/)
 
 /**
- * @param {string[]} key
  * @param {string[]} input
+ * @param {string[]} key
  */
 const diff = (input, key) => {
   const source = input.join('')
