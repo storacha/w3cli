@@ -504,7 +504,7 @@ export async function usageReport(opts) {
     total += size.final
   }
   if (!opts?.json) {
-    console.log(`Total: ${opts?.human ? filesize(total) : total}`)
+    console.log(`   Total: ${opts?.human ? filesize(total) : total}`)
   }
 }
 
@@ -517,8 +517,10 @@ async function * getSpaceUsageReports (client, period) {
     const subscriptions = await client.capability.subscription.list(account.did())
     for (const { consumers } of subscriptions.results) {
       for (const space of consumers) {
-        const report = await client.capability.usage.report(space, period)
-        yield { account, ...report }
+        const result = await client.capability.usage.report(space, period)
+        for (const [, report] of Object.entries(result)) {
+          yield { account: account.did(), ...report }
+        }
       }
     }
   }
