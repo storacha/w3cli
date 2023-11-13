@@ -5,10 +5,9 @@ import open from 'open'
 import updateNotifier from 'update-notifier'
 import { getPkg } from './lib.js'
 import {
+  Account,
+  Space,
   accessClaim,
-  authorize,
-  createSpace,
-  registerSpace,
   addSpace,
   listSpaces,
   useSpace,
@@ -40,18 +39,22 @@ const cli = sade('w3')
 
 cli
   .version(pkg.version)
-  .example('authorize user@example.com')
+  .example('login user@example.com')
   .example('up path/to/files')
 
 cli
-  .command('authorize <email>')
-  .alias('auth')
-  .example('authorize user@example.com')
+  .command('login <email>')
+  .example('login user@example.com')
   .describe(
-    'Authorize this agent to interact with the w3up service with capabilities granted to the given email.'
+    'Authenticate this agent with your email address to gain access to all capabilities that have been delegated to it.'
   )
-  .option('-c, --can', 'One or more abilities to authorize.')
-  .action(authorize)
+  .action(Account.login)
+
+cli
+  .command('account ls')
+  .alias('account list')
+  .describe('List accounts this agent has been authorized to act on behalf of.')
+  .action(Account.list)
 
 cli
   .command('up <file>')
@@ -105,20 +108,23 @@ cli
 cli
   .command('space create [name]')
   .describe('Create a new w3 space')
-  .action(createSpace)
+  .option('-nr, --no-recovery', 'Skips recovery key setup')
+  .option('-n, --no-caution', 'Prints out recovery key without confirmation')
+  .option('-nc, --no-customer', 'Skip billing setup')
+  .option('-c, --customer <email>', 'Billing account email')
+  .option('-na, --no-account', 'Skip account setup')
+  .option('-a, --account <email>', 'Managing account email')
+  .action(Space.create)
 
 cli
-  .command('space register')
-  .describe('Claim the space by associating it with your email address')
-  .option(
-    '-e, --email',
-    'The email address of the account to associate this space with.'
-  )
+  .command('space provision [name]')
+  .describe('Associating space with a billing account')
+  .option('-c, --customer', 'The email address of the billing account')
   .option(
     '-p, --provider',
     'The storage provider to associate with this space.'
   )
-  .action(registerSpace)
+  .action(Space.provision)
 
 cli
   .command('space add <proof>')

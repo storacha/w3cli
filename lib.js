@@ -93,25 +93,26 @@ export function getClient() {
     uploadServiceDID &&
     uploadServiceURL
   ) {
-    /** @type {import('@web3-storage/w3up-client/types').ServiceConf} */
-    serviceConf = {
-      access: connect({
-        id: parse(accessServiceDID),
-        codec: CAR.outbound,
-        channel: HTTP.open({
-          url: new URL(accessServiceURL),
-          method: 'POST',
+    serviceConf =
+      /** @type {import('@web3-storage/w3up-client/types').ServiceConf} */
+      ({
+        access: connect({
+          id: parse(accessServiceDID),
+          codec: CAR.outbound,
+          channel: HTTP.open({
+            url: new URL(accessServiceURL),
+            method: 'POST',
+          }),
         }),
-      }),
-      upload: connect({
-        id: parse(uploadServiceDID),
-        codec: CAR.outbound,
-        channel: HTTP.open({
-          url: new URL(uploadServiceURL),
-          method: 'POST',
+        upload: connect({
+          id: parse(uploadServiceDID),
+          codec: CAR.outbound,
+          channel: HTTP.open({
+            url: new URL(uploadServiceURL),
+            method: 'POST',
+          }),
         }),
-      }),
-    }
+      })
   }
 
   /** @type {import('@web3-storage/w3up-client/types').ClientFactoryOptions} */
