@@ -21,6 +21,7 @@ import {
   remove,
   list,
   whoami,
+  usageReport
 } from './index.js'
 import {
   storeAdd,
@@ -202,6 +203,13 @@ cli
   .describe('List proofs of capabilities delegated to this agent.')
   .option('--json', 'Format as newline delimited JSON')
   .action(listProofs)
+
+cli
+  .command('usage report')
+  .describe('Display report of current space usage in bytes.')
+  .option('--human', 'Format human readable values.', false)
+  .option('--json', 'Format as newline delimited JSON', false)
+  .action(usageReport)
 
 cli
   .command('can access claim')
