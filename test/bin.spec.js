@@ -3,7 +3,7 @@ import os from 'os'
 import path from 'path'
 import * as Signer from '@ucanto/principal/ed25519'
 import { importDAG } from '@ucanto/core/delegation'
-import { parseLink } from '@ucanto/server'
+import { parseLink, provide } from '@ucanto/server'
 import * as DID from '@ipld/dag-ucan/did'
 import * as dagJSON from '@ipld/dag-json'
 import { SpaceDID } from '@web3-storage/capabilities/utils'
@@ -167,6 +167,8 @@ export const testSpace = {
     async (assert, context) => {
       await login(context)
 
+      await selectPlan(context)
+
       const create = w3
         .args(['space', 'create', 'home', '--no-recovery'])
         .env(context.env.alice)
@@ -200,6 +202,8 @@ export const testSpace = {
 
       assert.ok(output.includes('alice@web.mail'))
       assert.ok(output.includes('alice@email.me'))
+
+      create.terminate()
     }
   ),
 
@@ -229,6 +233,8 @@ export const testSpace = {
       await login(context, { email: 'alice@web.mail' })
       await login(context, { email: 'alice@email.me' })
 
+      selectPlan(context)
+
       const create = await w3
         .args([
           'space',
@@ -256,6 +262,8 @@ export const testSpace = {
     test(async (assert, context) => {
       const email = 'alice@web.mail'
       await login(context, { email })
+      await selectPlan(context, { email })
+
       const { output } = await w3
         .args([
           'space',
@@ -281,6 +289,27 @@ export const testSpace = {
         'account has been delegated access to the space'
       )
     }),
+
+  'w3 space create home --no-recovery (blocks until plan is selected)': test(
+    async (assert, context) => {
+      const email = 'alice@web.mail'
+      await login(context, { email })
+
+      context.plansStorage.get = async (account) => {
+        return {
+          ok: { product: 'did:web:free.web3.storage', updatedAt: 'now' },
+        }
+      }
+
+      const { output, error } = await w3
+        .env(context.env.alice)
+        .args(['space', 'create', 'home', '--no-recovery'])
+        .join()
+
+      assert.match(output, /billing account is set/i)
+      assert.match(error, /wait.*plan.*select/i)
+    }
+  ),
 
   'w3 space add': test(async (assert, context) => {
     const { env } = context
@@ -531,6 +560,7 @@ export const testW3Up = {
   'w3 up': test(async (assert, context) => {
     const email = 'alice@web.mail'
     await login(context, { email })
+    await selectPlan(context, { email })
 
     const create = await w3
       .args([
@@ -562,6 +592,7 @@ export const testW3Up = {
   'w3 up --car': test(async (assert, context) => {
     const email = 'alice@web.mail'
     await login(context, { email })
+    await selectPlan(context, { email })
     await w3
       .args([
         'space',
@@ -1129,11 +1160,28 @@ export const login = async (
 }
 
 /**
+ * @typedef {import('@web3-storage/w3up-client/types').ProviderDID} Plan
+ *
  * @param {Test.Context} context
  * @param {object} options
- * @param {string} [options.email]
- * @param {string|null} [options.customer]
+ * @param {DIDMailto.EmailAddress} [options.email]
+ * @param {Plan} [options.plan]
+ */
+export const selectPlan = async (
+  context,
+  { email = 'alice@web.mail', plan = 'did:web:free.web3.storage' } = {}
+) => {
+  const customer = DIDMailto.fromEmail(email)
+  await context.plansStorage.set(customer, plan)
+}
+
+/**
+ * @param {Test.Context} context
+ * @param {object} options
+ * @param {DIDMailto.EmailAddress} [options.email]
+ * @param {DIDMailto.EmailAddress|null} [options.customer]
  * @param {string} [options.name]
+ * @param {Plan} [options.plan]
  * @param {Record<string, string>} [options.env]
  */
 export const createSpace = async (
@@ -1142,10 +1190,15 @@ export const createSpace = async (
     email = 'alice@web.mail',
     customer = email,
     name = 'home',
+    plan = 'did:web:free.web3.storage',
     env = context.env.alice,
   } = {}
 ) => {
   await login(context, { email, env })
+
+  if (customer != null && plan != null) {
+    await selectPlan(context, { email: customer, plan })
+  }
 
   const { output } = await w3
     .args([
