@@ -8,7 +8,6 @@ import { createEnv } from './env.js'
 import { Signer } from '@ucanto/principal/ed25519'
 import { createServer as createHTTPServer } from './http-server.js'
 import http from 'node:http'
-import { createHTTPListener } from './ucanto.js'
 import { StoreConf } from '@web3-storage/access/stores/store-conf'
 import * as FS from 'node:fs/promises'
 
