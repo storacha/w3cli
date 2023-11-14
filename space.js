@@ -134,22 +134,16 @@ const setupBilling = async (
   if (account) {
     const spinner = ora(waitMessage).start()
 
-    console.log('start the loop')
-
     let plan = null
-    console.log('wait for plan to be picked')
     while (!plan) {
-      console.log('request a plan')
       const result = await account.plan.get()
-      console.log('got a plan')
-      console.log('result', result)
+
       if (result.ok) {
         plan = result.ok
       } else {
-        await new Promise((resolve) => setTimeout(resolve, 250))
+        await new Promise((resolve) => setTimeout(resolve, 1000))
       }
     }
-    console.log('plan is selected', plan)
 
     spinner.text = message
 

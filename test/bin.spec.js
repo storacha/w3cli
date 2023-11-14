@@ -3,7 +3,7 @@ import os from 'os'
 import path from 'path'
 import * as Signer from '@ucanto/principal/ed25519'
 import { importDAG } from '@ucanto/core/delegation'
-import { parseLink } from '@ucanto/server'
+import { parseLink, provide } from '@ucanto/server'
 import * as DID from '@ipld/dag-ucan/did'
 import * as dagJSON from '@ipld/dag-json'
 import { SpaceDID } from '@web3-storage/capabilities/utils'
@@ -285,39 +285,26 @@ export const testSpace = {
       )
     }),
 
-  'only w3 space create home --no-recovery (blocks until plan is selected)':
-    test(async (assert, context) => {
+  'w3 space create home --no-recovery (blocks until plan is selected)': test(
+    async (assert, context) => {
       const email = 'alice@web.mail'
       await login(context, { email })
 
-      const create = w3
+      context.plansStorage.get = async (account) => {
+        return {
+          ok: { product: 'did:web:free.web3.storage', updatedAt: 'now' },
+        }
+      }
+
+      const { output, error } = await w3
         .env(context.env.alice)
         .args(['space', 'create', 'home', '--no-recovery'])
-        .fork()
+        .join()
 
-      // create.process.stdout?.on('data', (data) => {
-      //   console.log('stdout', data.toString())
-      // })
-
-      // create.process.stderr?.on('data', (data) => {
-      //   console.error('stderr', data.toString())
-      // })
-
-      // assert.match(await create.output.take(1).text(), /billing account/)
-      // assert.match(
-      //   await create.error.take(1).text(),
-      //   /wait.*payment plan.*select/i
-      // )
-
-      console.log('selecting a plan')
-      await selectPlan(context, { email })
-      console.log('selected a plan')
-
-      console.log('waiting for the thing')
-      const result = await create.join().catch()
-
-      console.log({ result })
-    }),
+      assert.match(output, /billing account is set/i)
+      assert.match(error, /wait.*plan.*select/i)
+    }
+  ),
 
   'w3 space add': test(async (assert, context) => {
     const { env } = context
@@ -533,6 +520,7 @@ export const testW3Up = {
   'w3 up': test(async (assert, context) => {
     const email = 'alice@web.mail'
     await login(context, { email })
+    await selectPlan(context, { email })
 
     const create = await w3
       .args([
@@ -564,6 +552,7 @@ export const testW3Up = {
   'w3 up --car': test(async (assert, context) => {
     const email = 'alice@web.mail'
     await login(context, { email })
+    await selectPlan(context, { email })
     await w3
       .args([
         'space',
