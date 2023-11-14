@@ -69,7 +69,6 @@ export const list = async () => {
  * Loaded account and delegations side-loaded are expected to be short-lived
  * given that delegations are effectively usable by anyone who knows the URL.
  *
- *
  * @param {import('@web3-storage/w3up-client').Client} client
  * @param {object} options
  * @param {URL} options.url
