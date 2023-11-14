@@ -162,6 +162,8 @@ export const testSpace = {
     async (assert, context) => {
       await login(context)
 
+      await selectPlan(context)
+
       const create = w3
         .args(['space', 'create', 'home', '--no-recovery'])
         .env(context.env.alice)
@@ -195,6 +197,8 @@ export const testSpace = {
 
       assert.ok(output.includes('alice@web.mail'))
       assert.ok(output.includes('alice@email.me'))
+
+      create.terminate()
     }
   ),
 
@@ -224,6 +228,8 @@ export const testSpace = {
       await login(context, { email: 'alice@web.mail' })
       await login(context, { email: 'alice@email.me' })
 
+      selectPlan(context)
+
       const create = await w3
         .args([
           'space',
@@ -251,6 +257,8 @@ export const testSpace = {
     test(async (assert, context) => {
       const email = 'alice@web.mail'
       await login(context, { email })
+      await selectPlan(context, { email })
+
       const { output } = await w3
         .args([
           'space',
@@ -275,6 +283,40 @@ export const testSpace = {
         result.ok?.find((d) => d.capabilities[0].can === '*'),
         'account has been delegated access to the space'
       )
+    }),
+
+  'only w3 space create home --no-recovery (blocks until plan is selected)':
+    test(async (assert, context) => {
+      const email = 'alice@web.mail'
+      await login(context, { email })
+
+      const create = w3
+        .env(context.env.alice)
+        .args(['space', 'create', 'home', '--no-recovery'])
+        .fork()
+
+      // create.process.stdout?.on('data', (data) => {
+      //   console.log('stdout', data.toString())
+      // })
+
+      // create.process.stderr?.on('data', (data) => {
+      //   console.error('stderr', data.toString())
+      // })
+
+      // assert.match(await create.output.take(1).text(), /billing account/)
+      // assert.match(
+      //   await create.error.take(1).text(),
+      //   /wait.*payment plan.*select/i
+      // )
+
+      console.log('selecting a plan')
+      await selectPlan(context, { email })
+      console.log('selected a plan')
+
+      console.log('waiting for the thing')
+      const result = await create.join().catch()
+
+      console.log({ result })
     }),
 
   'w3 space add': test(async (assert, context) => {
@@ -1089,11 +1131,28 @@ export const login = async (
 }
 
 /**
+ * @typedef {import('@web3-storage/w3up-client/types').ProviderDID} Plan
+ *
  * @param {Test.Context} context
  * @param {object} options
- * @param {string} [options.email]
- * @param {string|null} [options.customer]
+ * @param {DIDMailto.EmailAddress} [options.email]
+ * @param {Plan} [options.plan]
+ */
+export const selectPlan = async (
+  context,
+  { email = 'alice@web.mail', plan = 'did:web:free.web3.storage' } = {}
+) => {
+  const customer = DIDMailto.fromEmail(email)
+  await context.plansStorage.set(customer, plan)
+}
+
+/**
+ * @param {Test.Context} context
+ * @param {object} options
+ * @param {DIDMailto.EmailAddress} [options.email]
+ * @param {DIDMailto.EmailAddress|null} [options.customer]
  * @param {string} [options.name]
+ * @param {Plan} [options.plan]
  * @param {Record<string, string>} [options.env]
  */
 export const createSpace = async (
@@ -1102,10 +1161,15 @@ export const createSpace = async (
     email = 'alice@web.mail',
     customer = email,
     name = 'home',
+    plan = 'did:web:free.web3.storage',
     env = context.env.alice,
   } = {}
 ) => {
   await login(context, { email, env })
+
+  if (customer != null && plan != null) {
+    await selectPlan(context, { email: customer, plan })
+  }
 
   const { output } = await w3
     .args([
