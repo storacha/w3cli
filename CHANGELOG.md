@@ -1,5 +1,21 @@
 # Changelog
 
+## [5.0.0](https://github.com/web3-storage/w3cli/compare/v4.6.0...v5.0.0) (2023-11-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* wait for the plan picker ([#124](https://github.com/web3-storage/w3cli/issues/124))
+* new authorization flow ([#121](https://github.com/web3-storage/w3cli/issues/121))
+
+### Features
+
+* new authorization flow ([#121](https://github.com/web3-storage/w3cli/issues/121)) ([8d7caf6](https://github.com/web3-storage/w3cli/commit/8d7caf6d784406ff736c1376236ca771338c8be7))
+* setup prettier + linter ([#116](https://github.com/web3-storage/w3cli/issues/116)) ([5707e54](https://github.com/web3-storage/w3cli/commit/5707e5441ccee257208d085c5facf29d7c046713))
+* space usage reports ([#120](https://github.com/web3-storage/w3cli/issues/120)) ([5587a0d](https://github.com/web3-storage/w3cli/commit/5587a0d56161d612cfa86a04a0736e7964103e2d))
+* switch tests to using upload-api ([#118](https://github.com/web3-storage/w3cli/issues/118)) ([be19ff9](https://github.com/web3-storage/w3cli/commit/be19ff945af0b266251999d1f3ec54cdef7e619c))
+* wait for the plan picker ([#124](https://github.com/web3-storage/w3cli/issues/124)) ([dff71c4](https://github.com/web3-storage/w3cli/commit/dff71c46073c2b21319924fec6f15343d793f36f))
+
 ## [4.6.0](https://github.com/web3-storage/w3cli/compare/v4.5.0...v4.6.0) (2023-11-01)
 
 
