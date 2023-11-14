@@ -15,6 +15,7 @@ import {
   filesizeMB,
   readProof,
   uploadListResponseToString,
+  startOfLastMonth,
 } from './lib.js'
 import * as ucanto from '@ucanto/core'
 import chalk from 'chalk'
@@ -474,4 +475,53 @@ export async function listProofs(opts) {
 export async function whoami() {
   const client = await getClient()
   console.log(client.did())
+}
+
+/**
+ * @param {object} [opts]
+ * @param {boolean} [opts.human]
+ * @param {boolean} [opts.json]
+ */
+export async function usageReport(opts) {
+  const client = await getClient()
+  const now = new Date()
+  const period = {
+    // we may not have done a snapshot for this month _yet_, so get report from last month -> now
+    from: startOfLastMonth(now),
+    to: now
+  }
+
+  let total = 0
+  for await (const { account, provider, space, size } of getSpaceUsageReports(client, period)) {
+    if (opts?.json) {
+      console.log(dagJSON.stringify({ account, provider, space, size, reportedAt: now.toISOString() }))
+    } else {
+      console.log(` Account: ${account}`)
+      console.log(`Provider: ${provider}`)
+      console.log(`   Space: ${space}`)
+      console.log(`    Size: ${opts?.human ? filesize(size.final) : size.final}\n`)
+    }
+    total += size.final
+  }
+  if (!opts?.json) {
+    console.log(`   Total: ${opts?.human ? filesize(total) : total}`)
+  }
+}
+
+/**
+ * @param {import('@web3-storage/w3up-client').Client} client
+ * @param {{ from: Date, to: Date }} period
+ */
+async function * getSpaceUsageReports (client, period) {
+  for (const account of Object.values(client.accounts())) {
+    const subscriptions = await client.capability.subscription.list(account.did())
+    for (const { consumers } of subscriptions.results) {
+      for (const space of consumers) {
+        const result = await client.capability.usage.report(space, period)
+        for (const [, report] of Object.entries(result)) {
+          yield { account: account.did(), ...report }
+        }
+      }
+    }
+  }
 }
