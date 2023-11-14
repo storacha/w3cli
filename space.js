@@ -115,18 +115,38 @@ export const create = async (name, options) => {
  * @param {import('@web3-storage/upload-api').SpaceDID} options.space
  * @param {DIDMailto.EmailAddress} [options.customer]
  * @param {string} [options.message]
+ * @param {string} [options.waitMessage]
  * @returns {Promise<API.Result<{}, {reason:'abort'}|{reason: 'error', cause: Error}>>}
  */
 const setupBilling = async (
   client,
-  { customer, space, message = 'Setting up a billing account' }
+  {
+    customer,
+    space,
+    message = 'Setting up a billing account',
+    waitMessage = 'Waiting for payment plan to be selected',
+  }
 ) => {
   const account = customer
     ? await useAccount(client, { email: customer })
     : await selectAccount(client)
 
   if (account) {
-    const spinner = ora(message).start()
+    const spinner = ora(waitMessage).start()
+
+    let plan = null
+    while (!plan) {
+      const result = await account.plan.get()
+
+      if (result.ok) {
+        plan = result.ok
+      } else {
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+      }
+    }
+
+    spinner.text = message
+
     const result = await account.provision(space)
 
     spinner.stop()
@@ -265,8 +285,8 @@ const chooseName = async (name, spaces) => {
     name === ''
       ? 'What would you like to call this space?'
       : space
-      ? `Name "${space.name}" is already taken, please choose a different one`
-      : null
+        ? `Name "${space.name}" is already taken, please choose a different one`
+        : null
 
   if (message == null) {
     return name
