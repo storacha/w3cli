@@ -12,7 +12,12 @@ import { test } from './helpers/context.js'
 import * as Test from './helpers/context.js'
 import { pattern, match } from './helpers/util.js'
 import * as Command from './helpers/process.js'
+import { Absentee, ed25519 } from '@ucanto/principal'
 import * as DIDMailto from '@web3-storage/did-mailto'
+import { UCAN, Provider } from '@web3-storage/capabilities'
+import * as ED25519 from '@ucanto/principal/ed25519'
+import { sha256, delegate } from '@ucanto/core'
+import * as Result from '@web3-storage/w3up-client/result'
 
 const w3 = Command.create('./bin.js')
 
@@ -483,6 +488,41 @@ export const testSpace = {
       infoWithProvider.output,
       pattern`DID: ${spaceDID}\nProviders: .*${providerDID}`,
       'added provider shows up in the space info'
+    )
+  }),
+
+  'only w3 space provision': test(async (assert, context) => {
+    const spaceDID = await createSpace(context, { customer: null })
+
+    assert.deepEqual(
+      await context.provisionsStorage.getStorageProviders(spaceDID),
+      { ok: [] },
+      'space has no providers yet'
+    )
+
+    const archive = await createCustomerSession(context)
+    context.router['/proof.car'] = async () => {
+      return {
+        status: 200,
+        headers: { 'content-type': 'application/car' },
+        body: archive,
+      }
+    }
+
+    const url = new URL('/proof.car', context.serverURL)
+    const provision = await w3
+      .env(context.env.alice)
+      .args(['space', 'provision', '--proof', url.href])
+      .join()
+
+    assert.match(provision.output, /Billing account is set/)
+
+    const info = await w3.env(context.env.alice).args(['space', 'info']).join()
+
+    assert.match(
+      info.output,
+      pattern`Providers: ${context.service.did()}`,
+      'space got provisioned'
     )
   }),
 }
@@ -1122,4 +1162,58 @@ export const createSpace = async (
   const [did] = match(/(did:key:\w+)/, output)
 
   return SpaceDID.from(did)
+}
+
+/**
+ * @param {Test.Context} context
+ * @param {object} options
+ * @param {string} [options.password]
+ */
+export const createCustomerSession = async (
+  context,
+  { password = '' } = {}
+) => {
+  // Derive delegation audience from the password
+  const { digest } = await sha256.digest(new TextEncoder().encode(password))
+  const audience = await ED25519.derive(digest)
+
+  // Generate the agent that will be authorized to act on behalf of the customer
+  const agent = await ed25519.generate()
+
+  const customer = Absentee.from({ id: 'did:mailto:web.mail:workshop' })
+
+  // First we create delegation from the customer to the agent that authorizing
+  // it to perform `provider/add` on their behalf.
+  const delegation = await delegate({
+    issuer: customer,
+    audience: agent,
+    capabilities: [
+      {
+        with: 'ucan:*',
+        can: '*',
+      },
+    ],
+    expiration: Infinity,
+  })
+
+  // Then we create an attestation from the service to proof that agent has
+  // been authorized
+  const attestation = await UCAN.attest.delegate({
+    issuer: context.service,
+    audience: agent,
+    with: context.service.did(),
+    nb: { proof: delegation.cid },
+    expiration: delegation.expiration,
+  })
+
+  // Finally we create a short lived session that authorizes the audience to
+  // provider/add with their billing account.
+  const session = await Provider.add.delegate({
+    issuer: agent,
+    audience,
+    with: customer.did(),
+    proofs: [delegation, attestation],
+  })
+
+  return Result.try(await session.archive())
 }

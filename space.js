@@ -143,6 +143,7 @@ const setupBilling = async (
 /**
  * @typedef {object} ProvisionOptions
  * @property {DIDMailto.EmailAddress} [customer]
+ * @property {string} [proof]
  * @property {string} [provider]
  *
  * @param {string} name
@@ -158,18 +159,33 @@ export const provision = async (name = '', options = {}) => {
     process.exit(1)
   }
 
-  const setup = await setupBilling(client, {
-    customer: options.customer,
-    space,
-  })
+  let result
+  if (options.proof) {
+    const { ok: account, error } = await Account.load(client, {
+      url: new URL(options.proof),
+    })
 
-  if (setup.ok) {
-    console.log(`✨ Billing account is set`)
-  } else if (setup.error?.reason === 'error') {
+    if (error) {
+      result = { error }
+    } else {
+      result = await account.provision(space)
+    }
+  } else {
+    result = await setupBilling(client, {
+      customer: options.customer,
+      space,
+    })
+  }
+
+  if (result.error) {
     console.error(
-      `⚠️ Failed to set billing account - ${setup.error.cause.message}`
+      `⚠️ Failed to set up billing account,\n ${
+        Object(result.error).message ?? ''
+      }`
     )
     process.exit(1)
+  } else {
+    console.log(`✨ Billing account is set`)
   }
 }
 
@@ -265,8 +281,8 @@ const chooseName = async (name, spaces) => {
     name === ''
       ? 'What would you like to call this space?'
       : space
-      ? `Name "${space.name}" is already taken, please choose a different one`
-      : null
+        ? `Name "${space.name}" is already taken, please choose a different one`
+        : null
 
   if (message == null) {
     return name

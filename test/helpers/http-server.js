@@ -2,36 +2,60 @@ import http from 'http'
 import { once } from 'events'
 
 /**
+ * @typedef {import('@ucanto/interface').HTTPRequest<any>} HTTPRequest
+ * @typedef {import('@ucanto/server').HTTPResponse<any>} HTTPResponse
+ * @typedef {Record<string, (input:HTTPRequest) => PromiseLike<HTTPResponse>|HTTPResponse>} Router
+ *
  * @typedef {{
  *   server: http.Server
  *   serverURL: URL
- *   setRequestListener: (l: http.RequestListener) => void
+ *   router: Router
  * }} TestingServer
  */
 
-/** @returns {Promise<TestingServer>} */
-export async function createServer() {
-  /** @type {http.RequestListener} */
-  let listener = (_, response) => {
-    response.statusCode = 500
-    response.write('no request listener set')
+/**
+ * @param {Router} router
+ * @returns {Promise<TestingServer>}
+ */
+export async function createServer(router) {
+  /**
+   * @param {http.IncomingMessage} request
+   * @param {http.ServerResponse} response
+   */
+  const listener = async (request, response) => {
+    const chunks = []
+    for await (const chunk of request) {
+      chunks.push(chunk)
+    }
+
+    const handler = router[request.url ?? '/']
+    if (!handler) {
+      response.writeHead(404)
+      response.end()
+      return undefined
+    }
+
+    const { headers, body } = await handler({
+      headers: /** @type {Readonly<Record<string, string>>} */ (
+        request.headers
+      ),
+      body: Buffer.concat(chunks),
+    })
+
+    response.writeHead(200, headers)
+    response.write(body)
     response.end()
+    return undefined
   }
 
-  const server = http
-    .createServer((request, response) => {
-      listener(request, response)
-    })
-    .listen()
+  const server = http.createServer(listener).listen()
 
   await once(server, 'listening')
 
   return {
     server,
+    router,
     // @ts-expect-error
     serverURL: new URL(`http://127.0.0.1:${server.address().port}`),
-    setRequestListener: (l) => {
-      listener = l
-    },
   }
 }
