@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.1.0](https://github.com/web3-storage/w3cli/compare/v5.0.0...v5.1.0) (2023-11-15)
+
+
+### Features
+
+* delegation create uses space access ([#125](https://github.com/web3-storage/w3cli/issues/125)) ([bddff54](https://github.com/web3-storage/w3cli/commit/bddff54c35ea8b78ff6df8ee3508fcf2daa5369a))
+
 ## [5.0.0](https://github.com/web3-storage/w3cli/compare/v4.6.0...v5.0.0) (2023-11-14)
 
 
