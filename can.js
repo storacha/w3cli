@@ -1,11 +1,13 @@
 /* eslint-env browser */
 import fs from 'fs'
 import { CID } from 'multiformats'
+import { Piece } from '@web3-storage/data-segment'
 import ora from 'ora'
 import {
   getClient,
   uploadListResponseToString,
   storeListResponseToString,
+  filecoinInfoToString,
   parseCarLink,
 } from './lib.js'
 
@@ -163,4 +165,31 @@ export async function uploadRemove(rootCid) {
     console.error(err)
     process.exit(1)
   }
+}
+
+/**
+ * Get filecoin information for given PieceCid.
+ *
+ * @param {string} pieceCid
+ * @param {object} opts
+ * @param {boolean} [opts.json]
+ * @param {boolean} [opts.raw]
+ */
+export async function filecoinInfo(pieceCid, opts) {
+  let pieceInfo
+  try {
+    pieceInfo = Piece.fromString(pieceCid)
+  } catch (/** @type {any} */ err) {
+    console.error(`Error: ${pieceCid} is not a Link`)
+    process.exit(1)
+  }
+  const spinner = ora('Getting filecoin info').start()
+  const client = await getClient()
+  const info = await client.capability.filecoin.info(pieceInfo.link)
+  if (info.out.error) {
+    spinner.fail(`Error: failed to get filecoin info: ${info.out.error.message}`)
+    process.exit(1)
+  }
+  spinner.stop()
+  console.log(filecoinInfoToString(info.out.ok, opts))
 }

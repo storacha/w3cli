@@ -32,6 +32,7 @@ import {
   uploadAdd,
   uploadList,
   uploadRemove,
+  filecoinInfo
 } from './can.js'
 
 const pkg = getPkg()
@@ -286,6 +287,11 @@ cli
   .command('can upload rm <root-cid>')
   .describe('Remove an upload from the uploads listing.')
   .action(uploadRemove)
+
+cli
+  .command('can filecoin info <piece-cid>')
+  .describe('Get filecoin information for given PieceCid.')
+  .action(filecoinInfo)
 
 // show help text if no command provided
 cli.command('help [cmd]', 'Show help text', { default: true }).action((cmd) => {

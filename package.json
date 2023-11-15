@@ -1,7 +1,7 @@
 {
   "name": "@web3-storage/w3cli",
   "type": "module",
-  "version": "4.6.0",
+  "version": "5.2.0",
   "license": "(Apache-2.0 AND MIT)",
   "description": "💾 w3 command line interface",
   "bin": {
@@ -55,8 +55,9 @@
     "@ucanto/core": "^9.0.0",
     "@ucanto/transport": "^9.0.0",
     "@web3-storage/access": "^18.0.0",
+    "@web3-storage/data-segment": "^5.0.0",
+    "@web3-storage/w3up-client": "^10.0.0",
     "@web3-storage/did-mailto": "^2.1.0",
-    "@web3-storage/w3up-client": "^11.0.0",
     "chalk": "^5.3.0",
     "ansi-escapes": "^6.2.0",
     "@inquirer/prompts": "^3.3.0",

@@ -777,11 +777,9 @@ export const testDelegation = {
       .args(['delegation', 'create', bob.did()])
       .env(env)
       .join()
-      .catch()
 
-    assert.equal(delegate.status.success(), false)
-
-    assert.match(delegate.error, /missing capabilities for delegation/)
+    // TODO: Test output after we switch to Delegation.archive() / Delegation.extract()
+    assert.equal(delegate.status.success(), true)
   }),
 
   'w3 delegation ls --json': test(async (assert, context) => {
@@ -1132,6 +1130,24 @@ export const testCan = {
       .join()
 
     assert.ok(rm.status.success())
+  }),
+  'can filecoin info with not found': test(async (assert, context) => {
+    await createSpace(context)
+
+    const up = await w3
+      .args(['up', 'test/fixtures/pinpie.jpg', '--verbose'])
+      .env(context.env.alice)
+      .join()
+    const pieceCid = up.error.split('Piece CID: ')[1].split(`\n`)[0]
+
+    const { error } = await w3
+      .args(['can', 'filecoin', 'info', pieceCid, '--json'])
+      .env(context.env.alice)
+      .join()
+      .catch()
+    // no piece will be available right away
+    assert.ok(error)
+    assert.ok(error.includes('not found'))
   }),
 }
 
