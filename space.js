@@ -9,6 +9,7 @@ import ora from 'ora'
 import { select, input } from '@inquirer/prompts'
 import { mnemonic } from './dialog.js'
 import { API } from '@ucanto/core'
+import * as Result from '@web3-storage/w3up-client/result'
 
 /**
  * @typedef {object} CreateOptions
@@ -163,8 +164,9 @@ const setupBilling = async (
 /**
  * @typedef {object} ProvisionOptions
  * @property {DIDMailto.EmailAddress} [customer]
- * @property {string} [proof]
+ * @property {string} [coupon]
  * @property {string} [provider]
+ * @property {string} [password]
  *
  * @param {string} name
  * @param {ProvisionOptions} options
@@ -179,34 +181,55 @@ export const provision = async (name = '', options = {}) => {
     process.exit(1)
   }
 
-  let result
-  if (options.proof) {
-    const { ok: account, error } = await Account.load(client, {
-      url: new URL(options.proof),
-    })
+  if (options.coupon) {
+    const { ok: bytes, error: fetchError } = await fetch(options.coupon)
+      .then((response) => response.arrayBuffer())
+      .then((buffer) => Result.ok(new Uint8Array(buffer)))
+      .catch((error) => Result.error(/** @type {Error} */ (error)))
 
-    if (error) {
-      result = { error }
-    } else {
-      result = await account.provision(space)
+    if (fetchError) {
+      console.error(`Failed to fetch coupon from ${options.coupon}`)
+      process.exit(1)
+    }
+
+    const { ok: access, error: couponError } = await client.coupon
+      .redeem(bytes, options)
+      .then(Result.ok, Result.error)
+
+    if (!access) {
+      console.error(`Failed to redeem coupon: ${couponError.message}}`)
+      process.exit(1)
+    }
+
+    const result = await W3Space.provision(
+      { did: () => space },
+      {
+        proofs: access.proofs,
+        agent: client.agent,
+      }
+    )
+
+    if (result.error) {
+      console.log(`Failed to provision space: ${result.error.message}`)
+      process.exit(1)
     }
   } else {
-    result = await setupBilling(client, {
+    const result = await setupBilling(client, {
       customer: options.customer,
       space,
     })
+
+    if (result.error) {
+      console.error(
+        `⚠️ Failed to set up billing account,\n ${
+          Object(result.error).message ?? ''
+        }`
+      )
+      process.exit(1)
+    }
   }
 
-  if (result.error) {
-    console.error(
-      `⚠️ Failed to set up billing account,\n ${
-        Object(result.error).message ?? ''
-      }`
-    )
-    process.exit(1)
-  } else {
-    console.log(`✨ Billing account is set`)
-  }
+  console.log(`✨ Billing account is set`)
 }
 
 /**

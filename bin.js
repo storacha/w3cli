@@ -7,6 +7,7 @@ import { getPkg } from './lib.js'
 import {
   Account,
   Space,
+  Coupon,
   accessClaim,
   addSpace,
   listSpaces,
@@ -21,7 +22,8 @@ import {
   remove,
   list,
   whoami,
-  usageReport
+  usageReport,
+  getPlan,
 } from './index.js'
 import {
   storeAdd,
@@ -50,6 +52,12 @@ cli
     'Authenticate this agent with your email address to gain access to all capabilities that have been delegated to it.'
   )
   .action(Account.login)
+
+cli
+  .command('plan get [email]')
+  .example('plan get user@example.com')
+  .describe('Displays plan given account is on')
+  .action(getPlan)
 
 cli
   .command('account ls')
@@ -121,6 +129,8 @@ cli
   .command('space provision [name]')
   .describe('Associating space with a billing account')
   .option('-c, --customer', 'The email address of the billing account')
+  .option('--coupon', 'Coupon URL to provision space with')
+  .option('-p, -password', 'Coupon password')
   .option(
     '-p, --provider',
     'The storage provider to associate with this space.'
@@ -150,6 +160,20 @@ cli
   .command('space use <did>')
   .describe('Set the current space in use by the agent')
   .action(useSpace)
+
+cli
+  .command('coupon create <did>')
+  .option('-c, --can', 'One or more abilities to delegate.')
+  .option(
+    '-e, --expiration',
+    'Unix timestamp when the delegation is no longer valid. Zero indicates no expiration.',
+    0
+  )
+  .option(
+    '-o, --output',
+    'Path of file to write the exported delegation data to.'
+  )
+  .action(Coupon.issue)
 
 cli
   .command('delegation create <audience-did>')

@@ -520,7 +520,7 @@ export const testSpace = {
     )
   }),
 
-  'w3 space provision': test(async (assert, context) => {
+  'w3 space provision --coupon': test(async (assert, context) => {
     const spaceDID = await createSpace(context, { customer: null })
 
     assert.deepEqual(
@@ -541,7 +541,7 @@ export const testSpace = {
     const url = new URL('/proof.car', context.serverURL)
     const provision = await w3
       .env(context.env.alice)
-      .args(['space', 'provision', '--proof', url.href])
+      .args(['space', 'provision', '--coupon', url.href])
       .join()
 
     assert.match(provision.output, /Billing account is set/)
@@ -1132,6 +1132,23 @@ export const testCan = {
       .join()
 
     assert.ok(rm.status.success())
+  }),
+}
+
+export const testPlan = {
+  'w3 plan get': test(async (assert, context) => {
+    await login(context)
+    const notFound = await w3
+      .args(['plan', 'get'])
+      .env(context.env.alice)
+      .join()
+
+    assert.match(notFound.output, /no plan/i)
+
+    await selectPlan(context)
+
+    const plan = await w3.args(['plan', 'get']).env(context.env.alice).join()
+    assert.match(plan.output, /did:web:free.web3.storage/)
   }),
 }
 
