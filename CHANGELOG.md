@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.2.0](https://github.com/web3-storage/w3cli/compare/v5.1.0...v5.2.0) (2023-11-15)
+
+
+### Features
+
+* can filecoin info ([#127](https://github.com/web3-storage/w3cli/issues/127)) ([d8290a6](https://github.com/web3-storage/w3cli/commit/d8290a68bfcf542ab756f8810bbbbeb3cc0c6a29))
+
 ## [5.1.0](https://github.com/web3-storage/w3cli/compare/v5.0.0...v5.1.0) (2023-11-15)
 
 
