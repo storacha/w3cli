@@ -21,6 +21,7 @@ import chalk from 'chalk'
  * @typedef {import('@web3-storage/w3up-client/types').FileLike & { size: number }} FileLike
  * @typedef {import('@web3-storage/w3up-client/types').StoreListSuccess} StoreListSuccess
  * @typedef {import('@web3-storage/w3up-client/types').UploadListSuccess} UploadListSuccess
+ * @typedef {import('@web3-storage/capabilities/types').FilecoinInfoSuccess} FilecoinInfoSuccess
  */
 
 /**
@@ -203,6 +204,33 @@ export function storeListResponseToString(res, opts = {}) {
       .join('\n')
   } else {
     return res.results.map(({ link }) => link.toString()).join('\n')
+  }
+}
+
+/**
+ * 
+ * @param {FilecoinInfoSuccess} res 
+ * @param {object} [opts]
+ * @param {boolean} [opts.raw]
+ * @param {boolean} [opts.json]
+ */
+export function filecoinInfoToString(res, opts = {}) {
+  if (opts.json) {
+    return res.deals
+      .map(deal => dagJSON.stringify(({
+        aggregate: deal.aggregate.toString(),
+        provider: deal.provider,
+        dealId: deal.aux.dataSource.dealID
+        // not showing inclusion proof as it would just be bytes
+      })))
+      .join('\n')
+  } else {
+    return res.deals.map(deal => ({
+      aggregate: deal.aggregate.toString(),
+      provider: deal.provider,
+      dealId: deal.aux.dataSource.dealID
+      // not showing inclusion proof as it would just be bytes
+    }))
   }
 }
 
