@@ -228,8 +228,8 @@ export function filecoinInfoToString(res, opts = {}) {
       .map(deal => dagJSON.stringify(({
         aggregate: deal.aggregate.toString(),
         provider: deal.provider,
-        dealId: deal.aux.dataSource.dealID
-        // not showing inclusion proof as it would just be bytes
+        dealId: deal.aux.dataSource.dealID,
+        inclusion: deal.inclusion
       })))
       .join('\n')
   } else {
@@ -239,6 +239,7 @@ export function filecoinInfoToString(res, opts = {}) {
       Deals: Piece being aggregated and offered for deal...
       `
     }
+    // not showing inclusion proof as it would just be bytes
     return `
     Piece CID: ${res.piece.toString()}
     Deals: ${res.deals.map((deal) => `
