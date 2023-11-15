@@ -1091,6 +1091,24 @@ export const testCan = {
 
     assert.ok(rm.status.success())
   }),
+  'can filecoin info with not found': test(async (assert, context) => {
+    await createSpace(context)
+
+    const up = await w3
+      .args(['up', 'test/fixtures/pinpie.jpg', '--verbose'])
+      .env(context.env.alice)
+      .join()
+    const pieceCid = up.error.split('Piece CID: ')[1].split(`\n`)[0]
+
+    const { error } = await w3
+      .args(['can', 'filecoin', 'info', pieceCid, '--json'])
+      .env(context.env.alice)
+      .join()
+      .catch()
+    // no piece will be available right away
+    assert.ok(error)
+    assert.ok(error.includes('not found'))
+  }),
 }
 
 /**

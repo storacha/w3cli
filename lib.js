@@ -21,6 +21,7 @@ import chalk from 'chalk'
  * @typedef {import('@web3-storage/w3up-client/types').FileLike & { size: number }} FileLike
  * @typedef {import('@web3-storage/w3up-client/types').StoreListSuccess} StoreListSuccess
  * @typedef {import('@web3-storage/w3up-client/types').UploadListSuccess} UploadListSuccess
+ * @typedef {import('@web3-storage/capabilities/types').FilecoinInfoSuccess} FilecoinInfoSuccess
  */
 
 /**
@@ -105,6 +106,14 @@ export function getClient() {
           }),
         }),
         upload: connect({
+          id: parse(uploadServiceDID),
+          codec: CAR.outbound,
+          channel: HTTP.open({
+            url: new URL(uploadServiceURL),
+            method: 'POST',
+          }),
+        }),
+        filecoin: connect({
           id: parse(uploadServiceDID),
           codec: CAR.outbound,
           channel: HTTP.open({
@@ -203,6 +212,42 @@ export function storeListResponseToString(res, opts = {}) {
       .join('\n')
   } else {
     return res.results.map(({ link }) => link.toString()).join('\n')
+  }
+}
+
+/**
+ * 
+ * @param {FilecoinInfoSuccess} res 
+ * @param {object} [opts]
+ * @param {boolean} [opts.raw]
+ * @param {boolean} [opts.json]
+ */
+export function filecoinInfoToString(res, opts = {}) {
+  if (opts.json) {
+    return res.deals
+      .map(deal => dagJSON.stringify(({
+        aggregate: deal.aggregate.toString(),
+        provider: deal.provider,
+        dealId: deal.aux.dataSource.dealID,
+        inclusion: deal.inclusion
+      })))
+      .join('\n')
+  } else {
+    if (!res.deals.length) {
+      return `
+      Piece CID: ${res.piece.toString()}
+      Deals: Piece being aggregated and offered for deal...
+      `
+    }
+    // not showing inclusion proof as it would just be bytes
+    return `
+    Piece CID: ${res.piece.toString()}
+    Deals: ${res.deals.map((deal) => `
+      Aggregate: ${deal.aggregate.toString()}
+       Provider: ${deal.provider}
+        Deal ID: ${deal.aux.dataSource.dealID}
+    `).join('')}
+    `
   }
 }
 
