@@ -737,11 +737,9 @@ export const testDelegation = {
       .args(['delegation', 'create', bob.did()])
       .env(env)
       .join()
-      .catch()
 
-    assert.equal(delegate.status.success(), false)
-
-    assert.match(delegate.error, /missing capabilities for delegation/)
+    // TODO: Test output after we switch to Delegation.archive() / Delegation.extract()
+    assert.equal(delegate.status.success(), true)
   }),
 
   'w3 delegation ls --json': test(async (assert, context) => {
