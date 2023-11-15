@@ -3,10 +3,6 @@ import * as Result from '@web3-storage/w3up-client/result'
 import * as DidMailto from '@web3-storage/did-mailto'
 import { getClient } from './lib.js'
 import ora from 'ora'
-import { AccountDID } from '@web3-storage/access/provider'
-import { Delegation } from '@web3-storage/access'
-import * as ED25519 from '@ucanto/principal/ed25519'
-import { sha256 } from '@ucanto/core'
 
 /**
  * @typedef {Awaited<ReturnType<Account.login>>['ok']&{}} View
@@ -57,66 +53,4 @@ export const list = async () => {
       '⁂ Agent has not been authorized yet. Try `w3 login` to authorize this agent with your account.'
     )
   }
-}
-
-/**
- * Loads account from the the external proof delegated to the ED25519 principal
- * derived from the sha256 of the password. Delegation must be encoded in a CAR
- * format produced by `Delegation.archive` function. External delegation MAY
- * be fetched from a remote URL or from a local file system (if file:// URL is
- * provided).
- *
- * Loaded account and delegations side-loaded are expected to be short-lived
- * given that delegations are effectively usable by anyone who knows the URL.
- *
- * @param {import('@web3-storage/w3up-client').Client} client
- * @param {object} options
- * @param {URL} options.url
- * @param {string} [options.password]
- */
-export const load = async (client, { url, password = '' }) => {
-  const { ok: bytes, error: fetchError } = await fetch(url)
-    .then((response) => response.arrayBuffer())
-    .then((buffer) => Result.ok(new Uint8Array(buffer)))
-    .catch((error) => Result.error(/** @type {Error} */ (error)))
-
-  if (fetchError) {
-    return Result.error(fetchError)
-  }
-
-  const { error: extractError, ok: delegation } =
-    await Delegation.extract(bytes)
-  if (extractError) {
-    return Result.error(extractError)
-  }
-
-  const [capability] = delegation.capabilities
-
-  const { ok: customer, error } = AccountDID.read(capability.with)
-  if (error) {
-    return Result.error(error)
-  }
-
-  const { digest } = await sha256.digest(new TextEncoder().encode(password))
-  const audience = await ED25519.Signer.derive(digest)
-
-  if (delegation.audience.did() !== audience.did()) {
-    return Result.error(new RangeError('Invalid password'))
-  }
-
-  const account = new Account.Account({
-    agent: client.agent,
-    id: /** @type {DidMailto.DidMailto} */ (customer),
-    proofs: [
-      await Delegation.delegate({
-        issuer: audience,
-        audience: client.agent,
-        capabilities: [capability],
-        expiration: delegation.expiration,
-        proofs: [delegation],
-      }),
-    ],
-  })
-
-  return Result.ok(account)
 }
