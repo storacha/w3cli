@@ -20,7 +20,6 @@ import {
 } from './lib.js'
 import * as ucanto from '@ucanto/core'
 import chalk from 'chalk'
-import { select } from '@inquirer/prompts'
 export * as Coupon from './coupon.js'
 export { Account, Space }
 
