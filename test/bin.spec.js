@@ -520,7 +520,7 @@ export const testSpace = {
     )
   }),
 
-  'only w3 space provision': test(async (assert, context) => {
+  'w3 space provision': test(async (assert, context) => {
     const spaceDID = await createSpace(context, { customer: null })
 
     assert.deepEqual(
