@@ -233,12 +233,20 @@ export function filecoinInfoToString(res, opts = {}) {
       })))
       .join('\n')
   } else {
-    return res.deals.map(deal => ({
-      aggregate: deal.aggregate.toString(),
-      provider: deal.provider,
-      dealId: deal.aux.dataSource.dealID
-      // not showing inclusion proof as it would just be bytes
-    }))
+    if (!res.deals.length) {
+      return `
+      Piece CID: ${res.piece.toString()}
+      Deals: Piece being aggregated and offered for deal...
+      `
+    }
+    return `
+    Piece CID: ${res.piece.toString()}
+    Deals: ${res.deals.map((deal) => `
+      Aggregate: ${deal.aggregate.toString()}
+       Provider: ${deal.provider}
+        Deal ID: ${deal.aux.dataSource.dealID}
+    `).join('')}
+    `
   }
 }
 
