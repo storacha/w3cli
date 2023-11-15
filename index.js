@@ -7,6 +7,7 @@ import * as dagJSON from '@ipld/dag-json'
 import { CarWriter } from '@ipld/car'
 import { filesFromPaths } from 'files-from-path'
 import * as Account from './account.js'
+import { spaceAccess } from '@web3-storage/w3up-client/capability/access'
 import * as Space from './space.js'
 import {
   getClient,
@@ -305,14 +306,17 @@ Providers: ${providers || chalk.dim('none')}`)
  * @param {string} [opts.type]
  * @param {number} [opts.expiration]
  * @param {string} [opts.output]
+ * @param {string} [opts.with]
  */
 export async function createDelegation(audienceDID, opts) {
   const client = await getClient()
+
   if (client.currentSpace() == null) {
     throw new Error('no current space, use `w3 space register` to create one.')
   }
   const audience = DID.parse(audienceDID)
-  const abilities = opts.can ? [opts.can].flat() : []
+
+  const abilities = opts.can ? [opts.can].flat() : Object.keys(spaceAccess)
   if (!abilities.length) {
     console.error('Error: missing capabilities for delegation')
     process.exit(1)
