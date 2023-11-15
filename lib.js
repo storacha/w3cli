@@ -113,6 +113,14 @@ export function getClient() {
             method: 'POST',
           }),
         }),
+        filecoin: connect({
+          id: parse(uploadServiceDID),
+          codec: CAR.outbound,
+          channel: HTTP.open({
+            url: new URL(uploadServiceURL),
+            method: 'POST',
+          }),
+        }),
       })
   }
 
