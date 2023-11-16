@@ -5,10 +5,10 @@ import open from 'open'
 import updateNotifier from 'update-notifier'
 import { getPkg } from './lib.js'
 import {
+  Account,
+  Space,
+  Coupon,
   accessClaim,
-  authorize,
-  createSpace,
-  registerSpace,
   addSpace,
   listSpaces,
   useSpace,
@@ -22,6 +22,8 @@ import {
   remove,
   list,
   whoami,
+  usageReport,
+  getPlan,
 } from './index.js'
 import {
   storeAdd,
@@ -30,6 +32,7 @@ import {
   uploadAdd,
   uploadList,
   uploadRemove,
+  filecoinInfo,
 } from './can.js'
 
 const pkg = getPkg()
@@ -40,18 +43,28 @@ const cli = sade('w3')
 
 cli
   .version(pkg.version)
-  .example('authorize user@example.com')
+  .example('login user@example.com')
   .example('up path/to/files')
 
 cli
-  .command('authorize <email>')
-  .alias('auth')
-  .example('authorize user@example.com')
+  .command('login <email>')
+  .example('login user@example.com')
   .describe(
-    'Authorize this agent to interact with the w3up service with capabilities granted to the given email.'
+    'Authenticate this agent with your email address to gain access to all capabilities that have been delegated to it.'
   )
-  .option('-c, --can', 'One or more abilities to authorize.')
-  .action(authorize)
+  .action(Account.login)
+
+cli
+  .command('plan get [email]')
+  .example('plan get user@example.com')
+  .describe('Displays plan given account is on')
+  .action(getPlan)
+
+cli
+  .command('account ls')
+  .alias('account list')
+  .describe('List accounts this agent has been authorized to act on behalf of.')
+  .action(Account.list)
 
 cli
   .command('up <file>')
@@ -105,20 +118,25 @@ cli
 cli
   .command('space create [name]')
   .describe('Create a new w3 space')
-  .action(createSpace)
+  .option('-nr, --no-recovery', 'Skips recovery key setup')
+  .option('-n, --no-caution', 'Prints out recovery key without confirmation')
+  .option('-nc, --no-customer', 'Skip billing setup')
+  .option('-c, --customer <email>', 'Billing account email')
+  .option('-na, --no-account', 'Skip account setup')
+  .option('-a, --account <email>', 'Managing account email')
+  .action(Space.create)
 
 cli
-  .command('space register')
-  .describe('Claim the space by associating it with your email address')
-  .option(
-    '-e, --email',
-    'The email address of the account to associate this space with.'
-  )
+  .command('space provision [name]')
+  .describe('Associating space with a billing account')
+  .option('-c, --customer', 'The email address of the billing account')
+  .option('--coupon', 'Coupon URL to provision space with')
+  .option('-p, -password', 'Coupon password')
   .option(
     '-p, --provider',
     'The storage provider to associate with this space.'
   )
-  .action(registerSpace)
+  .action(Space.provision)
 
 cli
   .command('space add <proof>')
@@ -143,6 +161,21 @@ cli
   .command('space use <did>')
   .describe('Set the current space in use by the agent')
   .action(useSpace)
+
+cli
+  .command('coupon create <did>')
+  .option('--password', 'Password for created coupon.')
+  .option('-c, --can', 'One or more abilities to delegate.')
+  .option(
+    '-e, --expiration',
+    'Unix timestamp when the delegation is no longer valid. Zero indicates no expiration.',
+    0
+  )
+  .option(
+    '-o, --output',
+    'Path of file to write the exported delegation data to.'
+  )
+  .action(Coupon.issue)
 
 cli
   .command('delegation create <audience-did>')
@@ -198,6 +231,13 @@ cli
   .action(listProofs)
 
 cli
+  .command('usage report')
+  .describe('Display report of current space usage in bytes.')
+  .option('--human', 'Format human readable values.', false)
+  .option('--json', 'Format as newline delimited JSON', false)
+  .action(usageReport)
+
+cli
   .command('can access claim')
   .describe('Claim delegated capabilities for the authorized account.')
   .action(accessClaim)
@@ -248,6 +288,11 @@ cli
   .command('can upload rm <root-cid>')
   .describe('Remove an upload from the uploads listing.')
   .action(uploadRemove)
+
+cli
+  .command('can filecoin info <piece-cid>')
+  .describe('Get filecoin information for given PieceCid.')
+  .action(filecoinInfo)
 
 // show help text if no command provided
 cli.command('help [cmd]', 'Show help text', { default: true }).action((cmd) => {

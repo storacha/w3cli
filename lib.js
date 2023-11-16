@@ -21,6 +21,7 @@ import chalk from 'chalk'
  * @typedef {import('@web3-storage/w3up-client/types').FileLike & { size: number }} FileLike
  * @typedef {import('@web3-storage/w3up-client/types').StoreListSuccess} StoreListSuccess
  * @typedef {import('@web3-storage/w3up-client/types').UploadListSuccess} UploadListSuccess
+ * @typedef {import('@web3-storage/capabilities/types').FilecoinInfoSuccess} FilecoinInfoSuccess
  */
 
 /**
@@ -93,25 +94,34 @@ export function getClient() {
     uploadServiceDID &&
     uploadServiceURL
   ) {
-    /** @type {import('@web3-storage/w3up-client/types').ServiceConf} */
-    serviceConf = {
-      access: connect({
-        id: parse(accessServiceDID),
-        codec: CAR.outbound,
-        channel: HTTP.open({
-          url: new URL(accessServiceURL),
-          method: 'POST',
+    serviceConf =
+      /** @type {import('@web3-storage/w3up-client/types').ServiceConf} */
+      ({
+        access: connect({
+          id: parse(accessServiceDID),
+          codec: CAR.outbound,
+          channel: HTTP.open({
+            url: new URL(accessServiceURL),
+            method: 'POST',
+          }),
         }),
-      }),
-      upload: connect({
-        id: parse(uploadServiceDID),
-        codec: CAR.outbound,
-        channel: HTTP.open({
-          url: new URL(uploadServiceURL),
-          method: 'POST',
+        upload: connect({
+          id: parse(uploadServiceDID),
+          codec: CAR.outbound,
+          channel: HTTP.open({
+            url: new URL(uploadServiceURL),
+            method: 'POST',
+          }),
         }),
-      }),
-    }
+        filecoin: connect({
+          id: parse(uploadServiceDID),
+          codec: CAR.outbound,
+          channel: HTTP.open({
+            url: new URL(uploadServiceURL),
+            method: 'POST',
+          }),
+        }),
+      })
   }
 
   /** @type {import('@web3-storage/w3up-client/types').ClientFactoryOptions} */
@@ -206,6 +216,42 @@ export function storeListResponseToString(res, opts = {}) {
 }
 
 /**
+ * 
+ * @param {FilecoinInfoSuccess} res 
+ * @param {object} [opts]
+ * @param {boolean} [opts.raw]
+ * @param {boolean} [opts.json]
+ */
+export function filecoinInfoToString(res, opts = {}) {
+  if (opts.json) {
+    return res.deals
+      .map(deal => dagJSON.stringify(({
+        aggregate: deal.aggregate.toString(),
+        provider: deal.provider,
+        dealId: deal.aux.dataSource.dealID,
+        inclusion: deal.inclusion
+      })))
+      .join('\n')
+  } else {
+    if (!res.deals.length) {
+      return `
+      Piece CID: ${res.piece.toString()}
+      Deals: Piece being aggregated and offered for deal...
+      `
+    }
+    // not showing inclusion proof as it would just be bytes
+    return `
+    Piece CID: ${res.piece.toString()}
+    Deals: ${res.deals.map((deal) => `
+      Aggregate: ${deal.aggregate.toString()}
+       Provider: ${deal.provider}
+        Deal ID: ${deal.aux.dataSource.dealID}
+    `).join('')}
+    `
+  }
+}
+
+/**
  * Return validated CARLink or undefined
  *
  * @param {AnyLink} cid
@@ -227,4 +273,22 @@ export function parseCarLink(cidStr) {
   } catch {
     return undefined
   }
+}
+
+/** @param {string|number|Date} now */
+const startOfMonth = (now) => {
+  const d = new Date(now)
+  d.setUTCDate(1)
+  d.setUTCHours(0)
+  d.setUTCMinutes(0)
+  d.setUTCSeconds(0)
+  d.setUTCMilliseconds(0)
+  return d
+}
+
+/** @param {string|number|Date} now */
+export const startOfLastMonth = (now) => {
+  const d = startOfMonth(now)
+  d.setUTCMonth(d.getUTCMonth() - 1)
+  return d
 }

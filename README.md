@@ -4,7 +4,7 @@
 
 ## Getting started 
 
-Install the CLI from npm (**`w3up-client` requires Node 18 or higher**):
+Install the CLI from npm (**requires Node 18 or higher**):
 
 ```console
 npm install -g @web3-storage/w3cli
@@ -38,7 +38,7 @@ w3 up recipies.txt
 ## Commands
 
 * Basics
-  * [`w3 authorize`](#w3-authorize-email)
+  * [`w3 login`](#w3-login-email)
   * [`w3 up`](#w3-up-path-path)
   * [`w3 ls`](#w3-ls)
   * [`w3 rm`](#w3-rm-root-cid)
@@ -69,9 +69,9 @@ w3 up recipies.txt
 
 ---
 
-### `w3 authorize <email>`
+### `w3 login <email>`
 
-Authorize this agent to interact with the w3up service with any capabilities granted to the given email.
+Authenticate this agent with your email address to get access to all capabilities that had been delegated to it.
 
 ### `w3 up <path> [path...]`
 

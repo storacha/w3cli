@@ -4,7 +4,12 @@ import {
   createContext,
   cleanupContext,
 } from '@web3-storage/upload-api/test/context'
+import { createEnv } from './env.js'
 import { Signer } from '@ucanto/principal/ed25519'
+import { createServer as createHTTPServer } from './http-server.js'
+import http from 'node:http'
+import { StoreConf } from '@web3-storage/access/stores/store-conf'
+import * as FS from 'node:fs/promises'
 
 /** did:key:z6Mkqa4oY9Z5Pf5tUcjLHLUsDjKwMC95HGXdE1j22jkbhz6r */
 export const alice = Signer.parse(
@@ -22,9 +27,9 @@ export const mallory = Signer.parse(
 export { createContext, cleanupContext }
 
 /**
- * @typedef {Awaited<ReturnType<createContext>>} Context
+ * @typedef {Awaited<ReturnType<createContext>>} UcantoServerTestContext
  *
- * @param {Context} context
+ * @param {UcantoServerTestContext} context
  * @param {object} input
  * @param {API.DIDKey} input.space
  * @param {API.DID<'mailto'>} input.account
@@ -38,4 +43,79 @@ export const provisionSpace = async (context, { space, account, provider }) => {
     customer: account,
     provider,
   })
+}
+
+/**
+ * @typedef {import('@web3-storage/w3up-client/types').StoreAddSuccess} StoreAddSuccess
+ * @typedef {UcantoServerTestContext & {
+ *   server: import('./http-server').TestingServer['server']
+ *   router: import('./http-server').Router
+ *   env: { alice: Record<string, string>, bob: Record<string, string> }
+ *   serverURL: URL
+ * }} Context
+ *
+ * @returns {Promise<Context>}
+ */
+export const setup = async () => {
+  const context = await createContext({ http })
+  const { server, serverURL, router } = await createHTTPServer({
+    '/': context.connection.channel.request.bind(context.connection.channel),
+  })
+
+  return Object.assign(context, {
+    server,
+    serverURL,
+    router,
+    serverRouter: router,
+    env: {
+      alice: createEnv({
+        storeName: `w3cli-test-alice-${context.service.did()}`,
+        servicePrincipal: context.service,
+        serviceURL: serverURL,
+      }),
+      bob: createEnv({
+        storeName: `w3cli-test-bob-${context.service.did()}`,
+        servicePrincipal: context.service,
+        serviceURL: serverURL,
+      }),
+    },
+  })
+}
+
+/**
+ * @param {Context} context
+ */
+export const teardown = async (context) => {
+  await cleanupContext(context)
+  context.server.close()
+
+  const stores = [
+    context.env.alice.W3_STORE_NAME,
+    context.env.bob.W3_STORE_NAME,
+  ]
+
+  await Promise.all(
+    stores.map(async (name) => {
+      const { path } = new StoreConf({ profile: name })
+      try {
+        await FS.rm(path)
+      } catch (/** @type {any} */ err) {
+        if (err.code === 'ENOENT') return // is ok maybe it wasn't used in the test
+        throw err
+      }
+    })
+  )
+}
+
+/**
+ * @param {(assert: import('entail').Assert, context: Context) => unknown} unit
+ * @returns {import('entail').Test}
+ */
+export const test = (unit) => async (assert) => {
+  const context = await setup()
+  try {
+    await unit(assert, context)
+  } finally {
+    await teardown(context)
+  }
 }

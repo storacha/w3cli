@@ -6,6 +6,9 @@ import * as DID from '@ipld/dag-ucan/did'
 import * as dagJSON from '@ipld/dag-json'
 import { CarWriter } from '@ipld/car'
 import { filesFromPaths } from 'files-from-path'
+import * as Account from './account.js'
+import { spaceAccess } from '@web3-storage/w3up-client/capability/access'
+import * as Space from './space.js'
 import {
   getClient,
   checkPathsExist,
@@ -13,10 +16,12 @@ import {
   filesizeMB,
   readProof,
   uploadListResponseToString,
+  startOfLastMonth,
 } from './lib.js'
 import * as ucanto from '@ucanto/core'
-import * as DidMailto from '@web3-storage/did-mailto'
 import chalk from 'chalk'
+export * as Coupon from './coupon.js'
+export { Account, Space }
 
 /**
  *
@@ -24,6 +29,31 @@ import chalk from 'chalk'
 export async function accessClaim() {
   const client = await getClient()
   await client.capability.access.claim()
+}
+
+/**
+ * @param {string} email
+ */
+export const getPlan = async (email = '') => {
+  const client = await getClient()
+  const account =
+    email === ''
+      ? await Space.selectAccount(client)
+      : await Space.useAccount(client, { email })
+
+  if (account) {
+    const { ok: plan, error } = await account.plan.get()
+    if (plan) {
+      console.log(`⁂ ${plan.product}`)
+    } else if (error?.name === 'PlanNotFound') {
+      console.log('⁂ no plan has been selected yet')
+    } else {
+      console.error(`Failed to get plan - ${error.message}`)
+      process.exit(1)
+    }
+  } else {
+    process.exit(1)
+  }
 }
 
 /**
@@ -90,8 +120,8 @@ export async function upload(firstPath, opts) {
   const uploadFn = opts?.car
     ? client.uploadCAR.bind(client, files[0])
     : files.length === 1 && opts?.['no-wrap']
-    ? client.uploadFile.bind(client, files[0])
-    : client.uploadDirectory.bind(client, files)
+      ? client.uploadFile.bind(client, files[0])
+      : client.uploadDirectory.bind(client, files)
 
   const root = await uploadFn({
     onShardStored: ({ cid, size, piece }) => {
@@ -215,73 +245,6 @@ export async function createSpace(name) {
   console.log(space.did())
 }
 
-/** @param {import('@web3-storage/w3up-client').Client} client */
-function findAccountsThatCanProviderAdd(client) {
-  /** @type {Array<ReturnType<DidMailto.fromString>>} */
-  const accounts = []
-  const proofs = client.proofs()
-  for (const proof of proofs) {
-    const allows = ucanto.Delegation.allows(proof)
-    for (const resourceDID of Object.keys(allows)) {
-      if (
-        resourceDID.startsWith('did:mailto:') &&
-        allows[resourceDID]['provider/add']
-      ) {
-        accounts.push(DidMailto.fromString(resourceDID))
-      }
-    }
-  }
-  return accounts
-}
-
-/**
- * @param {object} [opts]
- * @param {string} [opts.email]
- * @param {`did:web:${string}`} [opts.provider]
- */
-export async function registerSpace(opts) {
-  const client = await getClient()
-  let accountEmail = opts?.email
-  if (!accountEmail) {
-    const accounts = findAccountsThatCanProviderAdd(client)
-    if (accounts.length === 1) {
-      accountEmail = DidMailto.toEmail(accounts[0])
-    } else {
-      if (accounts.length > 1) {
-        console.error(
-          'Error: you are authorized to use more than one account and have not specified which one you would like to use to register this space.'
-        )
-      } else {
-        console.error('Error: please authorize before registering spaces')
-      }
-      process.exit(1)
-    }
-  }
-  let space = client.currentSpace()
-  if (space === undefined) {
-    space = await client.createSpace()
-    await client.setCurrentSpace(space.did())
-  }
-  /** @type {import('ora').Ora|undefined} */
-  const spinner = ora('registering your space').start()
-
-  try {
-    await client.registerSpace(accountEmail, { provider: opts?.provider })
-  } catch (/** @type {any} */ err) {
-    if (spinner) spinner.stop()
-    if (err.message.startsWith('Space already registered')) {
-      console.error('Error: space already registered.')
-    } else if (err.message.startsWith('no proofs available')) {
-      console.error(`Error: you are not authorized as ${accountEmail}`)
-    } else {
-      console.error(err)
-    }
-    process.exit(1)
-  }
-  if (spinner) spinner.stop()
-  console.log(`⁂ space registered to ${accountEmail}`)
-}
-
 /**
  * @param {string} proofPath
  */
@@ -300,7 +263,7 @@ export async function listSpaces() {
   const current = client.currentSpace()
   for (const space of client.spaces()) {
     const prefix = current && current.did() === space.did() ? '* ' : '  '
-    console.log(`${prefix}${space.did()} ${space.name() ?? ''}`)
+    console.log(`${prefix}${space.did()} ${space.name ?? ''}`)
   }
 }
 
@@ -311,7 +274,7 @@ export async function useSpace(did) {
   const client = await getClient()
   const spaces = client.spaces()
   const space =
-    spaces.find((s) => s.did() === did) ?? spaces.find((s) => s.name() === did)
+    spaces.find((s) => s.did() === did) ?? spaces.find((s) => s.name === did)
   if (!space) {
     console.error(`Error: space not found: ${did}`)
     process.exit(1)
@@ -368,14 +331,17 @@ Providers: ${providers || chalk.dim('none')}`)
  * @param {string} [opts.type]
  * @param {number} [opts.expiration]
  * @param {string} [opts.output]
+ * @param {string} [opts.with]
  */
 export async function createDelegation(audienceDID, opts) {
   const client = await getClient()
+
   if (client.currentSpace() == null) {
     throw new Error('no current space, use `w3 space register` to create one.')
   }
   const audience = DID.parse(audienceDID)
-  const abilities = opts.can ? [opts.can].flat() : []
+
+  const abilities = opts.can ? [opts.can].flat() : Object.keys(spaceAccess)
   if (!abilities.length) {
     console.error('Error: missing capabilities for delegation')
     process.exit(1)
@@ -537,6 +503,69 @@ export async function listProofs(opts) {
  */
 export async function whoami() {
   const client = await getClient()
-  const who = client.agent()
-  console.log(who.did())
+  console.log(client.did())
+}
+
+/**
+ * @param {object} [opts]
+ * @param {boolean} [opts.human]
+ * @param {boolean} [opts.json]
+ */
+export async function usageReport(opts) {
+  const client = await getClient()
+  const now = new Date()
+  const period = {
+    // we may not have done a snapshot for this month _yet_, so get report from last month -> now
+    from: startOfLastMonth(now),
+    to: now,
+  }
+
+  let total = 0
+  for await (const { account, provider, space, size } of getSpaceUsageReports(
+    client,
+    period
+  )) {
+    if (opts?.json) {
+      console.log(
+        dagJSON.stringify({
+          account,
+          provider,
+          space,
+          size,
+          reportedAt: now.toISOString(),
+        })
+      )
+    } else {
+      console.log(` Account: ${account}`)
+      console.log(`Provider: ${provider}`)
+      console.log(`   Space: ${space}`)
+      console.log(
+        `    Size: ${opts?.human ? filesize(size.final) : size.final}\n`
+      )
+    }
+    total += size.final
+  }
+  if (!opts?.json) {
+    console.log(`   Total: ${opts?.human ? filesize(total) : total}`)
+  }
+}
+
+/**
+ * @param {import('@web3-storage/w3up-client').Client} client
+ * @param {{ from: Date, to: Date }} period
+ */
+async function* getSpaceUsageReports(client, period) {
+  for (const account of Object.values(client.accounts())) {
+    const subscriptions = await client.capability.subscription.list(
+      account.did()
+    )
+    for (const { consumers } of subscriptions.results) {
+      for (const space of consumers) {
+        const result = await client.capability.usage.report(space, period)
+        for (const [, report] of Object.entries(result)) {
+          yield { account: account.did(), ...report }
+        }
+      }
+    }
+  }
 }
