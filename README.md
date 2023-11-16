@@ -35,7 +35,6 @@ w3 space register # defaults to registering you with web3.storage
 
 If you'd like to learn more about what is going on under the hood with w3up and its use of Spaces, [UCANs](https://ucan.xyz/), and more, check out the `w3up-client` README [here](https://github.com/web3-storage/w3up/tree/main/packages/w3up-client#usage).
 
-> By registering your w3up beta Space with [web3.storage](http://web3.storage/), you agree to the w3up beta [Terms of Service](https://console.web3.storage/terms). Until the beta period is over and this migration occurs, uploads to w3up will not appear in your web3.storage account (and vice versa), even if you register with the same email.
 
 Upload a file or directory:
 
@@ -244,8 +243,41 @@ Remove an upload from the current space's upload list. Does not remove CAR from 
 
 ## Environment Variables
 
-By default, `w3` will use the w3up service at https://up.web3.storage. If you would like
-to use a different w3up-compatible service, you can use the `W3UP_SERVICE_DID` and `W3UP_SERVICE_URL` environment variables to set the service DID and URL endpoint.
+### `W3_PRINCIPAL`
+
+Set the key `w3` should use to sign ucan invocations. By default `w3` will generate a new Ed25519 key on first run and store it. Set it along with a custom `W3_STORE_NAME` to manage multiple custom keys and profiles. Trying to use an existing store with different keys will fail.
+
+You can generate Ed25519 keys with [`ucan-key`](https://github.com/olizilla/ucan-key) e.g. `npx ucan-key ed`
+
+**Usage**
+```bash
+W3_PRINCIPAL=$(npx ucan-key ed --json | jq -r .key) W3_STORE_NAME="other" w3 whoami
+did:key:z6Mkf7bvSNgoXk67Ubhie8QMurN9E4yaCCGBzXow78zxnmuB
+```
+
+Default _unset_, a random Ed25519 key is generated.
+
+### `W3_STORE_NAME`
+
+Allows you to use `w3` with different profiles. You could use it to log in with different emails and keep the delegations separate.
+
+`w3` stores state to disk using the [`conf`](https://github.com/sindresorhus/conf) module. `W3_STORE_NAME` sets the conf [`configName`](https://github.com/sindresorhus/conf#configname) option.
+
+Default `w3cli`
+
+### `W3UP_SERVICE_URL`
+
+`w3` will use the w3up service at https://up.web3.storage. If you would like
+to use a different w3up-compatible service, set `W3UP_SERVICE_DID` and `W3UP_SERVICE_URL` environment variables to set the service DID and URL endpoint.
+
+Default `https://up.web3.storage`
+
+### `W3UP_SERVICE_DID`
+
+`w3` will use the w3up `did:web:web3.storage` as the service did. If you would like
+to use a different w3up-compatible service, set `W3UP_SERVICE_DID` and `W3UP_SERVICE_URL` environment variables to set the service DID and URL endpoint.
+
+Default `did:web:web3.storage`
 
 ## FAQ
 
