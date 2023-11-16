@@ -8,7 +8,6 @@ import { createEnv } from './env.js'
 import { Signer } from '@ucanto/principal/ed25519'
 import { createServer as createHTTPServer } from './http-server.js'
 import http from 'node:http'
-import { createHTTPListener } from './ucanto.js'
 import { StoreConf } from '@web3-storage/access/stores/store-conf'
 import * as FS from 'node:fs/promises'
 
@@ -50,17 +49,24 @@ export const provisionSpace = async (context, { space, account, provider }) => {
  * @typedef {import('@web3-storage/w3up-client/types').StoreAddSuccess} StoreAddSuccess
  * @typedef {UcantoServerTestContext & {
  *   server: import('./http-server').TestingServer['server']
+ *   router: import('./http-server').Router
  *   env: { alice: Record<string, string>, bob: Record<string, string> }
+ *   serverURL: URL
  * }} Context
  *
  * @returns {Promise<Context>}
  */
 export const setup = async () => {
-  const { server, serverURL, setRequestListener } = await createHTTPServer()
   const context = await createContext({ http })
-  setRequestListener(createHTTPListener(context.connection.channel))
+  const { server, serverURL, router } = await createHTTPServer({
+    '/': context.connection.channel.request.bind(context.connection.channel),
+  })
+
   return Object.assign(context, {
     server,
+    serverURL,
+    router,
+    serverRouter: router,
     env: {
       alice: createEnv({
         storeName: `w3cli-test-alice-${context.service.did()}`,

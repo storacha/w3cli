@@ -20,7 +20,7 @@ import {
 } from './lib.js'
 import * as ucanto from '@ucanto/core'
 import chalk from 'chalk'
-
+export * as Coupon from './coupon.js'
 export { Account, Space }
 
 /**
@@ -29,6 +29,31 @@ export { Account, Space }
 export async function accessClaim() {
   const client = await getClient()
   await client.capability.access.claim()
+}
+
+/**
+ * @param {string} email
+ */
+export const getPlan = async (email = '') => {
+  const client = await getClient()
+  const account =
+    email === ''
+      ? await Space.selectAccount(client)
+      : await Space.useAccount(client, { email })
+
+  if (account) {
+    const { ok: plan, error } = await account.plan.get()
+    if (plan) {
+      console.log(`⁂ ${plan.product}`)
+    } else if (error?.name === 'PlanNotFound') {
+      console.log('⁂ no plan has been selected yet')
+    } else {
+      console.error(`Failed to get plan - ${error.message}`)
+      process.exit(1)
+    }
+  } else {
+    process.exit(1)
+  }
 }
 
 /**
@@ -95,8 +120,8 @@ export async function upload(firstPath, opts) {
   const uploadFn = opts?.car
     ? client.uploadCAR.bind(client, files[0])
     : files.length === 1 && opts?.['no-wrap']
-    ? client.uploadFile.bind(client, files[0])
-    : client.uploadDirectory.bind(client, files)
+      ? client.uploadFile.bind(client, files[0])
+      : client.uploadDirectory.bind(client, files)
 
   const root = await uploadFn({
     onShardStored: ({ cid, size, piece }) => {
@@ -492,18 +517,31 @@ export async function usageReport(opts) {
   const period = {
     // we may not have done a snapshot for this month _yet_, so get report from last month -> now
     from: startOfLastMonth(now),
-    to: now
+    to: now,
   }
 
   let total = 0
-  for await (const { account, provider, space, size } of getSpaceUsageReports(client, period)) {
+  for await (const { account, provider, space, size } of getSpaceUsageReports(
+    client,
+    period
+  )) {
     if (opts?.json) {
-      console.log(dagJSON.stringify({ account, provider, space, size, reportedAt: now.toISOString() }))
+      console.log(
+        dagJSON.stringify({
+          account,
+          provider,
+          space,
+          size,
+          reportedAt: now.toISOString(),
+        })
+      )
     } else {
       console.log(` Account: ${account}`)
       console.log(`Provider: ${provider}`)
       console.log(`   Space: ${space}`)
-      console.log(`    Size: ${opts?.human ? filesize(size.final) : size.final}\n`)
+      console.log(
+        `    Size: ${opts?.human ? filesize(size.final) : size.final}\n`
+      )
     }
     total += size.final
   }
@@ -516,9 +554,11 @@ export async function usageReport(opts) {
  * @param {import('@web3-storage/w3up-client').Client} client
  * @param {{ from: Date, to: Date }} period
  */
-async function * getSpaceUsageReports (client, period) {
+async function* getSpaceUsageReports(client, period) {
   for (const account of Object.values(client.accounts())) {
-    const subscriptions = await client.capability.subscription.list(account.did())
+    const subscriptions = await client.capability.subscription.list(
+      account.did()
+    )
     for (const { consumers } of subscriptions.results) {
       for (const space of consumers) {
         const result = await client.capability.usage.report(space, period)
