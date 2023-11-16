@@ -1,5 +1,16 @@
 # Changelog
 
+## [6.0.0](https://github.com/web3-storage/w3cli/compare/v5.2.0...v6.0.0) (2023-11-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* provision using a proof ([#123](https://github.com/web3-storage/w3cli/issues/123))
+
+### Features
+
+* provision using a proof ([#123](https://github.com/web3-storage/w3cli/issues/123)) ([d61bdf3](https://github.com/web3-storage/w3cli/commit/d61bdf324254f9f444b989f33fd5434054e9028d))
+
 ## [5.2.0](https://github.com/web3-storage/w3cli/compare/v5.1.0...v5.2.0) (2023-11-15)
 
 
