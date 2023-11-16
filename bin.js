@@ -32,7 +32,7 @@ import {
   uploadAdd,
   uploadList,
   uploadRemove,
-  filecoinInfo
+  filecoinInfo,
 } from './can.js'
 
 const pkg = getPkg()
@@ -164,6 +164,7 @@ cli
 
 cli
   .command('coupon create <did>')
+  .option('--password', 'Password for created coupon.')
   .option('-c, --can', 'One or more abilities to delegate.')
   .option(
     '-e, --expiration',
