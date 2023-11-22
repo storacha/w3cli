@@ -6,15 +6,21 @@ name: Release
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+      pull-requests: write
     steps:
       - uses: google-github-actions/release-please-action@v3
         id: release
         with:
           release-type: node
           package-name: '@web3-storage/w3cli'
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        if: ${{ steps.release.outputs.release_created }}
       - uses: ./.github/actions/test
-      - run: npm publish
+        if: ${{ steps.release.outputs.release_created }}
+      - run: npm publish --provenance
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
         if: ${{ steps.release.outputs.release_created }}
