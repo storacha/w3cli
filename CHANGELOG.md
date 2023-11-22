@@ -1,5 +1,17 @@
 # Changelog
 
+## [6.1.0](https://github.com/web3-storage/w3cli/compare/v6.0.0...v6.1.0) (2023-11-22)
+
+
+### Features
+
+* add npm package provenance ([#135](https://github.com/web3-storage/w3cli/issues/135)) ([9b1697c](https://github.com/web3-storage/w3cli/commit/9b1697cd38af5f7a71638b2e6d33b10106e9d151))
+
+
+### Bug Fixes
+
+* update deps. pull in w3up-client fixes ([#133](https://github.com/web3-storage/w3cli/issues/133)) ([6aacec8](https://github.com/web3-storage/w3cli/commit/6aacec86a8cd3b46fd81d83f12a14fc182d3073d))
+
 ## [6.0.0](https://github.com/web3-storage/w3cli/compare/v5.2.0...v6.0.0) (2023-11-16)
 
 
