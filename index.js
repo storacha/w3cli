@@ -22,6 +22,7 @@ import * as ucanto from '@ucanto/core'
 import chalk from 'chalk'
 export * as Coupon from './coupon.js'
 export { Account, Space }
+import ago from 's-ago'
 
 /**
  *
@@ -474,33 +475,33 @@ export async function listProofs(opts) {
   const proofs = client.proofs()
   if (opts.json) {
     for (const proof of proofs) {
-      console.log(
-        JSON.stringify({
-          cid: proof.cid.toString(),
-          issuer: proof.issuer.did(),
-          capabilities: proof.capabilities.map((c) => ({
-            with: c.with,
-            can: c.can,
-          })),
-        })
-      )
+      console.log(JSON.stringify(proof))
     }
   } else {
     for (const proof of proofs) {
-      console.log(proof.cid.toString())
-      console.log(`  issuer: ${proof.issuer.did()}`)
-      console.log(`  audience: ${proof.audience.did()}`)
-      for (const capability of proof.capabilities) {
-        console.log(`  with: ${capability.with}`)
-        console.log(`  can: ${capability.can}`)
+      console.log(chalk.dim(`# ${proof.cid.toString()}`))
+      console.log(`iss: ${chalk.cyan(proof.issuer.did())}`)
+      if (proof.expiration !== Infinity) {
+        console.log(`exp: ${chalk.yellow(proof.expiration)} ${chalk.dim(` # expires ${ago(new Date(proof.expiration * 1000))}`)}`)
       }
+      console.log('att:')
+      for (const capability of proof.capabilities) {
+        console.log(`  - can: ${chalk.magenta(capability.can)}`)
+        console.log(`    with: ${chalk.green(capability.with)}`)
+        if (capability.nb) {
+          console.log(`  - ${JSON.stringify(capability.nb)}`)
+        }
+      }
+      console.log('fct:')
+      for (const fact of proof.facts) {
+        console.log(`  - ${JSON.stringify(fact)}`)
+      }
+      console.log('')
     }
+    console.log(`⁂ ${proofs.length} proof${proofs.length === 1 ? '' : 's'}`)
   }
 }
 
-/**
- *
- */
 export async function whoami() {
   const client = await getClient()
   console.log(client.did())

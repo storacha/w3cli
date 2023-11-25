@@ -967,10 +967,10 @@ export const testProof = {
       .env(env.bob)
       .join()
     const proofData = JSON.parse(proofList.output)
-    assert.equal(proofData.issuer, aliceDID)
-    assert.equal(proofData.capabilities.length, 1)
-    assert.equal(proofData.capabilities[0].with, spaceDID)
-    assert.equal(proofData.capabilities[0].can, 'store/*')
+    assert.equal(proofData.iss, aliceDID)
+    assert.equal(proofData.att.length, 1)
+    assert.equal(proofData.att[0].with, spaceDID)
+    assert.equal(proofData.att[0].can, 'store/*')
   }),
 }
 
