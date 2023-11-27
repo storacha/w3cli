@@ -480,25 +480,27 @@ export async function listProofs(opts) {
   } else {
     for (const proof of proofs) {
       console.log(chalk.dim(`# ${proof.cid.toString()}`))
-      console.log(`iss: ${chalk.cyan(proof.issuer.did())}`)
+      console.log(`iss: ${chalk.cyanBright(proof.issuer.did())}`)
       if (proof.expiration !== Infinity) {
         console.log(`exp: ${chalk.yellow(proof.expiration)} ${chalk.dim(` # expires ${ago(new Date(proof.expiration * 1000))}`)}`)
       }
       console.log('att:')
       for (const capability of proof.capabilities) {
-        console.log(`  - can: ${chalk.magenta(capability.can)}`)
+        console.log(`  - can: ${chalk.magentaBright(capability.can)}`)
         console.log(`    with: ${chalk.green(capability.with)}`)
         if (capability.nb) {
-          console.log(`  - ${JSON.stringify(capability.nb)}`)
+          console.log(`    nb: ${JSON.stringify(capability.nb)}`)
         }
       }
-      console.log('fct:')
+      if (proof.facts.length > 0) {
+        console.log('fct:')
+      }
       for (const fact of proof.facts) {
         console.log(`  - ${JSON.stringify(fact)}`)
       }
       console.log('')
     }
-    console.log(`⁂ ${proofs.length} proof${proofs.length === 1 ? '' : 's'}`)
+    console.log(chalk.dim(`# ${proofs.length} proof${proofs.length === 1 ? '' : 's'} for ${client.agent.did()}`))
   }
 }
 
