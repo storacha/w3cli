@@ -1,5 +1,16 @@
 # Changelog
 
+## [7.0.0](https://github.com/web3-storage/w3cli/compare/v6.1.0...v7.0.0) (2023-11-29)
+
+
+### ⚠ BREAKING CHANGES
+
+* upgrade `proof ls` ([#136](https://github.com/web3-storage/w3cli/issues/136))
+
+### Features
+
+* upgrade `proof ls` ([#136](https://github.com/web3-storage/w3cli/issues/136)) ([d95d1a4](https://github.com/web3-storage/w3cli/commit/d95d1a4b98ec02e8b48496c8c370a455c82b9b1d))
+
 ## [6.1.0](https://github.com/web3-storage/w3cli/compare/v6.0.0...v6.1.0) (2023-11-22)
 
 
