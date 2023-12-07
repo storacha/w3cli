@@ -1,5 +1,13 @@
 # Changelog
 
+## [7.0.1](https://github.com/web3-storage/w3cli/compare/v7.0.0...v7.0.1) (2023-12-07)
+
+
+### Bug Fixes
+
+* memory usage ([084a75e](https://github.com/web3-storage/w3cli/commit/084a75eb7ccede7471a89393b6b8892f66e500dd))
+* types for files-from-path ([20965e9](https://github.com/web3-storage/w3cli/commit/20965e91c5a89885217c4781206686e68459be82))
+
 ## [7.0.0](https://github.com/web3-storage/w3cli/compare/v6.1.0...v7.0.0) (2023-11-29)
 
 
