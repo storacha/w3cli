@@ -127,7 +127,7 @@ List spaces known to the agent.
 ### `w3 space register`
 
 Register the space by adding a storage provider and delegating all of its 
-capabilities to the currently login account. If you are authorized against
+capabilities to the currently logged in account. If you are authorized against
 more than one account you'll need to pass the `--email` option to specify which account to
 register the space with.
 
