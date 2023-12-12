@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.0.2](https://github.com/web3-storage/w3cli/compare/v7.0.1...v7.0.2) (2023-12-12)
+
+
+### Bug Fixes
+
+* pin @web3-storage/access to 18.0.5 ([#144](https://github.com/web3-storage/w3cli/issues/144)) ([a5b2127](https://github.com/web3-storage/w3cli/commit/a5b2127420c570e28242f5e9a7bb161e181e084f))
+
 ## [7.0.1](https://github.com/web3-storage/w3cli/compare/v7.0.0...v7.0.1) (2023-12-07)
 
 
