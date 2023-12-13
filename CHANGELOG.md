@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.0.3](https://github.com/web3-storage/w3cli/compare/v7.0.2...v7.0.3) (2023-12-13)
+
+
+### Bug Fixes
+
+* upgrade to latest access-client ([#146](https://github.com/web3-storage/w3cli/issues/146)) ([34e5d61](https://github.com/web3-storage/w3cli/commit/34e5d616ce36d11cc2d0a9ca7a4f28016e0f7a52))
+
 ## [7.0.2](https://github.com/web3-storage/w3cli/compare/v7.0.1...v7.0.2) (2023-12-12)
 
 
