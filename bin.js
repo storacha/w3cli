@@ -37,7 +37,7 @@ import {
 
 const pkg = getPkg()
 
-updateNotifier({ pkg }).notify()
+updateNotifier({ pkg }).notify({ isGlobal: true })
 
 const cli = sade('w3')
 
