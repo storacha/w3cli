@@ -92,7 +92,7 @@ export async function authorize(email, opts = {}) {
  *   hidden?: boolean
  *   json?: boolean
  *   verbose?: boolean
- *   'no-wrap'?: boolean
+ *   wrap?: boolean
  *   'shard-size'?: number
  *   'concurrent-requests'?: number
  * }} [opts]
@@ -120,7 +120,7 @@ export async function upload(firstPath, opts) {
   /** @type {(o?: import('@web3-storage/w3up-client/src/types').UploadOptions) => Promise<import('@web3-storage/w3up-client/src/types').AnyLink>} */
   const uploadFn = opts?.car
     ? client.uploadCAR.bind(client, files[0])
-    : files.length === 1 && opts?.['no-wrap']
+    : files.length === 1 && opts?.wrap === false
       ? client.uploadFile.bind(client, files[0])
       : client.uploadDirectory.bind(client, files)
 
@@ -133,9 +133,9 @@ export async function upload(firstPath, opts) {
             '   └── '
           )}Piece CID: ${piece}`,
         })
-        spinner.start(`Storing ${Math.round((totalSent / totalSize) * 100)}%`)
+        spinner.start(`Storing ${Math.min(Math.round((totalSent / totalSize) * 100), 100)}%`)
       } else {
-        spinner.text = `Storing ${Math.round((totalSent / totalSize) * 100)}%`
+        spinner.text = `Storing ${Math.min(Math.round((totalSent / totalSize) * 100), 100)}%`
       }
       opts?.json &&
         opts?.verbose &&
