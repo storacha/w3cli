@@ -1,5 +1,13 @@
 # Changelog
 
+## [7.0.4](https://github.com/web3-storage/w3cli/compare/v7.0.3...v7.0.4) (2024-01-09)
+
+
+### Bug Fixes
+
+* no-wrap option ([#153](https://github.com/web3-storage/w3cli/issues/153)) ([9ae49e9](https://github.com/web3-storage/w3cli/commit/9ae49e931729f86bfa86b57d21cc859a5caf9664))
+* update notification includes -g flag for cli ([#150](https://github.com/web3-storage/w3cli/issues/150)) ([370bfc6](https://github.com/web3-storage/w3cli/commit/370bfc69889cda82976442adb08dd53002f2487d))
+
 ## [7.0.3](https://github.com/web3-storage/w3cli/compare/v7.0.2...v7.0.3) (2023-12-13)
 
 
