@@ -358,16 +358,17 @@ export async function createDelegation(audienceDID, opts) {
     audienceMeta,
   })
 
-  const { writer, out } = CarWriter.create()
-  const dest = opts.output ? fs.createWriteStream(opts.output) : process.stdout
-
-  Readable.from(out).pipe(dest)
-
-  for (const block of delegation.export()) {
-    // @ts-expect-error
-    await writer.put(block)
+  const result = await delegation.archive()
+  if (result.error) {
+    console.error(`Error: failed to archive delegation: ${result.error.message}`)
+    process.exit(1)
   }
-  await writer.close()
+
+  if (opts.output) {
+    await fs.promises.writeFile(opts.output, result.ok)
+  } else {
+    process.stdout.write(result.ok)
+  }
 }
 
 /**
