@@ -19,6 +19,7 @@ import {
   startOfLastMonth,
 } from './lib.js'
 import * as ucanto from '@ucanto/core'
+import { ed25519, RSA } from '@ucanto/principal'
 import chalk from 'chalk'
 export * as Coupon from './coupon.js'
 export { Account, Space }
@@ -121,8 +122,8 @@ export async function upload(firstPath, opts) {
   const uploadFn = opts?.car
     ? client.uploadCAR.bind(client, files[0])
     : files.length === 1 && opts?.wrap === false
-      ? client.uploadFile.bind(client, files[0])
-      : client.uploadDirectory.bind(client, files)
+    ? client.uploadFile.bind(client, files[0])
+    : client.uploadDirectory.bind(client, files)
 
   const root = await uploadFn({
     onShardStored: ({ cid, size, piece }) => {
@@ -133,9 +134,14 @@ export async function upload(firstPath, opts) {
             '   └── '
           )}Piece CID: ${piece}`,
         })
-        spinner.start(`Storing ${Math.min(Math.round((totalSent / totalSize) * 100), 100)}%`)
+        spinner.start(
+          `Storing ${Math.min(Math.round((totalSent / totalSize) * 100), 100)}%`
+        )
       } else {
-        spinner.text = `Storing ${Math.min(Math.round((totalSent / totalSize) * 100), 100)}%`
+        spinner.text = `Storing ${Math.min(
+          Math.round((totalSent / totalSize) * 100),
+          100
+        )}%`
       }
       opts?.json &&
         opts?.verbose &&
@@ -482,7 +488,11 @@ export async function listProofs(opts) {
       console.log(chalk.dim(`# ${proof.cid.toString()}`))
       console.log(`iss: ${chalk.cyanBright(proof.issuer.did())}`)
       if (proof.expiration !== Infinity) {
-        console.log(`exp: ${chalk.yellow(proof.expiration)} ${chalk.dim(` # expires ${ago(new Date(proof.expiration * 1000))}`)}`)
+        console.log(
+          `exp: ${chalk.yellow(proof.expiration)} ${chalk.dim(
+            ` # expires ${ago(new Date(proof.expiration * 1000))}`
+          )}`
+        )
       }
       console.log('att:')
       for (const capability of proof.capabilities) {
@@ -500,7 +510,13 @@ export async function listProofs(opts) {
       }
       console.log('')
     }
-    console.log(chalk.dim(`# ${proofs.length} proof${proofs.length === 1 ? '' : 's'} for ${client.agent.did()}`))
+    console.log(
+      chalk.dim(
+        `# ${proofs.length} proof${
+          proofs.length === 1 ? '' : 's'
+        } for ${client.agent.did()}`
+      )
+    )
   }
 }
 
@@ -570,5 +586,19 @@ async function* getSpaceUsageReports(client, period) {
         }
       }
     }
+  }
+}
+
+/**
+ * @param {{ json: boolean }} options
+ */
+export async function createKey({ json }) {
+  const signer = await ed25519.generate()
+  const key = ed25519.format(signer)
+  if (json) {
+    console.log(dagJSON.stringify(signer.toArchive()))
+  } else {
+    console.log(`# ${signer.did()}`)
+    console.log(`${key}`)
   }
 }
