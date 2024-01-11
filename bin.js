@@ -297,7 +297,7 @@ cli
 
 cli
   .command('key create')
-  .describe('Print a new key pair. Does not change your current signing key')
+  .describe('Generate and print a new ed25519 key pair. Does not change your current signing key.')
   .option('--json', 'output as json')
   .action(createKey)
 

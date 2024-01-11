@@ -58,7 +58,7 @@ w3 up recipies.txt
   - [`w3 proof add`](#w3-proof-add-proofucan)
   - [`w3 proof ls`](#w3-proof-ls)
 - Key management
-- [`w3 key create`](#w3-key-create)
+  - [`w3 key create`](#w3-key-create)
 - Advanced usage
   - [`w3 can space info`](#w3-can-space-info-did) <sup>coming soon!</sup>
   - [`w3 can space recover`](#w3-can-space-recover-email) <sup>coming soon!</sup>
@@ -135,7 +135,6 @@ register the space with.
 
 - `--email` The email address of the account to associate this space with.
 - `--provider` The storage provider to associate with this space.
-  > By registering your w3up beta Space with [web3.storage](http://web3.storage/), you agree to the w3up beta [Terms of Service](https://console.web3.storage/terms). Until the beta period is over and this migration occurs, uploads to w3up will not appear in your web3.storage account (and vice versa), even if you register with the same email.
 
 ### `w3 space use <did>`
 

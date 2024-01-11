@@ -599,6 +599,6 @@ export async function createKey({ json }) {
     console.log(dagJSON.stringify(signer.toArchive()))
   } else {
     console.log(`# ${signer.did()}`)
-    console.log(`${key}`)
+    console.log(key)
   }
 }
