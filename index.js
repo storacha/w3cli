@@ -19,7 +19,7 @@ import {
   startOfLastMonth,
 } from './lib.js'
 import * as ucanto from '@ucanto/core'
-import { ed25519, RSA } from '@ucanto/principal'
+import { ed25519 } from '@ucanto/principal'
 import chalk from 'chalk'
 export * as Coupon from './coupon.js'
 export { Account, Space }
@@ -596,7 +596,7 @@ export async function createKey({ json }) {
   const signer = await ed25519.generate()
   const key = ed25519.format(signer)
   if (json) {
-    console.log(dagJSON.stringify(signer.toArchive()))
+    console.log(JSON.stringify({ did: signer.did(), key }, null, 2))
   } else {
     console.log(`# ${signer.did()}`)
     console.log(key)

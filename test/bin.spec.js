@@ -1173,7 +1173,7 @@ export const testPlan = {
 export const testKey = {
   'w3 key create': test(async (assert) => {
     const res = await w3.args(['key', 'create', '--json']).join()
-    const key = ED25519.from(dagJSON.parse(res.output))
+    const key = ED25519.parse(JSON.parse(res.output).key)
     assert.ok(key.did().startsWith('did:key'))
   }),
 }
