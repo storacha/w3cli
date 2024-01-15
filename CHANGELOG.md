@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.1.0](https://github.com/web3-storage/w3cli/compare/v7.0.4...v7.1.0) (2024-01-15)
+
+
+### Features
+
+* `w3 key create` ([#155](https://github.com/web3-storage/w3cli/issues/155)) ([1fe7adb](https://github.com/web3-storage/w3cli/commit/1fe7adb634ae67037a97a6e66def7b2f56ad315a))
+
 ## [7.0.4](https://github.com/web3-storage/w3cli/compare/v7.0.3...v7.0.4) (2024-01-09)
 
 
