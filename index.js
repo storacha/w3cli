@@ -272,20 +272,19 @@ export async function addSpace(proofPathOrCid) {
     /* otherwise, try as path */
   }
 
+  let delegation
   if (cid) {
     if (cid.multihash.code !== identity.code) {
       console.error(`Error: failed to read proof. Must be identity CID. Fetching of remote proof CARs not supported by this command yet`)
       process.exit(1)
     }
-    const delegation = await readProofFromBytes(cid.multihash.digest)
-    const space = await client.addSpace(delegation)
-    console.log(space.did())
-
+    delegation = await readProofFromBytes(cid.multihash.digest)
   } else {
-    const delegation = await readProof(proofPathOrCid)
-    const space = await client.addSpace(delegation)
-    console.log(space.did())
+    delegation = await readProof(proofPathOrCid)
   }
+
+  const space = await client.addSpace(delegation)
+  console.log(space.did())
 }
 
 /**
@@ -365,7 +364,7 @@ Providers: ${providers || chalk.dim('none')}`)
  * @param {number} [opts.expiration]
  * @param {string} [opts.output]
  * @param {string} [opts.with]
- * @param {boolean} [opts.stringify]
+ * @param {boolean} [opts.base64]
  */
 export async function createDelegation(audienceDID, opts) {
   const client = await getClient()
@@ -399,13 +398,13 @@ export async function createDelegation(audienceDID, opts) {
     async function* maybeBaseEncode(src) {
       const chunks = []
       for await (const chunk of src) {
-        if (!opts.stringify) {
+        if (!opts.base64) {
           yield chunk
         } else {
           chunks.push(chunk)
         }
       }
-      if (!opts.stringify) return
+      if (!opts.base64) return
       const blob = new Blob(chunks)
       const bytes = new Uint8Array(await blob.arrayBuffer())
       const idCid = CID.createV1(ucanto.CAR.code, identity.digest(bytes))

@@ -350,7 +350,7 @@ export const testSpace = {
     assert.ok(listSome.output.includes(spaceDID))
   }),
 
-  'w3 space add `stringified proof car`': test(async (assert, context) => {
+  'w3 space add `base64 proof car`': test(async (assert, context) => {
     const { env } = context
     const spaceDID = await loginAndCreateSpace(context, { env: env.alice })
     const whosBob = await w3.args(['whoami']).env(env.bob).join()
@@ -363,7 +363,7 @@ export const testSpace = {
         '-c',
         'store/*',
         'upload/*',
-        '--stringify'
+        '--base64'
       ])
       .env(env.alice)
       .join()
@@ -813,7 +813,7 @@ export const testDelegation = {
     assert.equal(delegate.status.success(), true)
   }),
 
-  'w3 delegation create -c store/add -c upload/add --stringify': test(
+  'w3 delegation create -c store/add -c upload/add --base64': test(
     async (assert, context) => {
       const env = context.env.alice
       const { bob } = Test
@@ -827,7 +827,7 @@ export const testDelegation = {
           'store/add',
           '-c',
           'upload/add',
-          '--stringify'
+          '--base64'
         ])
         .env(env)
         .join()
