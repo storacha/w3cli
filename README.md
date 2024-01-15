@@ -179,7 +179,7 @@ List proofs of delegated capabilities. Proofs are delegations with an audience m
 
 - `--json` Format as newline delimited JSON
 
-### `w3 key create`
+### `w3 key create`
 
 Print a new key pair. Does not change your current signing key
 
