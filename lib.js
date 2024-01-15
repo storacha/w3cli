@@ -167,6 +167,29 @@ export async function readProof(path) {
 }
 
 /**
+ * @param {Uint8Array} bytes Path to the proof file.
+ */
+export async function readProofFromBytes(bytes) {
+  const blocks = []
+  try {
+    const reader = await CarReader.fromBytes(bytes)
+    for await (const block of reader.blocks()) {
+      blocks.push(block)
+    }
+  } catch (/** @type {any} */ err) {
+    console.error(`Error: failed to parse proof: ${err.message}`)
+    process.exit(1)
+  }
+  try {
+    // @ts-expect-error
+    return importDAG(blocks)
+  } catch (/** @type {any} */ err) {
+    console.error(`Error: failed to import proof: ${err.message}`)
+    process.exit(1)
+  }
+}
+
+/**
  * @param {UploadListSuccess} res
  * @param {object} [opts]
  * @param {boolean} [opts.raw]

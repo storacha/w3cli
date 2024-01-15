@@ -142,7 +142,7 @@ cli
 cli
   .command('space add <proof>')
   .describe(
-    'Add a space to the agent. The proof is a CAR encoded delegation to _this_ agent.'
+    'Import a space from a proof: a CAR encoded UCAN delegation to this agent. proof is a stringified CAR or a filesystem path to one, as created by `w3 delegation create`'
   )
   .action(addSpace)
 
@@ -200,6 +200,10 @@ cli
   .option(
     '-o, --output',
     'Path of file to write the exported delegation data to.'
+  )
+  .option(
+    '--stringify',
+    'Encode output as a string. Useful when saving it as an environment variable.'
   )
   .action(createDelegation)
 

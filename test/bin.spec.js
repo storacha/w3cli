@@ -18,6 +18,7 @@ import { UCAN, Provider } from '@web3-storage/capabilities'
 import * as ED25519 from '@ucanto/principal/ed25519'
 import { sha256, delegate } from '@ucanto/core'
 import * as Result from '@web3-storage/w3up-client/result'
+import { base64 } from 'multiformats/bases/base64'
 
 const w3 = Command.create('./bin.js')
 
@@ -343,6 +344,34 @@ export const testSpace = {
     assert.ok(!listNone.output.includes(spaceDID))
 
     const add = await w3.args(['space', 'add', proofPath]).env(env.bob).join()
+    assert.equal(add.output.trim(), spaceDID)
+
+    const listSome = await w3.args(['space', 'ls']).env(env.bob).join()
+    assert.ok(listSome.output.includes(spaceDID))
+  }),
+
+  'w3 space add `stringified proof car`': test(async (assert, context) => {
+    const { env } = context
+    const spaceDID = await loginAndCreateSpace(context, { env: env.alice })
+    const whosBob = await w3.args(['whoami']).env(env.bob).join()
+    const bobDID = SpaceDID.from(whosBob.output.trim())
+    const res = await w3
+      .args([
+        'delegation',
+        'create',
+        bobDID,
+        '-c',
+        'store/*',
+        'upload/*',
+        '--stringify'
+      ])
+      .env(env.alice)
+      .join()
+
+    const listNone = await w3.args(['space', 'ls']).env(env.bob).join()
+    assert.ok(!listNone.output.includes(spaceDID))
+
+    const add = await w3.args(['space', 'add', res.output]).env(env.bob).join()
     assert.equal(add.output.trim(), spaceDID)
 
     const listSome = await w3.args(['space', 'ls']).env(env.bob).join()
@@ -783,6 +812,44 @@ export const testDelegation = {
     // TODO: Test output after we switch to Delegation.archive() / Delegation.extract()
     assert.equal(delegate.status.success(), true)
   }),
+
+  'w3 delegation create -c store/add -c upload/add --stringify': test(
+    async (assert, context) => {
+      const env = context.env.alice
+      const { bob } = Test
+      const spaceDID = await loginAndCreateSpace(context)
+      const res = await w3
+        .args([
+          'delegation',
+          'create',
+          bob.did(),
+          '-c',
+          'store/add',
+          '-c',
+          'upload/add',
+          '--stringify'
+        ])
+        .env(env)
+        .join()
+
+      assert.equal(res.status.success(), true)
+
+      const identityCid = parseLink(res.output, base64)
+      const reader = await CarReader.fromBytes(identityCid.multihash.digest)
+      const blocks = []
+      for await (const block of reader.blocks()) {
+        blocks.push(block)
+      }
+
+      // @ts-expect-error
+      const delegation = importDAG(blocks)
+      assert.equal(delegation.audience.did(), bob.did())
+      assert.equal(delegation.capabilities[0].can, 'store/add')
+      assert.equal(delegation.capabilities[0].with, spaceDID)
+      assert.equal(delegation.capabilities[1].can, 'upload/add')
+      assert.equal(delegation.capabilities[1].with, spaceDID)
+    }
+  ),
 
   'w3 delegation ls --json': test(async (assert, context) => {
     const { mallory } = Test
