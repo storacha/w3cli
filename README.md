@@ -20,7 +20,6 @@ Create a new Space for storing your data and register it:
 
 ```console
 w3 space create Documents # pick a good name!
-w3 space register # defaults to registering you with web3.storage
 ```
 
 If you'd like to learn more about what is going on under the hood with w3up and its use of Spaces, [UCANs](https://ucan.xyz/), and more, check out the `w3up-client` README [here](https://github.com/web3-storage/w3up/tree/main/packages/w3up-client#usage).
