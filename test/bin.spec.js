@@ -400,7 +400,9 @@ export const testSpace = {
   }),
 
   'w3 space use': test(async (assert, context) => {
-    const spaceDID = await loginAndCreateSpace(context, { env: context.env.alice })
+    const spaceDID = await loginAndCreateSpace(context, {
+      env: context.env.alice,
+    })
 
     const listDefault = await w3
       .args(['space', 'ls'])
@@ -1168,6 +1170,14 @@ export const testPlan = {
   }),
 }
 
+export const testKey = {
+  'w3 key create': test(async (assert) => {
+    const res = await w3.args(['key', 'create', '--json']).join()
+    const key = ED25519.parse(JSON.parse(res.output).key)
+    assert.ok(key.did().startsWith('did:key'))
+  }),
+}
+
 /**
  * @param {Test.Context} context
  * @param {object} options
@@ -1217,11 +1227,7 @@ export const selectPlan = async (
  */
 export const createSpace = async (
   context,
-  {
-    customer = 'alice@web.mail',
-    name = 'home',
-    env = context.env.alice
-  } = {}
+  { customer = 'alice@web.mail', name = 'home', env = context.env.alice } = {}
 ) => {
   const { output } = await w3
     .args([
@@ -1256,7 +1262,7 @@ export const loginAndCreateSpace = async (
     customer = email,
     name = 'home',
     plan = 'did:web:free.web3.storage',
-    env = context.env.alice
+    env = context.env.alice,
   } = {}
 ) => {
   await login(context, { email, env })

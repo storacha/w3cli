@@ -2,7 +2,7 @@
 
 💾 the `w3` command line interface.
 
-## Getting started 
+## Getting started
 
 Install the CLI from npm (**requires Node 18 or higher**):
 
@@ -25,47 +25,49 @@ w3 space register # defaults to registering you with web3.storage
 
 If you'd like to learn more about what is going on under the hood with w3up and its use of Spaces, [UCANs](https://ucan.xyz/), and more, check out the `w3up-client` README [here](https://github.com/web3-storage/w3up/tree/main/packages/w3up-client#usage).
 
-
 Upload a file or directory:
 
 ```console
 w3 up recipies.txt
 ```
-> ⚠️❗ __Public Data__ 🌎: All data uploaded to w3up is available to anyone who requests it using the correct CID. Do not store any private or sensitive information in an unencrypted form using w3up.
 
-> ⚠️❗ __Permanent Data__ ♾️: Removing files from w3up will remove them from the file listing for your account, but that doesn’t prevent nodes on the decentralized storage network from retaining copies of the data indefinitely. Do not use w3up for data that may need to be permanently deleted in the future.
+> ⚠️❗ **Public Data** 🌎: All data uploaded to w3up is available to anyone who requests it using the correct CID. Do not store any private or sensitive information in an unencrypted form using w3up.
+
+> ⚠️❗ **Permanent Data** ♾️: Removing files from w3up will remove them from the file listing for your account, but that doesn’t prevent nodes on the decentralized storage network from retaining copies of the data indefinitely. Do not use w3up for data that may need to be permanently deleted in the future.
 
 ## Commands
 
-* Basics
-  * [`w3 login`](#w3-login-email)
-  * [`w3 up`](#w3-up-path-path)
-  * [`w3 ls`](#w3-ls)
-  * [`w3 rm`](#w3-rm-root-cid)
-  * [`w3 open`](#w3-open-cid)
-  * [`w3 whoami`](#w3-whoami)
-* Space management
-  * [`w3 space add`](#w3-space-add-proofucan)
-  * [`w3 space create`](#w3-space-create-name)
-  * [`w3 space ls`](#w3-space-ls)
-  * [`w3 space register`](#w3-space-register)
-  * [`w3 space use`](#w3-space-use-did)
-  * [`w3 space info`](#w3-space-info)
-* Capability management
-  * [`w3 delegation create`](#w3-delegation-create-audience-did)
-  * [`w3 delegation ls`](#w3-delegation-ls)
-  * [`w3 delegation revoke`](#w3-delegation-revoke-delegation-cid)
-  * [`w3 proof add`](#w3-proof-add-proofucan)
-  * [`w3 proof ls`](#w3-proof-ls)
-* Advanced usage
-  * [`w3 can space info`](#w3-can-space-info-did) <sup>coming soon!</sup>
-  * [`w3 can space recover`](#w3-can-space-recover-email) <sup>coming soon!</sup>
-  * [`w3 can store add`](#w3-can-store-add-car-path)
-  * [`w3 can store ls`](#w3-can-store-ls)
-  * [`w3 can store rm`](#w3-can-store-rm-car-cid)
-  * [`w3 can upload add`](#w3-can-upload-add-root-cid-shard-cid-shard-cid)
-  * [`w3 can upload ls`](#w3-can-upload-ls)
-  * [`w3 can upload rm`](#w3-can-upload-rm-root-cid)
+- Basics
+  - [`w3 login`](#w3-login-email)
+  - [`w3 up`](#w3-up-path-path)
+  - [`w3 ls`](#w3-ls)
+  - [`w3 rm`](#w3-rm-root-cid)
+  - [`w3 open`](#w3-open-cid)
+  - [`w3 whoami`](#w3-whoami)
+- Space management
+  - [`w3 space add`](#w3-space-add-proofucan)
+  - [`w3 space create`](#w3-space-create-name)
+  - [`w3 space ls`](#w3-space-ls)
+  - [`w3 space register`](#w3-space-register)
+  - [`w3 space use`](#w3-space-use-did)
+  - [`w3 space info`](#w3-space-info)
+- Capability management
+  - [`w3 delegation create`](#w3-delegation-create-audience-did)
+  - [`w3 delegation ls`](#w3-delegation-ls)
+  - [`w3 delegation revoke`](#w3-delegation-revoke-delegation-cid)
+  - [`w3 proof add`](#w3-proof-add-proofucan)
+  - [`w3 proof ls`](#w3-proof-ls)
+- Key management
+  - [`w3 key create`](#w3-key-create)
+- Advanced usage
+  - [`w3 can space info`](#w3-can-space-info-did) <sup>coming soon!</sup>
+  - [`w3 can space recover`](#w3-can-space-recover-email) <sup>coming soon!</sup>
+  - [`w3 can store add`](#w3-can-store-add-car-path)
+  - [`w3 can store ls`](#w3-can-store-ls)
+  - [`w3 can store rm`](#w3-can-store-rm-car-cid)
+  - [`w3 can upload add`](#w3-can-upload-add-root-cid-shard-cid-shard-cid)
+  - [`w3 can upload ls`](#w3-can-upload-ls)
+  - [`w3 can upload rm`](#w3-can-upload-rm-root-cid)
 
 ---
 
@@ -77,24 +79,24 @@ Authenticate this agent with your email address to get access to all capabilitie
 
 Upload file(s) to web3.storage. The IPFS Content ID (CID) for your files is calculated on your machine, and sent up along with your files. web3.storage makes your content available on the IPFS network
 
-* `--no-wrap` Don't wrap input files with a directory.
-* `-H, --hidden` Include paths that start with ".".
-* `-c, --car` File is a CAR file.
-* `--shard-size` Shard uploads into CAR files of approximately this size in bytes.
-* `--concurrent-requests` Send up to this many CAR shards concurrently.
+- `--no-wrap` Don't wrap input files with a directory.
+- `-H, --hidden` Include paths that start with ".".
+- `-c, --car` File is a CAR file.
+- `--shard-size` Shard uploads into CAR files of approximately this size in bytes.
+- `--concurrent-requests` Send up to this many CAR shards concurrently.
 
 ### `w3 ls`
 
 List all the uploads registered in the current space.
 
-* `--json` Format as newline delimited JSON
-* `--shards` Pretty print with shards in output
+- `--json` Format as newline delimited JSON
+- `--shards` Pretty print with shards in output
 
 ### `w3 rm <root-cid>`
 
 Remove an upload from the uploads listing. Note that this command does not remove the data from the IPFS network, nor does it remove it from space storage (by default).
 
-* `--shards` Also remove all shards referenced by the upload from the store. Use with caution and ensure other uploads do not reference the same shards.
+- `--shards` Also remove all shards referenced by the upload from the store. Use with caution and ensure other uploads do not reference the same shards.
 
 ### `w3 open <cid>`
 
@@ -126,14 +128,13 @@ List spaces known to the agent.
 
 ### `w3 space register`
 
-Register the space by adding a storage provider and delegating all of its 
+Register the space by adding a storage provider and delegating all of its
 capabilities to the currently logged in account. If you are authorized against
 more than one account you'll need to pass the `--email` option to specify which account to
 register the space with.
 
-* `--email` The email address of the account to associate this space with.
-* `--provider` The storage provider to associate with this space.
-> By registering your w3up beta Space with [web3.storage](http://web3.storage/), you agree to the w3up beta [Terms of Service](https://console.web3.storage/terms). Until the beta period is over and this migration occurs, uploads to w3up will not appear in your web3.storage account (and vice versa), even if you register with the same email.
+- `--email` The email address of the account to associate this space with.
+- `--provider` The storage provider to associate with this space.
 
 ### `w3 space use <did>`
 
@@ -144,17 +145,17 @@ Set the current space in use by the agent.
 Get information about a space (by default the current space) from the service, including
 which providers the space is currently registered with.
 
-* `--space` The space to get information about. Defaults to the current space.
-* `--json` Format as newline delimited JSON
+- `--space` The space to get information about. Defaults to the current space.
+- `--json` Format as newline delimited JSON
 
 ### `w3 delegation create <audience-did>`
 
 Create a delegation to the passed audience for the given abilities with the _current_ space as the resource.
 
-* `--can` A capability to delegate. To specify more than one capability, use this option more than once.
-* `--name` Human readable name for the audience receiving the delegation.
-* `--type` Type of the audience receiving the delegation, one of: device, app, service.
-* `--output` Path of file to write the exported delegation data to.
+- `--can` A capability to delegate. To specify more than one capability, use this option more than once.
+- `--name` Human readable name for the audience receiving the delegation.
+- `--type` Type of the audience receiving the delegation, one of: device, app, service.
+- `--output` Path of file to write the exported delegation data to.
 
 ```bash
 # delegate space/info to did:key:z6MkrwtRceSo2bE6vAY4gi8xPNfNszSpvf8MpAHnxVfMYreN
@@ -172,14 +173,13 @@ w3 delegation create did:key:z6MkrwtRceSo2bE6vAY4gi8xPNfNszSpvf8MpAHnxVfMYreN --
 
 List delegations created by this agent for others.
 
-* `--json` Format as newline delimited JSON
-
+- `--json` Format as newline delimited JSON
 
 ### `w3 delegation revoke <delegation-cid>`
 
 Revoke a delegation by CID.
 
-* `--proof` Name of a file containing the delegation and any additional proofs needed to prove authority to revoke
+- `--proof` Name of a file containing the delegation and any additional proofs needed to prove authority to revoke
 
 ### `w3 proof add <proof.ucan>`
 
@@ -189,7 +189,13 @@ Add a proof delegated to this agent. The proof is a CAR encoded delegation to _t
 
 List proofs of delegated capabilities. Proofs are delegations with an audience matching the agent DID.
 
-* `--json` Format as newline delimited JSON
+- `--json` Format as newline delimited JSON
+
+### `w3 key create`
+
+Print a new key pair. Does not change your current signing key
+
+- `--json` Export as dag-json
 
 ### `w3 can space info <did>`
 
@@ -203,10 +209,10 @@ Store a [CAR](https://ipld.io/specs/transport/car/carv1/) file to web3.storage.
 
 List CARs in the current space.
 
-* `--json` Format as newline delimited JSON
-* `--size` The desired number of results to return
-* `--cursor` An opaque string included in a prior upload/list response that allows the service to provide the next "page" of results
-* `--pre` If true, return the page of results preceding the cursor
+- `--json` Format as newline delimited JSON
+- `--size` The desired number of results to return
+- `--cursor` An opaque string included in a prior upload/list response that allows the service to provide the next "page" of results
+- `--pre` If true, return the page of results preceding the cursor
 
 ### `w3 can store rm <shard-cid>`
 
@@ -220,16 +226,15 @@ Register an upload - a DAG with the given root data CID that is stored in the gi
 
 List uploads in the current space.
 
-* `--json` Format as newline delimited JSON
-* `--shards` Pretty print with shards in output
-* `--size` The desired number of results to return
-* `--cursor` An opaque string included in a prior upload/list response that allows the service to provide the next "page" of results
-* `--pre` If true, return the page of results preceding the cursor
+- `--json` Format as newline delimited JSON
+- `--shards` Pretty print with shards in output
+- `--size` The desired number of results to return
+- `--cursor` An opaque string included in a prior upload/list response that allows the service to provide the next "page" of results
+- `--pre` If true, return the page of results preceding the cursor
 
 ### `w3 can upload rm <root-cid>`
 
 Remove an upload from the current space's upload list. Does not remove CAR from the store.
-
 
 ## Environment Variables
 
@@ -240,6 +245,7 @@ Set the key `w3` should use to sign ucan invocations. By default `w3` will gener
 You can generate Ed25519 keys with [`ucan-key`](https://github.com/olizilla/ucan-key) e.g. `npx ucan-key ed`
 
 **Usage**
+
 ```bash
 W3_PRINCIPAL=$(npx ucan-key ed --json | jq -r .key) W3_STORE_NAME="other" w3 whoami
 did:key:z6Mkf7bvSNgoXk67Ubhie8QMurN9E4yaCCGBzXow78zxnmuB
