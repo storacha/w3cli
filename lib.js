@@ -139,31 +139,15 @@ export function getClient() {
  * @param {string} path Path to the proof file.
  */
 export async function readProof(path) {
+  let bytes
   try {
-    await fs.promises.access(path, fs.constants.R_OK)
+    const buff = await fs.promises.readFile(path)
+    bytes = new Uint8Array(buff.buffer)
   } catch (/** @type {any} */ err) {
     console.error(`Error: failed to read proof: ${err.message}`)
     process.exit(1)
   }
-
-  const blocks = []
-  try {
-    const reader = await CarReader.fromIterable(fs.createReadStream(path))
-    for await (const block of reader.blocks()) {
-      blocks.push(block)
-    }
-  } catch (/** @type {any} */ err) {
-    console.error(`Error: failed to parse proof: ${err.message}`)
-    process.exit(1)
-  }
-
-  try {
-    // @ts-expect-error
-    return importDAG(blocks)
-  } catch (/** @type {any} */ err) {
-    console.error(`Error: failed to import proof: ${err.message}`)
-    process.exit(1)
-  }
+  return readProofFromBytes(bytes)
 }
 
 /**
