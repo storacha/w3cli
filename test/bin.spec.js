@@ -620,6 +620,70 @@ export const testW3Up = {
     assert.match(up.error, /Stored 1 file/)
   }),
 
+  'w3 up --no-wrap': test(async (assert, context) => {
+    const email = 'alice@web.mail'
+    await login(context, { email })
+    await selectPlan(context, { email })
+
+    const create = await w3
+      .args([
+        'space',
+        'create',
+        'home',
+        '--no-recovery',
+        '--no-account',
+        '--customer',
+        email,
+      ])
+      .env(context.env.alice)
+      .join()
+
+    assert.ok(create.status.success())
+
+    const up = await w3
+      .args(['up', 'test/fixtures/pinpie.jpg', '--no-wrap'])
+      .env(context.env.alice)
+      .join()
+
+    assert.match(
+      up.output,
+      /bafkreiajkbmpugz75eg2tmocmp3e33sg5kuyq2amzngslahgn6ltmqxxfa/
+    )
+    assert.match(up.error, /Stored 1 file/)
+  }),
+
+  'w3 up --wrap false': test(async (assert, context) => {
+    const email = 'alice@web.mail'
+    await login(context, { email })
+    await selectPlan(context, { email })
+
+    const create = await w3
+      .args([
+        'space',
+        'create',
+        'home',
+        '--no-recovery',
+        '--no-account',
+        '--customer',
+        email,
+      ])
+      .env(context.env.alice)
+      .join()
+
+    assert.ok(create.status.success())
+
+    const up = await w3
+      .args(['up', 'test/fixtures/pinpie.jpg', '--wrap', 'false'])
+      .env(context.env.alice)
+      .join()
+
+    assert.match(
+      up.output,
+      /bafkreiajkbmpugz75eg2tmocmp3e33sg5kuyq2amzngslahgn6ltmqxxfa/
+    )
+    assert.match(up.error, /Stored 1 file/)
+  }),
+
   'w3 up --car': test(async (assert, context) => {
     const email = 'alice@web.mail'
     await login(context, { email })
