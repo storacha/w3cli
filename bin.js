@@ -71,9 +71,9 @@ cli
   .command('up <file>')
   .alias('upload', 'put')
   .describe('Store a file(s) to the service and register an upload.')
-  .option('--no-wrap', "Don't wrap input files with a directory.", false)
   .option('-H, --hidden', 'Include paths that start with ".".')
   .option('-c, --car', 'File is a CAR file.', false)
+  .option('--wrap', "Wrap single input file in a directory. Has no effect on directory or CAR uploads. Pass --no-wrap to disable.", true)
   .option('--json', 'Format as newline delimited JSON')
   .option('--verbose', 'Output more details.')
   .option(
