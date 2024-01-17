@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.2.1](https://github.com/web3-storage/w3cli/compare/v7.2.0...v7.2.1) (2024-01-17)
+
+
+### Bug Fixes
+
+* make `w3 up --no-wrap` work as advertised. ([#160](https://github.com/web3-storage/w3cli/issues/160)) ([426faad](https://github.com/web3-storage/w3cli/commit/426faadf1860bd5d35dd50b12c77e8acee0a0526))
+
 ## [7.2.0](https://github.com/web3-storage/w3cli/compare/v7.1.0...v7.2.0) (2024-01-17)
 
 
