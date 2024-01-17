@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.2.0](https://github.com/web3-storage/w3cli/compare/v7.1.0...v7.2.0) (2024-01-17)
+
+
+### Features
+
+* `w3 delegation create --base64` & `w3 space add &lt;base64&gt;` ([#158](https://github.com/web3-storage/w3cli/issues/158)) ([98284ef](https://github.com/web3-storage/w3cli/commit/98284ef7ef95f5675b040ac49eabfaebe1701132))
+
 ## [7.1.0](https://github.com/web3-storage/w3cli/compare/v7.0.4...v7.1.0) (2024-01-15)
 
 
