@@ -652,7 +652,7 @@ export const testW3Up = {
     assert.match(up.error, /Stored 1 file/)
   }),
 
-  'only w3 up --wrap false': test(async (assert, context) => {
+  'w3 up --wrap false': test(async (assert, context) => {
     const email = 'alice@web.mail'
     await login(context, { email })
     await selectPlan(context, { email })
@@ -673,7 +673,7 @@ export const testW3Up = {
     assert.ok(create.status.success())
 
     const up = await w3
-      .args(['up', 'test/fixtures/pinpie.jpg', '--no-wrap'])
+      .args(['up', 'test/fixtures/pinpie.jpg', '--wrap', 'false'])
       .env(context.env.alice)
       .join()
 
