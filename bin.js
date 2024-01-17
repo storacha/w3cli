@@ -142,7 +142,7 @@ cli
 cli
   .command('space add <proof>')
   .describe(
-    'Add a space to the agent. The proof is a CAR encoded delegation to _this_ agent.'
+    'Import a space from a proof: a CAR encoded UCAN delegating capabilities to this agent. proof is a filesystem path, or a base64 encoded cid string.'
   )
   .action(addSpace)
 
@@ -181,7 +181,7 @@ cli
 cli
   .command('delegation create <audience-did>')
   .describe(
-    'Create a delegation to the passed audience for the given abilities with the _current_ space as the resource.'
+    'Output a CAR encoded UCAN that delegates capabilities to the audience for the current space.'
   )
   .option('-c, --can', 'One or more abilities to delegate.')
   .option(
@@ -200,6 +200,10 @@ cli
   .option(
     '-o, --output',
     'Path of file to write the exported delegation data to.'
+  )
+  .option(
+    '--base64',
+    'Format as base64 identity CID string. Useful when saving it as an environment variable.'
   )
   .action(createDelegation)
 
