@@ -1,5 +1,17 @@
 # Changelog
 
+## [7.3.0](https://github.com/web3-storage/w3cli/compare/v7.2.1...v7.3.0) (2024-01-23)
+
+
+### Features
+
+* add `name` to `w3 space info` output ([#164](https://github.com/web3-storage/w3cli/issues/164)) ([2b1bc4a](https://github.com/web3-storage/w3cli/commit/2b1bc4a117b1c611b0df8e574ceb501456a1aee5))
+
+
+### Bug Fixes
+
+* clear timeout always ([#166](https://github.com/web3-storage/w3cli/issues/166)) ([c1b7cce](https://github.com/web3-storage/w3cli/commit/c1b7ccee73ca7c54ea75eb6313d6e8a56b090c33))
+
 ## [7.2.1](https://github.com/web3-storage/w3cli/compare/v7.2.0...v7.2.1) (2024-01-17)
 
 
