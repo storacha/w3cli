@@ -21,7 +21,7 @@ export const login = async (email) => loginWithClient(email, await getClient())
 export const loginWithClient = async (email, client) => {
   /** @type {import('ora').Ora|undefined} */
   let spinner
-  setTimeout(() => {
+  const timeout = setTimeout(() => {
     spinner = ora(
       `🔗 please click the link sent to ${email} to authorize this agent`
     ).start()
@@ -38,6 +38,8 @@ export const loginWithClient = async (email, client) => {
     if (spinner) spinner.stop()
     console.error(err)
     process.exit(1)
+  } finally {
+    clearTimeout(timeout)
   }
 }
 
