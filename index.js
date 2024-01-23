@@ -345,13 +345,17 @@ export async function spaceInfo(opts) {
     }
   }
 
+  const space = client.spaces().find((s) => s.did() === spaceDID)
+  const name = space ? space.name : undefined
+
   if (opts.json) {
-    console.log(JSON.stringify(info, null, 4))
+    console.log(JSON.stringify({ ...info, name }, null, 4))
   } else {
     const providers = info.providers?.join(', ') ?? ''
     console.log(`
       DID: ${info.did}
-Providers: ${providers || chalk.dim('none')}`)
+Providers: ${providers || chalk.dim('none')}
+     Name: ${name ?? chalk.dim('none')}`)
   }
 }
 

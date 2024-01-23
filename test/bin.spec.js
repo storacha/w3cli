@@ -19,6 +19,7 @@ import * as ED25519 from '@ucanto/principal/ed25519'
 import { sha256, delegate } from '@ucanto/core'
 import * as Result from '@web3-storage/w3up-client/result'
 import { base64 } from 'multiformats/bases/base64'
+import { info } from 'console'
 
 const w3 = Command.create('./bin.js')
 
@@ -533,6 +534,12 @@ export const testSpace = {
       'space has no providers'
     )
 
+    assert.match(
+      infoWithoutProvider.output,
+      pattern`Name: home`,
+      'space name is set'
+    )
+
     Test.provisionSpace(context, {
       space: spaceDID,
       account: 'did:mailto:web.mail:alice',
@@ -549,6 +556,17 @@ export const testSpace = {
       pattern`DID: ${spaceDID}\nProviders: .*${providerDID}`,
       'added provider shows up in the space info'
     )
+
+    const infoWithProviderJson = await w3
+    .args(['space', 'info', '--json'])
+    .env(context.env.alice)
+    .join()
+
+    assert.deepEqual(JSON.parse(infoWithProviderJson.output), {
+      did: spaceDID,
+      providers: [providerDID],
+      name: 'home'
+    })
   }),
 
   'w3 space provision --coupon': test(async (assert, context) => {
