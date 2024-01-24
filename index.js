@@ -593,7 +593,6 @@ export async function usageReport(opts) {
     period
   )) {
     if ('error' in result) {
-      console.warn('error getting usage report. Catching and moving on, but will include in warning at end.', result)
       failures.push(result)
     } else {
       if (opts?.json) {
