@@ -586,34 +586,52 @@ export async function usageReport(opts) {
     from: startOfLastMonth(now),
     to: now,
   }
-
+  const failures = []
   let total = 0
-  for await (const { account, provider, space, size } of getSpaceUsageReports(
+  for await (const result of getSpaceUsageReports(
     client,
     period
   )) {
-    if (opts?.json) {
-      console.log(
-        dagJSON.stringify({
-          account,
-          provider,
-          space,
-          size,
-          reportedAt: now.toISOString(),
-        })
-      )
+    if ('error' in result) {
+      failures.push(result)
     } else {
-      console.log(` Account: ${account}`)
-      console.log(`Provider: ${provider}`)
-      console.log(`   Space: ${space}`)
-      console.log(
-        `    Size: ${opts?.human ? filesize(size.final) : size.final}\n`
-      )
+      if (opts?.json) {
+        const { account, provider, space, size } = result
+        console.log(
+          dagJSON.stringify({
+            account,
+            provider,
+            space,
+            size,
+            reportedAt: now.toISOString(),
+          })
+        )
+      } else {
+        const { account, provider, space, size } = result
+        console.log(` Account: ${account}`)
+        console.log(`Provider: ${provider}`)
+        console.log(`   Space: ${space}`)
+        console.log(
+          `    Size: ${opts?.human ? filesize(size.final) : size.final}\n`
+        )
+      }
+      total += result.size.final
     }
-    total += size.final
   }
   if (!opts?.json) {
     console.log(`   Total: ${opts?.human ? filesize(total) : total}`)
+    if (failures.length) {
+      console.warn(``)
+      console.warn(`   WARNING: there were ${failures.length} errors getting usage reports for some spaces.`)
+      console.warn(`   This may happen if your agent does not have usage/report authorization for a space.`)
+      console.warn(`   These spaces were not included in the usage report total:`)
+      for (const fail of failures) {
+        console.warn(`   * space: ${fail.space}`)
+        // @ts-expect-error error is unknown
+        console.warn(`     error: ${fail.error?.message}`)
+        console.warn(`     account: ${fail.account}`)
+      }
+    }
   }
 }
 
@@ -628,7 +646,14 @@ async function* getSpaceUsageReports(client, period) {
     )
     for (const { consumers } of subscriptions.results) {
       for (const space of consumers) {
-        const result = await client.capability.usage.report(space, period)
+        /** @type {import('@web3-storage/upload-client/types').UsageReportSuccess} */
+        let result
+        try {
+          result = await client.capability.usage.report(space, period)
+        } catch (error) {
+          yield { error, space, period, consumers, account: account.did() }
+          continue
+        }
         for (const [, report] of Object.entries(result)) {
           yield { account: account.did(), ...report }
         }
