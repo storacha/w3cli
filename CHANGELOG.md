@@ -1,5 +1,91 @@
 # Changelog
 
+## [7.3.0](https://github.com/web3-storage/w3cli/compare/v7.2.1...v7.3.0) (2024-01-23)
+
+
+### Features
+
+* add `name` to `w3 space info` output ([#164](https://github.com/web3-storage/w3cli/issues/164)) ([2b1bc4a](https://github.com/web3-storage/w3cli/commit/2b1bc4a117b1c611b0df8e574ceb501456a1aee5))
+
+
+### Bug Fixes
+
+* clear timeout always ([#166](https://github.com/web3-storage/w3cli/issues/166)) ([c1b7cce](https://github.com/web3-storage/w3cli/commit/c1b7ccee73ca7c54ea75eb6313d6e8a56b090c33))
+
+## [7.2.1](https://github.com/web3-storage/w3cli/compare/v7.2.0...v7.2.1) (2024-01-17)
+
+
+### Bug Fixes
+
+* make `w3 up --no-wrap` work as advertised. ([#160](https://github.com/web3-storage/w3cli/issues/160)) ([426faad](https://github.com/web3-storage/w3cli/commit/426faadf1860bd5d35dd50b12c77e8acee0a0526))
+
+## [7.2.0](https://github.com/web3-storage/w3cli/compare/v7.1.0...v7.2.0) (2024-01-17)
+
+
+### Features
+
+* `w3 delegation create --base64` & `w3 space add &lt;base64&gt;` ([#158](https://github.com/web3-storage/w3cli/issues/158)) ([98284ef](https://github.com/web3-storage/w3cli/commit/98284ef7ef95f5675b040ac49eabfaebe1701132))
+
+## [7.1.0](https://github.com/web3-storage/w3cli/compare/v7.0.4...v7.1.0) (2024-01-15)
+
+
+### Features
+
+* `w3 key create` ([#155](https://github.com/web3-storage/w3cli/issues/155)) ([1fe7adb](https://github.com/web3-storage/w3cli/commit/1fe7adb634ae67037a97a6e66def7b2f56ad315a))
+
+## [7.0.4](https://github.com/web3-storage/w3cli/compare/v7.0.3...v7.0.4) (2024-01-09)
+
+
+### Bug Fixes
+
+* no-wrap option ([#153](https://github.com/web3-storage/w3cli/issues/153)) ([9ae49e9](https://github.com/web3-storage/w3cli/commit/9ae49e931729f86bfa86b57d21cc859a5caf9664))
+* update notification includes -g flag for cli ([#150](https://github.com/web3-storage/w3cli/issues/150)) ([370bfc6](https://github.com/web3-storage/w3cli/commit/370bfc69889cda82976442adb08dd53002f2487d))
+
+## [7.0.3](https://github.com/web3-storage/w3cli/compare/v7.0.2...v7.0.3) (2023-12-13)
+
+
+### Bug Fixes
+
+* upgrade to latest access-client ([#146](https://github.com/web3-storage/w3cli/issues/146)) ([34e5d61](https://github.com/web3-storage/w3cli/commit/34e5d616ce36d11cc2d0a9ca7a4f28016e0f7a52))
+
+## [7.0.2](https://github.com/web3-storage/w3cli/compare/v7.0.1...v7.0.2) (2023-12-12)
+
+
+### Bug Fixes
+
+* pin @web3-storage/access to 18.0.5 ([#144](https://github.com/web3-storage/w3cli/issues/144)) ([a5b2127](https://github.com/web3-storage/w3cli/commit/a5b2127420c570e28242f5e9a7bb161e181e084f))
+
+## [7.0.1](https://github.com/web3-storage/w3cli/compare/v7.0.0...v7.0.1) (2023-12-07)
+
+
+### Bug Fixes
+
+* memory usage ([084a75e](https://github.com/web3-storage/w3cli/commit/084a75eb7ccede7471a89393b6b8892f66e500dd))
+* types for files-from-path ([20965e9](https://github.com/web3-storage/w3cli/commit/20965e91c5a89885217c4781206686e68459be82))
+
+## [7.0.0](https://github.com/web3-storage/w3cli/compare/v6.1.0...v7.0.0) (2023-11-29)
+
+
+### ⚠ BREAKING CHANGES
+
+* upgrade `proof ls` ([#136](https://github.com/web3-storage/w3cli/issues/136))
+
+### Features
+
+* upgrade `proof ls` ([#136](https://github.com/web3-storage/w3cli/issues/136)) ([d95d1a4](https://github.com/web3-storage/w3cli/commit/d95d1a4b98ec02e8b48496c8c370a455c82b9b1d))
+
+## [6.1.0](https://github.com/web3-storage/w3cli/compare/v6.0.0...v6.1.0) (2023-11-22)
+
+
+### Features
+
+* add npm package provenance ([#135](https://github.com/web3-storage/w3cli/issues/135)) ([9b1697c](https://github.com/web3-storage/w3cli/commit/9b1697cd38af5f7a71638b2e6d33b10106e9d151))
+
+
+### Bug Fixes
+
+* update deps. pull in w3up-client fixes ([#133](https://github.com/web3-storage/w3cli/issues/133)) ([6aacec8](https://github.com/web3-storage/w3cli/commit/6aacec86a8cd3b46fd81d83f12a14fc182d3073d))
+
 ## [6.0.0](https://github.com/web3-storage/w3cli/compare/v5.2.0...v6.0.0) (2023-11-16)
 
 

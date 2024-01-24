@@ -24,6 +24,7 @@ import {
   whoami,
   usageReport,
   getPlan,
+  createKey,
 } from './index.js'
 import {
   storeAdd,
@@ -37,7 +38,7 @@ import {
 
 const pkg = getPkg()
 
-updateNotifier({ pkg }).notify()
+updateNotifier({ pkg }).notify({ isGlobal: true })
 
 const cli = sade('w3')
 
@@ -70,11 +71,11 @@ cli
   .command('up <file>')
   .alias('upload', 'put')
   .describe('Store a file(s) to the service and register an upload.')
-  .option('--no-wrap', "Don't wrap input files with a directory.", false)
-  .option('-H, --hidden', 'Include paths that start with ".".')
+  .option('-H, --hidden', 'Include paths that start with ".".', false)
   .option('-c, --car', 'File is a CAR file.', false)
-  .option('--json', 'Format as newline delimited JSON')
-  .option('--verbose', 'Output more details.')
+  .option('--wrap', "Wrap single input file in a directory. Has no effect on directory or CAR uploads. Pass --no-wrap to disable.", true)
+  .option('--json', 'Format as newline delimited JSON', false)
+  .option('--verbose', 'Output more details.', false)
   .option(
     '--shard-size',
     'Shard uploads into CAR files of approximately this size in bytes.'
@@ -141,7 +142,7 @@ cli
 cli
   .command('space add <proof>')
   .describe(
-    'Add a space to the agent. The proof is a CAR encoded delegation to _this_ agent.'
+    'Import a space from a proof: a CAR encoded UCAN delegating capabilities to this agent. proof is a filesystem path, or a base64 encoded cid string.'
   )
   .action(addSpace)
 
@@ -180,7 +181,7 @@ cli
 cli
   .command('delegation create <audience-did>')
   .describe(
-    'Create a delegation to the passed audience for the given abilities with the _current_ space as the resource.'
+    'Output a CAR encoded UCAN that delegates capabilities to the audience for the current space.'
   )
   .option('-c, --can', 'One or more abilities to delegate.')
   .option(
@@ -199,6 +200,10 @@ cli
   .option(
     '-o, --output',
     'Path of file to write the exported delegation data to.'
+  )
+  .option(
+    '--base64',
+    'Format as base64 identity CID string. Useful when saving it as an environment variable.'
   )
   .action(createDelegation)
 
@@ -293,6 +298,12 @@ cli
   .command('can filecoin info <piece-cid>')
   .describe('Get filecoin information for given PieceCid.')
   .action(filecoinInfo)
+
+cli
+  .command('key create')
+  .describe('Generate and print a new ed25519 key pair. Does not change your current signing key.')
+  .option('--json', 'output as json')
+  .action(createKey)
 
 // show help text if no command provided
 cli.command('help [cmd]', 'Show help text', { default: true }).action((cmd) => {

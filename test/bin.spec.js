@@ -18,6 +18,8 @@ import { UCAN, Provider } from '@web3-storage/capabilities'
 import * as ED25519 from '@ucanto/principal/ed25519'
 import { sha256, delegate } from '@ucanto/core'
 import * as Result from '@web3-storage/w3up-client/result'
+import { base64 } from 'multiformats/bases/base64'
+import { info } from 'console'
 
 const w3 = Command.create('./bin.js')
 
@@ -314,7 +316,7 @@ export const testSpace = {
   'w3 space add': test(async (assert, context) => {
     const { env } = context
 
-    const spaceDID = await createSpace(context, { env: env.alice })
+    const spaceDID = await loginAndCreateSpace(context, { env: env.alice })
 
     const whosBob = await w3.args(['whoami']).env(env.bob).join()
 
@@ -343,6 +345,34 @@ export const testSpace = {
     assert.ok(!listNone.output.includes(spaceDID))
 
     const add = await w3.args(['space', 'add', proofPath]).env(env.bob).join()
+    assert.equal(add.output.trim(), spaceDID)
+
+    const listSome = await w3.args(['space', 'ls']).env(env.bob).join()
+    assert.ok(listSome.output.includes(spaceDID))
+  }),
+
+  'w3 space add `base64 proof car`': test(async (assert, context) => {
+    const { env } = context
+    const spaceDID = await loginAndCreateSpace(context, { env: env.alice })
+    const whosBob = await w3.args(['whoami']).env(env.bob).join()
+    const bobDID = SpaceDID.from(whosBob.output.trim())
+    const res = await w3
+      .args([
+        'delegation',
+        'create',
+        bobDID,
+        '-c',
+        'store/*',
+        'upload/*',
+        '--base64'
+      ])
+      .env(env.alice)
+      .join()
+
+    const listNone = await w3.args(['space', 'ls']).env(env.bob).join()
+    assert.ok(!listNone.output.includes(spaceDID))
+
+    const add = await w3.args(['space', 'add', res.output]).env(env.bob).join()
     assert.equal(add.output.trim(), spaceDID)
 
     const listSome = await w3.args(['space', 'ls']).env(env.bob).join()
@@ -388,7 +418,7 @@ export const testSpace = {
       .env(context.env.alice)
       .join()
 
-    const spaceDID = await createSpace(context)
+    const spaceDID = await loginAndCreateSpace(context)
 
     const spaceList = await w3
       .args(['space', 'ls'])
@@ -400,7 +430,9 @@ export const testSpace = {
   }),
 
   'w3 space use': test(async (assert, context) => {
-    const spaceDID = await createSpace(context, { env: context.env.alice })
+    const spaceDID = await loginAndCreateSpace(context, {
+      env: context.env.alice,
+    })
 
     const listDefault = await w3
       .args(['space', 'ls'])
@@ -484,7 +516,7 @@ export const testSpace = {
   }),
 
   'w3 space info': test(async (assert, context) => {
-    const spaceDID = await createSpace(context, {
+    const spaceDID = await loginAndCreateSpace(context, {
       customer: null,
     })
 
@@ -500,6 +532,12 @@ export const testSpace = {
       infoWithoutProvider.output,
       pattern`DID: ${spaceDID}\nProviders: .*none`,
       'space has no providers'
+    )
+
+    assert.match(
+      infoWithoutProvider.output,
+      pattern`Name: home`,
+      'space name is set'
     )
 
     Test.provisionSpace(context, {
@@ -518,10 +556,21 @@ export const testSpace = {
       pattern`DID: ${spaceDID}\nProviders: .*${providerDID}`,
       'added provider shows up in the space info'
     )
+
+    const infoWithProviderJson = await w3
+    .args(['space', 'info', '--json'])
+    .env(context.env.alice)
+    .join()
+
+    assert.deepEqual(JSON.parse(infoWithProviderJson.output), {
+      did: spaceDID,
+      providers: [providerDID],
+      name: 'home'
+    })
   }),
 
   'w3 space provision --coupon': test(async (assert, context) => {
-    const spaceDID = await createSpace(context, { customer: null })
+    const spaceDID = await loginAndCreateSpace(context, { customer: null })
 
     assert.deepEqual(
       await context.provisionsStorage.getStorageProviders(spaceDID),
@@ -589,6 +638,70 @@ export const testW3Up = {
     assert.match(up.error, /Stored 1 file/)
   }),
 
+  'w3 up --no-wrap': test(async (assert, context) => {
+    const email = 'alice@web.mail'
+    await login(context, { email })
+    await selectPlan(context, { email })
+
+    const create = await w3
+      .args([
+        'space',
+        'create',
+        'home',
+        '--no-recovery',
+        '--no-account',
+        '--customer',
+        email,
+      ])
+      .env(context.env.alice)
+      .join()
+
+    assert.ok(create.status.success())
+
+    const up = await w3
+      .args(['up', 'test/fixtures/pinpie.jpg', '--no-wrap'])
+      .env(context.env.alice)
+      .join()
+
+    assert.match(
+      up.output,
+      /bafkreiajkbmpugz75eg2tmocmp3e33sg5kuyq2amzngslahgn6ltmqxxfa/
+    )
+    assert.match(up.error, /Stored 1 file/)
+  }),
+
+  'w3 up --wrap false': test(async (assert, context) => {
+    const email = 'alice@web.mail'
+    await login(context, { email })
+    await selectPlan(context, { email })
+
+    const create = await w3
+      .args([
+        'space',
+        'create',
+        'home',
+        '--no-recovery',
+        '--no-account',
+        '--customer',
+        email,
+      ])
+      .env(context.env.alice)
+      .join()
+
+    assert.ok(create.status.success())
+
+    const up = await w3
+      .args(['up', 'test/fixtures/pinpie.jpg', '--wrap', 'false'])
+      .env(context.env.alice)
+      .join()
+
+    assert.match(
+      up.output,
+      /bafkreiajkbmpugz75eg2tmocmp3e33sg5kuyq2amzngslahgn6ltmqxxfa/
+    )
+    assert.match(up.error, /Stored 1 file/)
+  }),
+
   'w3 up --car': test(async (assert, context) => {
     const email = 'alice@web.mail'
     await login(context, { email })
@@ -619,7 +732,7 @@ export const testW3Up = {
   }),
 
   'w3 ls': test(async (assert, context) => {
-    await createSpace(context)
+    await loginAndCreateSpace(context)
 
     const list0 = await w3.args(['ls']).env(context.env.alice).join()
     assert.match(list0.output, /No uploads in space/)
@@ -635,7 +748,7 @@ export const testW3Up = {
   }),
 
   'w3 remove': test(async (assert, context) => {
-    await createSpace(context)
+    await loginAndCreateSpace(context)
 
     const rm = await w3
       .args([
@@ -651,7 +764,7 @@ export const testW3Up = {
   }),
 
   'w3 remove - no such upload': test(async (assert, context) => {
-    await createSpace(context)
+    await loginAndCreateSpace(context)
 
     const rm = await w3
       .args([
@@ -670,7 +783,7 @@ export const testW3Up = {
   }),
 
   'w3 remove --shards': test(async (assert, context) => {
-    await createSpace(context)
+    await loginAndCreateSpace(context)
 
     const up = await w3
       .args(['up', 'test/fixtures/pinpie.jpg'])
@@ -701,7 +814,7 @@ export const testW3Up = {
   }),
 
   'w3 remove --shards - no shards to remove': test(async (assert, context) => {
-    const space = await createSpace(context)
+    const space = await loginAndCreateSpace(context)
 
     const root = parseLink(
       'bafybeih2k7ughhfwedltjviunmn3esueijz34snyay77zmsml5w24tqamm'
@@ -732,7 +845,7 @@ export const testDelegation = {
       const env = context.env.alice
       const { bob } = Test
 
-      const spaceDID = await createSpace(context)
+      const spaceDID = await loginAndCreateSpace(context)
 
       const proofPath = path.join(
         os.tmpdir(),
@@ -771,7 +884,7 @@ export const testDelegation = {
   'w3 delegation create': test(async (assert, context) => {
     const env = context.env.alice
     const { bob } = Test
-    await createSpace(context)
+    await loginAndCreateSpace(context)
 
     const delegate = await w3
       .args(['delegation', 'create', bob.did()])
@@ -782,10 +895,48 @@ export const testDelegation = {
     assert.equal(delegate.status.success(), true)
   }),
 
+  'w3 delegation create -c store/add -c upload/add --base64': test(
+    async (assert, context) => {
+      const env = context.env.alice
+      const { bob } = Test
+      const spaceDID = await loginAndCreateSpace(context)
+      const res = await w3
+        .args([
+          'delegation',
+          'create',
+          bob.did(),
+          '-c',
+          'store/add',
+          '-c',
+          'upload/add',
+          '--base64'
+        ])
+        .env(env)
+        .join()
+
+      assert.equal(res.status.success(), true)
+
+      const identityCid = parseLink(res.output, base64)
+      const reader = await CarReader.fromBytes(identityCid.multihash.digest)
+      const blocks = []
+      for await (const block of reader.blocks()) {
+        blocks.push(block)
+      }
+
+      // @ts-expect-error
+      const delegation = importDAG(blocks)
+      assert.equal(delegation.audience.did(), bob.did())
+      assert.equal(delegation.capabilities[0].can, 'store/add')
+      assert.equal(delegation.capabilities[0].with, spaceDID)
+      assert.equal(delegation.capabilities[1].can, 'upload/add')
+      assert.equal(delegation.capabilities[1].with, spaceDID)
+    }
+  ),
+
   'w3 delegation ls --json': test(async (assert, context) => {
     const { mallory } = Test
 
-    const spaceDID = await createSpace(context)
+    const spaceDID = await loginAndCreateSpace(context)
 
     // delegate to mallory
     await w3
@@ -809,7 +960,7 @@ export const testDelegation = {
   'w3 delegation revoke': test(async (assert, context) => {
     const env = context.env.alice
     const { mallory } = Test
-    await createSpace(context)
+    await loginAndCreateSpace(context)
 
     const delegationPath = `${os.tmpdir()}/delegation-${Date.now()}.ucan`
     await w3
@@ -840,7 +991,7 @@ export const testDelegation = {
 
     assert.match(revoke.output, pattern`delegation ${cid} revoked`)
 
-    await createSpace(context, {
+    await loginAndCreateSpace(context, {
       env: context.env.bob,
       customer: 'bob@super.host',
     })
@@ -874,7 +1025,7 @@ export const testProof = {
   'w3 proof add': test(async (assert, context) => {
     const { env } = context
 
-    const spaceDID = await createSpace(context, { env: env.alice })
+    const spaceDID = await loginAndCreateSpace(context, { env: env.alice })
     const whoisbob = await w3.args(['whoami']).env(env.bob).join()
     const bobDID = DID.parse(whoisbob.output.trim()).did()
     const proofPath = path.join(
@@ -939,7 +1090,7 @@ export const testProof = {
   }),
   'w3 proof ls': test(async (assert, context) => {
     const { env } = context
-    const spaceDID = await createSpace(context, { env: env.alice })
+    const spaceDID = await loginAndCreateSpace(context, { env: env.alice })
     const whoisalice = await w3.args(['whoami']).env(env.alice).join()
     const aliceDID = DID.parse(whoisalice.output.trim()).did()
 
@@ -967,16 +1118,16 @@ export const testProof = {
       .env(env.bob)
       .join()
     const proofData = JSON.parse(proofList.output)
-    assert.equal(proofData.issuer, aliceDID)
-    assert.equal(proofData.capabilities.length, 1)
-    assert.equal(proofData.capabilities[0].with, spaceDID)
-    assert.equal(proofData.capabilities[0].can, 'store/*')
+    assert.equal(proofData.iss, aliceDID)
+    assert.equal(proofData.att.length, 1)
+    assert.equal(proofData.att[0].with, spaceDID)
+    assert.equal(proofData.att[0].can, 'store/*')
   }),
 }
 
 export const testStore = {
   'w3 can store add': test(async (assert, context) => {
-    await createSpace(context)
+    await loginAndCreateSpace(context)
 
     const { error } = await w3
       .args(['can', 'store', 'add', 'test/fixtures/pinpie.car'])
@@ -989,7 +1140,7 @@ export const testStore = {
 
 export const testCan = {
   'w3 can upload add': test(async (assert, context) => {
-    await createSpace(context)
+    await loginAndCreateSpace(context)
 
     const carPath = 'test/fixtures/pinpie.car'
     const reader = await CarReader.fromBytes(
@@ -1015,7 +1166,7 @@ export const testCan = {
   }),
 
   'w3 can upload ls': test(async (assert, context) => {
-    await createSpace(context)
+    await loginAndCreateSpace(context)
 
     await w3
       .args(['up', 'test/fixtures/pinpie.jpg'])
@@ -1030,7 +1181,7 @@ export const testCan = {
     assert.ok(dagJSON.parse(list.output))
   }),
   'w3 can upload rm': test(async (assert, context) => {
-    await createSpace(context)
+    await loginAndCreateSpace(context)
 
     const up = await w3
       .args(['up', 'test/fixtures/pinpie.jpg'])
@@ -1071,7 +1222,7 @@ export const testCan = {
     assert.ok(rm.status.success())
   }),
   'w3 can store ls': test(async (assert, context) => {
-    await createSpace(context)
+    await loginAndCreateSpace(context)
 
     await w3
       .args(['up', 'test/fixtures/pinpie.jpg'])
@@ -1086,7 +1237,7 @@ export const testCan = {
     assert.ok(dagJSON.parse(list.output))
   }),
   'w3 can store rm': test(async (assert, context) => {
-    const space = await createSpace(context)
+    const space = await loginAndCreateSpace(context)
 
     await w3
       .args(['up', 'test/fixtures/pinpie.jpg'])
@@ -1132,7 +1283,7 @@ export const testCan = {
     assert.ok(rm.status.success())
   }),
   'can filecoin info with not found': test(async (assert, context) => {
-    await createSpace(context)
+    await loginAndCreateSpace(context)
 
     const up = await w3
       .args(['up', 'test/fixtures/pinpie.jpg', '--verbose'])
@@ -1165,6 +1316,14 @@ export const testPlan = {
 
     const plan = await w3.args(['plan', 'get']).env(context.env.alice).join()
     assert.match(plan.output, /did:web:free.web3.storage/)
+  }),
+}
+
+export const testKey = {
+  'w3 key create': test(async (assert) => {
+    const res = await w3.args(['key', 'create', '--json']).join()
+    const key = ED25519.parse(JSON.parse(res.output).key)
+    assert.ok(key.did().startsWith('did:key'))
   }),
 }
 
@@ -1211,28 +1370,14 @@ export const selectPlan = async (
 /**
  * @param {Test.Context} context
  * @param {object} options
- * @param {DIDMailto.EmailAddress} [options.email]
  * @param {DIDMailto.EmailAddress|null} [options.customer]
  * @param {string} [options.name]
- * @param {Plan} [options.plan]
  * @param {Record<string, string>} [options.env]
  */
 export const createSpace = async (
   context,
-  {
-    email = 'alice@web.mail',
-    customer = email,
-    name = 'home',
-    plan = 'did:web:free.web3.storage',
-    env = context.env.alice,
-  } = {}
+  { customer = 'alice@web.mail', name = 'home', env = context.env.alice } = {}
 ) => {
-  await login(context, { email, env })
-
-  if (customer != null && plan != null) {
-    await selectPlan(context, { email: customer, plan })
-  }
-
   const { output } = await w3
     .args([
       'space',
@@ -1248,6 +1393,34 @@ export const createSpace = async (
   const [did] = match(/(did:key:\w+)/, output)
 
   return SpaceDID.from(did)
+}
+
+/**
+ * @param {Test.Context} context
+ * @param {object} options
+ * @param {DIDMailto.EmailAddress} [options.email]
+ * @param {DIDMailto.EmailAddress|null} [options.customer]
+ * @param {string} [options.name]
+ * @param {Plan} [options.plan]
+ * @param {Record<string, string>} [options.env]
+ */
+export const loginAndCreateSpace = async (
+  context,
+  {
+    email = 'alice@web.mail',
+    customer = email,
+    name = 'home',
+    plan = 'did:web:free.web3.storage',
+    env = context.env.alice,
+  } = {}
+) => {
+  await login(context, { email, env })
+
+  if (customer != null && plan != null) {
+    await selectPlan(context, { email: customer, plan })
+  }
+
+  return createSpace(context, { customer, name, env })
 }
 
 /**

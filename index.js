@@ -1,7 +1,9 @@
 import fs from 'fs'
 import ora, { oraPromise } from 'ora'
-import { Readable } from 'stream'
+import { pipeline } from 'node:stream/promises'
 import { CID } from 'multiformats/cid'
+import { base64 } from 'multiformats/bases/base64'
+import { identity } from 'multiformats/hashes/identity'
 import * as DID from '@ipld/dag-ucan/did'
 import * as dagJSON from '@ipld/dag-json'
 import { CarWriter } from '@ipld/car'
@@ -15,13 +17,16 @@ import {
   filesize,
   filesizeMB,
   readProof,
+  readProofFromBytes,
   uploadListResponseToString,
   startOfLastMonth,
 } from './lib.js'
 import * as ucanto from '@ucanto/core'
+import { ed25519 } from '@ucanto/principal'
 import chalk from 'chalk'
 export * as Coupon from './coupon.js'
 export { Account, Space }
+import ago from 's-ago'
 
 /**
  *
@@ -91,7 +96,7 @@ export async function authorize(email, opts = {}) {
  *   hidden?: boolean
  *   json?: boolean
  *   verbose?: boolean
- *   'no-wrap'?: boolean
+ *   wrap?: boolean
  *   'shard-size'?: number
  *   'concurrent-requests'?: number
  * }} [opts]
@@ -119,9 +124,9 @@ export async function upload(firstPath, opts) {
   /** @type {(o?: import('@web3-storage/w3up-client/src/types').UploadOptions) => Promise<import('@web3-storage/w3up-client/src/types').AnyLink>} */
   const uploadFn = opts?.car
     ? client.uploadCAR.bind(client, files[0])
-    : files.length === 1 && opts?.['no-wrap']
-      ? client.uploadFile.bind(client, files[0])
-      : client.uploadDirectory.bind(client, files)
+    : files.length === 1 && opts?.wrap === false
+    ? client.uploadFile.bind(client, files[0])
+    : client.uploadDirectory.bind(client, files)
 
   const root = await uploadFn({
     onShardStored: ({ cid, size, piece }) => {
@@ -132,9 +137,14 @@ export async function upload(firstPath, opts) {
             '   └── '
           )}Piece CID: ${piece}`,
         })
-        spinner.start(`Storing ${Math.round((totalSent / totalSize) * 100)}%`)
+        spinner.start(
+          `Storing ${Math.min(Math.round((totalSent / totalSize) * 100), 100)}%`
+        )
       } else {
-        spinner.text = `Storing ${Math.round((totalSent / totalSize) * 100)}%`
+        spinner.text = `Storing ${Math.min(
+          Math.round((totalSent / totalSize) * 100),
+          100
+        )}%`
       }
       opts?.json &&
         opts?.verbose &&
@@ -246,11 +256,33 @@ export async function createSpace(name) {
 }
 
 /**
- * @param {string} proofPath
+ * @param {string} proofPathOrCid
  */
-export async function addSpace(proofPath) {
+export async function addSpace(proofPathOrCid) {
   const client = await getClient()
-  const delegation = await readProof(proofPath)
+
+  let cid
+  try {
+    cid = CID.parse(proofPathOrCid, base64)
+  } catch (/** @type {any} */ err) {
+    if (err?.message?.includes('Unexpected end of data')) {
+      console.error(`Error: failed to read proof. The string has been truncated.`)
+      process.exit(1)
+    }
+    /* otherwise, try as path */
+  }
+
+  let delegation
+  if (cid) {
+    if (cid.multihash.code !== identity.code) {
+      console.error(`Error: failed to read proof. Must be identity CID. Fetching of remote proof CARs not supported by this command yet`)
+      process.exit(1)
+    }
+    delegation = await readProofFromBytes(cid.multihash.digest)
+  } else {
+    delegation = await readProof(proofPathOrCid)
+  }
+
   const space = await client.addSpace(delegation)
   console.log(space.did())
 }
@@ -313,13 +345,17 @@ export async function spaceInfo(opts) {
     }
   }
 
+  const space = client.spaces().find((s) => s.did() === spaceDID)
+  const name = space ? space.name : undefined
+
   if (opts.json) {
-    console.log(JSON.stringify(info, null, 4))
+    console.log(JSON.stringify({ ...info, name }, null, 4))
   } else {
     const providers = info.providers?.join(', ') ?? ''
     console.log(`
       DID: ${info.did}
-Providers: ${providers || chalk.dim('none')}`)
+Providers: ${providers || chalk.dim('none')}
+     Name: ${name ?? chalk.dim('none')}`)
   }
 }
 
@@ -332,6 +368,7 @@ Providers: ${providers || chalk.dim('none')}`)
  * @param {number} [opts.expiration]
  * @param {string} [opts.output]
  * @param {string} [opts.with]
+ * @param {boolean} [opts.base64]
  */
 export async function createDelegation(audienceDID, opts) {
   const client = await getClient()
@@ -360,7 +397,25 @@ export async function createDelegation(audienceDID, opts) {
   const { writer, out } = CarWriter.create()
   const dest = opts.output ? fs.createWriteStream(opts.output) : process.stdout
 
-  Readable.from(out).pipe(dest)
+  pipeline(
+    out,
+    async function* maybeBaseEncode(src) {
+      const chunks = []
+      for await (const chunk of src) {
+        if (!opts.base64) {
+          yield chunk
+        } else {
+          chunks.push(chunk)
+        }
+      }
+      if (!opts.base64) return
+      const blob = new Blob(chunks)
+      const bytes = new Uint8Array(await blob.arrayBuffer())
+      const idCid = CID.createV1(ucanto.CAR.code, identity.digest(bytes))
+      yield idCid.toString(base64)
+    },
+    dest
+  )
 
   for (const block of delegation.export()) {
     // @ts-expect-error
@@ -474,33 +529,45 @@ export async function listProofs(opts) {
   const proofs = client.proofs()
   if (opts.json) {
     for (const proof of proofs) {
-      console.log(
-        JSON.stringify({
-          cid: proof.cid.toString(),
-          issuer: proof.issuer.did(),
-          capabilities: proof.capabilities.map((c) => ({
-            with: c.with,
-            can: c.can,
-          })),
-        })
-      )
+      console.log(JSON.stringify(proof))
     }
   } else {
     for (const proof of proofs) {
-      console.log(proof.cid.toString())
-      console.log(`  issuer: ${proof.issuer.did()}`)
-      console.log(`  audience: ${proof.audience.did()}`)
-      for (const capability of proof.capabilities) {
-        console.log(`  with: ${capability.with}`)
-        console.log(`  can: ${capability.can}`)
+      console.log(chalk.dim(`# ${proof.cid.toString()}`))
+      console.log(`iss: ${chalk.cyanBright(proof.issuer.did())}`)
+      if (proof.expiration !== Infinity) {
+        console.log(
+          `exp: ${chalk.yellow(proof.expiration)} ${chalk.dim(
+            ` # expires ${ago(new Date(proof.expiration * 1000))}`
+          )}`
+        )
       }
+      console.log('att:')
+      for (const capability of proof.capabilities) {
+        console.log(`  - can: ${chalk.magentaBright(capability.can)}`)
+        console.log(`    with: ${chalk.green(capability.with)}`)
+        if (capability.nb) {
+          console.log(`    nb: ${JSON.stringify(capability.nb)}`)
+        }
+      }
+      if (proof.facts.length > 0) {
+        console.log('fct:')
+      }
+      for (const fact of proof.facts) {
+        console.log(`  - ${JSON.stringify(fact)}`)
+      }
+      console.log('')
     }
+    console.log(
+      chalk.dim(
+        `# ${proofs.length} proof${
+          proofs.length === 1 ? '' : 's'
+        } for ${client.agent.did()}`
+      )
+    )
   }
 }
 
-/**
- *
- */
 export async function whoami() {
   const client = await getClient()
   console.log(client.did())
@@ -593,5 +660,19 @@ async function* getSpaceUsageReports(client, period) {
         }
       }
     }
+  }
+}
+
+/**
+ * @param {{ json: boolean }} options
+ */
+export async function createKey({ json }) {
+  const signer = await ed25519.generate()
+  const key = ed25519.format(signer)
+  if (json) {
+    console.log(JSON.stringify({ did: signer.did(), key }, null, 2))
+  } else {
+    console.log(`# ${signer.did()}`)
+    console.log(key)
   }
 }
