@@ -10,9 +10,11 @@ import { CarWriter } from '@ipld/car'
 import { filesFromPaths } from 'files-from-path'
 import * as Account from './account.js'
 import { spaceAccess } from '@web3-storage/w3up-client/capability/access'
+import { AgentData } from '@web3-storage/access'
 import * as Space from './space.js'
 import {
   getClient,
+  getStore,
   checkPathsExist,
   filesize,
   filesizeMB,
@@ -649,4 +651,16 @@ export async function createKey({ json }) {
     console.log(`# ${signer.did()}`)
     console.log(key)
   }
+}
+
+export const reset = async () => {
+  const store = getStore()
+  const exportData = await store.load()
+  if (exportData) {
+    let data = AgentData.fromExport(exportData)
+    // do not reset the principal
+    data = await AgentData.create({ principal: data.principal, meta: data.meta })
+    await store.save(data.export())
+  }
+  console.log('⁂ Agent reset.')
 }
