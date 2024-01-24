@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.4.0](https://github.com/web3-storage/w3cli/compare/v7.3.0...v7.4.0) (2024-01-24)
+
+
+### Features
+
+* w3 usage report catches/warns about errors invoking usage/report ([#169](https://github.com/web3-storage/w3cli/issues/169)) ([e47159e](https://github.com/web3-storage/w3cli/commit/e47159e74c7aef1c18ac83e43c6b78454f61a808))
+
 ## [7.3.0](https://github.com/web3-storage/w3cli/compare/v7.2.1...v7.3.0) (2024-01-23)
 
 
