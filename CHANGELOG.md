@@ -1,5 +1,17 @@
 # Changelog
 
+## [7.5.0](https://github.com/web3-storage/w3cli/compare/v7.4.0...v7.5.0) (2024-01-25)
+
+
+### Features
+
+* add reset command ([#170](https://github.com/web3-storage/w3cli/issues/170)) ([8eea385](https://github.com/web3-storage/w3cli/commit/8eea385e526bd73a9cfb3a674c31168a7b161f30))
+
+
+### Bug Fixes
+
+* use remove from client ([#167](https://github.com/web3-storage/w3cli/issues/167)) ([96966ba](https://github.com/web3-storage/w3cli/commit/96966bac7506e490330ac190587c2294627e838f))
+
 ## [7.4.0](https://github.com/web3-storage/w3cli/compare/v7.3.0...v7.4.0) (2024-01-24)
 
 
