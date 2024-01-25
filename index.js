@@ -204,43 +204,12 @@ export async function remove(rootCid, opts) {
     process.exit(1)
   }
   const client = await getClient()
-  let upload
+
   try {
-    upload = await client.capability.upload.remove(root)
+    await client.remove(root, opts)
   } catch (/** @type {any} */ err) {
     console.error(`Remove failed: ${err.message ?? err}`)
     console.error(err)
-    process.exit(1)
-  }
-  if (!opts.shards) {
-    return
-  }
-  if (!upload.root) {
-    return console.log(
-      '⁂ upload not found. could not determine shards to remove.'
-    )
-  }
-  if (!upload.shards || !upload.shards.length) {
-    return console.log('⁂ no shards to remove.')
-  }
-
-  const { shards } = upload
-  console.log(
-    `⁂ removing ${shards.length} shard${shards.length === 1 ? '' : 's'}`
-  )
-
-  /** @param {import('@web3-storage/w3up-client/types').CARLink} shard */
-  function removeShard(shard) {
-    return oraPromise(client.capability.store.remove(shard), {
-      text: `${shard}`,
-      successText: `${shard} removed`,
-      failText: `${shard} failed`,
-    })
-  }
-
-  const results = await Promise.allSettled(shards.map(removeShard))
-
-  if (results.some((res) => res.status === 'rejected')) {
     process.exit(1)
   }
 }

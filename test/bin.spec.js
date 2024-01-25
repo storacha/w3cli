@@ -774,68 +774,13 @@ export const testW3Up = {
       ])
       .env(context.env.alice)
       .join()
+      .catch()
 
-    assert.equal(rm.status.code, 0)
-    assert.match(
-      rm.output,
-      /upload not found. could not determine shards to remove/
-    )
-  }),
-
-  'w3 remove --shards': test(async (assert, context) => {
-    await loginAndCreateSpace(context)
-
-    const up = await w3
-      .args(['up', 'test/fixtures/pinpie.jpg'])
-      .env(context.env.alice)
-      .join()
-
-    assert.match(
-      up.output,
-      /bafybeiajdopsmspomlrpaohtzo5sdnpknbolqjpde6huzrsejqmvijrcea/
-    )
-
-    const rm = await w3
-      .args([
-        'rm',
-        'bafybeiajdopsmspomlrpaohtzo5sdnpknbolqjpde6huzrsejqmvijrcea',
-        '--shards',
-      ])
-      .env(context.env.alice)
-      .join()
-
-    assert.equal(rm.status.code, 0)
-
-    assert.match(rm.output, /1 shard/)
+    assert.equal(rm.status.code, 1)
     assert.match(
       rm.error,
-      /bagbaieraxkuzouwfuphnqlbbpobywmypb26stej5vbwkelrv7chdqoxfuuea removed/
+      /Upload not found/
     )
-  }),
-
-  'w3 remove --shards - no shards to remove': test(async (assert, context) => {
-    const space = await loginAndCreateSpace(context)
-
-    const root = parseLink(
-      'bafybeih2k7ughhfwedltjviunmn3esueijz34snyay77zmsml5w24tqamm'
-    )
-
-    // store upload without any shards
-    await context.uploadTable.insert({
-      space,
-      root,
-      shards: [],
-      issuer: Test.alice.did(),
-      invocation: parseLink('bafkqaaa'),
-    })
-
-    const rm = await w3
-      .args(['rm', root.toString(), '--shards'])
-      .env(context.env.alice)
-      .join()
-
-    assert.equal(rm.status.code, 0)
-    assert.match(rm.output, /no shards to remove/)
   }),
 }
 
