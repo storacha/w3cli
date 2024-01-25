@@ -25,6 +25,7 @@ import {
   usageReport,
   getPlan,
   createKey,
+  reset,
 } from './index.js'
 import {
   storeAdd,
@@ -304,6 +305,11 @@ cli
   .describe('Generate and print a new ed25519 key pair. Does not change your current signing key.')
   .option('--json', 'output as json')
   .action(createKey)
+
+cli
+  .command('reset')
+  .describe('Remove all proofs/delegations from the store but retain the agent DID.')
+  .action(reset)
 
 // show help text if no command provided
 cli.command('help [cmd]', 'Show help text', { default: true }).action((cmd) => {

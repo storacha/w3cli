@@ -57,11 +57,16 @@ export function filesizeMB(bytes) {
   return `${(bytes / 1000 / 1000).toFixed(1)}MB`
 }
 
+/** Get a configured w3up store used by the CLI. */
+export function getStore() {
+  return new StoreConf({ profile: process.env.W3_STORE_NAME ?? 'w3cli' })
+}
+
 /**
  * Get a new API client configured from env vars.
  */
 export function getClient() {
-  const store = new StoreConf({ profile: process.env.W3_STORE_NAME ?? 'w3cli' })
+  const store = getStore()
 
   if (process.env.W3_ACCESS_SERVICE_URL || process.env.W3_UPLOAD_SERVICE_URL) {
     console.warn(
