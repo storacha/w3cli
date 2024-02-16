@@ -1,10 +1,9 @@
-import fs from 'node:fs/promises'
 import * as DID from '@ipld/dag-ucan/did'
 import * as Account from './account.js'
 import * as Space from './space.js'
 import { getClient } from './lib.js'
 import * as ucanto from '@ucanto/core'
-import { base64pad } from 'multiformats/bases/base64'
+import { base64url } from 'multiformats/bases/base64'
 import cryptoRandomString from 'crypto-random-string';
 
 export { Account, Space }
@@ -50,8 +49,8 @@ export const generateTokens = async (
   }
 
   console.log(`
-Authorization header: ${base64pad.encode(new TextEncoder().encode(password))}  
+X-Auth-Secret header: ${base64url.encode(new TextEncoder().encode(password))}  
 
-Proof: ${base64pad.encode(bytes)}
+Authorization header: ${base64url.encode(bytes)}
 `)
 }
