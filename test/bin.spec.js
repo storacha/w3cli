@@ -558,9 +558,9 @@ export const testSpace = {
     )
 
     const infoWithProviderJson = await w3
-    .args(['space', 'info', '--json'])
-    .env(context.env.alice)
-    .join()
+      .args(['space', 'info', '--json'])
+      .env(context.env.alice)
+      .join()
 
     assert.deepEqual(JSON.parse(infoWithProviderJson.output), {
       did: spaceDID,
@@ -1269,6 +1269,15 @@ export const testKey = {
     const res = await w3.args(['key', 'create', '--json']).join()
     const key = ED25519.parse(JSON.parse(res.output).key)
     assert.ok(key.did().startsWith('did:key'))
+  }),
+}
+
+export const testBridge = {
+  'w3 bridge generate-tokens': test(async (assert, context) => {
+    const spaceDID = await loginAndCreateSpace(context)
+    const res = await w3.args(['bridge', 'generate-tokens', spaceDID]).join()
+    assert.match(res.output, /X-Auth-Secret header: u/)
+    assert.match(res.output, /Authorization header: u/)
   }),
 }
 
