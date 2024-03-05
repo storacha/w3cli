@@ -13,13 +13,14 @@ export { Account, Space }
  * @property {string} resource
  * @property {string[]|string} [can]
  * @property {number} [expiration]
+ * @property {boolean} [json]
  *
  * @param {string} resource
  * @param {BridgeGenerateTokensOptions} options
  */
 export const generateTokens = async (
   resource,
-  { can = ['store/add', 'upload/add'], expiration }
+  { can = ['store/add', 'upload/add'], expiration, json }
 ) => {
   const client = await getClient()
 
@@ -47,10 +48,19 @@ export const generateTokens = async (
     console.error(error)
     return process.exit(1)
   }
+  const xAuthSecret = base64url.encode(new TextEncoder().encode(password))
+  const authorization = base64url.encode(bytes)
 
-  console.log(`
-X-Auth-Secret header: ${base64url.encode(new TextEncoder().encode(password))}  
+  if (json) {
+    console.log(JSON.stringify({
+      "X-Auth-Secret": xAuthSecret,
+      "Authorization": authorization
+    }))
+  } else {
+    console.log(`
+X-Auth-Secret header: ${xAuthSecret}  
 
-Authorization header: ${base64url.encode(bytes)}
-`)
+Authorization header: ${authorization}
+    `)
+  }
 }

@@ -185,12 +185,12 @@ cli
   .option('-c, --can', 'One or more abilities to delegate.')
   .option(
     '-e, --expiration',
-    'Unix timestamp when the delegation is no longer valid. Zero indicates no expiration.',
+    'Unix timestamp (in seconds) when the delegation is no longer valid. Zero indicates no expiration.',
     0
   )
   .option(
-    '-o, --output',
-    'Path of file to write the exported delegation data to.'
+    '-j, --json',
+    'If set, output JSON suitable to spread into the `headers` field of a `fetch` request.'
   )
   .action(Bridge.generateTokens)
 
