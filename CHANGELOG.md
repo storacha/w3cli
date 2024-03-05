@@ -1,5 +1,13 @@
 # Changelog
 
+## [7.6.0](https://github.com/web3-storage/w3cli/compare/v7.5.0...v7.6.0) (2024-03-05)
+
+
+### Features
+
+* introduce `bridge generate-tokens` command ([#175](https://github.com/web3-storage/w3cli/issues/175)) ([5de8579](https://github.com/web3-storage/w3cli/commit/5de8579a7d0633c9c232ef4036b70b35ede55ec8))
+* updates from PR feedback ([#179](https://github.com/web3-storage/w3cli/issues/179)) ([75f2195](https://github.com/web3-storage/w3cli/commit/75f2195571c9248a0ba3eacb240cd10b1b44e82d))
+
 ## [7.5.0](https://github.com/web3-storage/w3cli/compare/v7.4.0...v7.5.0) (2024-01-25)
 
 
