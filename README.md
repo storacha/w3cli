@@ -57,6 +57,8 @@ w3 up recipies.txt
   - [`w3 proof ls`](#w3-proof-ls)
 - Key management
   - [`w3 key create`](#w3-key-create)
+- UCAN-HTTP Bridge
+  - [`w3 bridge generate-tokens`](#w3-bridge-generate-tokens)
 - Advanced usage
   - [`w3 can space info`](#w3-can-space-info-did) <sup>coming soon!</sup>
   - [`w3 can space recover`](#w3-can-space-recover-email) <sup>coming soon!</sup>
@@ -183,6 +185,12 @@ List proofs of delegated capabilities. Proofs are delegations with an audience m
 Print a new key pair. Does not change your current signing key
 
 - `--json` Export as dag-json
+
+### `w3 bridge generate-tokens`
+
+Generate tokens that can be used as the `X-Auth-Secret` and `Authorization` headers required to use the UCAN-HTTP bridge.
+
+TODO: link to UCAN-HTTP bridge specification once it lands
 
 ### `w3 can space info <did>`
 

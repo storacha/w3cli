@@ -27,6 +27,7 @@ import * as ucanto from '@ucanto/core'
 import { ed25519 } from '@ucanto/principal'
 import chalk from 'chalk'
 export * as Coupon from './coupon.js'
+export * as Bridge from './bridge.js'
 export { Account, Space }
 import ago from 's-ago'
 
