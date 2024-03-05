@@ -190,7 +190,12 @@ Print a new key pair. Does not change your current signing key
 
 Generate tokens that can be used as the `X-Auth-Secret` and `Authorization` headers required to use the UCAN-HTTP bridge.
 
-TODO: link to UCAN-HTTP bridge specification once it lands
+See the [UCAN Bridge specification](https://github.com/web3-storage/specs/blob/main/w3-ucan-bridge.md) for more information
+on how these are expected to be used.
+
+- `--can` One or more abilities to delegate.
+- `--expiration` Unix timestamp (in seconds) when the delegation is no longer valid. Zero indicates no expiration.
+- `--json` If set, output JSON suitable to splat into the `headers` field of a `fetch` request.
 
 ### `w3 can space info <did>`
 
