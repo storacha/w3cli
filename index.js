@@ -10,7 +10,8 @@ import { CarWriter } from '@ipld/car'
 import { filesFromPaths } from 'files-from-path'
 import * as Account from './account.js'
 import { spaceAccess } from '@web3-storage/w3up-client/capability/access'
-import { AgentData } from '@web3-storage/access'
+import * as W3Space from '@web3-storage/w3up-client/space'
+import { AgentData, StoreMemory } from '@web3-storage/access'
 import * as Space from './space.js'
 import {
   getClient,
@@ -30,6 +31,7 @@ export * as Coupon from './coupon.js'
 export * as Bridge from './bridge.js'
 export { Account, Space }
 import ago from 's-ago'
+import { accountAccess } from '@web3-storage/access/access'
 
 /**
  *
@@ -333,17 +335,33 @@ Providers: ${providers || chalk.dim('none')}
 
 /**
  * @param {string} audienceDID
- * @param {object} opts
- * @param {string[]|string} opts.can
- * @param {string} [opts.name]
- * @param {string} [opts.type]
- * @param {number} [opts.expiration]
- * @param {string} [opts.output]
- * @param {string} [opts.with]
- * @param {boolean} [opts.base64]
+ * @param {{
+ *   can: string | string[],
+ *   name?: string,
+ *   type?: string,
+ *   expiration?: number,
+ *   output?: string,
+ *   with?: string,
+ *   base64?: boolean,
+ *   'use-space-recovery-key'?: string
+ * }} opts
  */
 export async function createDelegation(audienceDID, opts) {
-  const client = await getClient()
+  let client
+  const recoveryKey = opts['use-space-recovery-key']
+  if (recoveryKey) {
+    const space = await W3Space.fromMnemonic(recoveryKey, { name: '' })
+    
+    // create a client with an in-memory store and the space ID as the principal
+    client = await getClient({ principal: ed25519.format(space.signer), store: new StoreMemory() })
+
+    // "add" the space so that we don't get an error when trying to create a delegation later
+    // TODO: should we update the client so that this is unnecessary? maybe the client should warn but continue
+    // since it is possible to create a delegation from the root with no proofs?
+    await client.addSpace(await space.createAuthorization(client.agent, { access: accountAccess }))
+  } else {
+    client = await getClient()
+  }
 
   if (client.currentSpace() == null) {
     throw new Error('no current space, use `w3 space register` to create one.')
@@ -453,7 +471,7 @@ export async function revokeDelegation(delegationCid, opts) {
     process.exit(1)
   }
   const result = await client.revokeDelegation(
-    /** @type {import('@ucanto/interface').UCANLink} */ (cid),
+    /** @type {import('@ucanto/interface').UCANLink} */(cid),
     { proofs: proof ? [proof] : [] }
   )
   if (result.ok) {
@@ -532,8 +550,7 @@ export async function listProofs(opts) {
     }
     console.log(
       chalk.dim(
-        `# ${proofs.length} proof${
-          proofs.length === 1 ? '' : 's'
+        `# ${proofs.length} proof${proofs.length === 1 ? '' : 's'
         } for ${client.agent.did()}`
       )
     )
