@@ -43,6 +43,9 @@ export const loginWithClient = async (email, client) => {
   }
 }
 
+/**
+ *
+ */
 export const list = async () => {
   const client = await getClient()
   const accounts = Object.values(Account.list(client))
