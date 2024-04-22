@@ -540,6 +540,9 @@ export async function listProofs(opts) {
   }
 }
 
+/**
+ *
+ */
 export async function whoami() {
   const client = await getClient()
   console.log(client.did())
