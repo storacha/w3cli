@@ -17,7 +17,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/web3-storage/w3cli.git"
+    "url": "git+https://github.com/w3s-project/w3cli.git"
   },
   "keywords": [
     "w3",
@@ -27,9 +27,9 @@
     "cli"
   ],
   "bugs": {
-    "url": "https://github.com/web3-storage/w3cli/issues"
+    "url": "https://github.com/w3s-project/w3cli/issues"
   },
-  "homepage": "https://github.com/web3-storage/w3cli#readme",
+  "homepage": "https://github.com/w3s-project/w3cli#readme",
   "devDependencies": {
     "@types/update-notifier": "^6.0.5",
     "@ucanto/interface": "^9.0.0",
