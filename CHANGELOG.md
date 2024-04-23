@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.6.1](https://github.com/w3s-project/w3cli/compare/v7.6.0...v7.6.1) (2024-04-23)
+
+
+### Bug Fixes
+
+* remove leftover semicolon ([#183](https://github.com/w3s-project/w3cli/issues/183)) ([3b697de](https://github.com/w3s-project/w3cli/commit/3b697dee7184114710c7b43aca0ccfb9c947c548))
+
 ## [7.6.0](https://github.com/web3-storage/w3cli/compare/v7.5.0...v7.6.0) (2024-03-05)
 
 
