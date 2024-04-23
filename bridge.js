@@ -4,7 +4,7 @@ import * as Space from './space.js'
 import { getClient } from './lib.js'
 import * as ucanto from '@ucanto/core'
 import { base64url } from 'multiformats/bases/base64'
-import cryptoRandomString from 'crypto-random-string';
+import cryptoRandomString from 'crypto-random-string'
 
 export { Account, Space }
 
