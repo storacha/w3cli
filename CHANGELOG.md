@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.6.2](https://github.com/w3s-project/w3cli/compare/v7.6.1...v7.6.2) (2024-04-23)
+
+
+### Bug Fixes
+
+* address npm provenance ([#185](https://github.com/w3s-project/w3cli/issues/185)) ([9981391](https://github.com/w3s-project/w3cli/commit/99813913e8b90de3e6b2e12859d1e760f5301c4a))
+
 ## [7.6.1](https://github.com/w3s-project/w3cli/compare/v7.6.0...v7.6.1) (2024-04-23)
 
 
