@@ -19,7 +19,6 @@ import * as ED25519 from '@ucanto/principal/ed25519'
 import { sha256, delegate } from '@ucanto/core'
 import * as Result from '@web3-storage/w3up-client/result'
 import { base64 } from 'multiformats/bases/base64'
-import { info } from 'console'
 
 const w3 = Command.create('./bin.js')
 
@@ -56,19 +55,18 @@ export const testW3 = {
 }
 
 export const testAccount = {
-  // 'w3 account ls': test(async (assert, context) => {
-  //   const { output } = await w3
-  //     .env(context.env.alice)
-  //     .args(['account ls'])
-  //     .join()
-  //   console.log('out', output)
+  'w3 account ls': test(async (assert, context) => {
+    const { output } = await w3
+      .env(context.env.alice)
+      .args(['account ls'])
+      .join()
 
-  //   assert.match(output, /has not been authorized yet/)
-  // }),
+    assert.match(output, /has not been authorized yet/)
+  }),
 
   'w3 login': test(async (assert, context) => {
     const login = w3
-      .args(['login', 'alice-cli-test@web.mail'])
+      .args(['login', 'alice@web.mail'])
       .env(context.env.alice)
       .fork()
 
@@ -83,7 +81,7 @@ export const testAccount = {
 
     const message = await login.output.text()
 
-    assert.match(message ?? '', /authorized by did:mailto:web.mail:alice-cli-test/)
+    assert.match(message ?? '', /authorized by did:mailto:web.mail:alice/)
   }),
 
   'w3 account list': test(async (assert, context) => {
@@ -298,7 +296,7 @@ export const testSpace = {
       const email = 'alice@web.mail'
       await login(context, { email })
 
-      context.plansStorage.get = async (account) => {
+      context.plansStorage.get = async () => {
         return {
           ok: { product: 'did:web:free.web3.storage', updatedAt: 'now' },
         }
@@ -743,6 +741,9 @@ export const testW3Up = {
       .env(context.env.alice)
       .join()
 
+    // wait a second for invocation to get a different expiry
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+
     const list1 = await w3.args(['ls', '--json']).env(context.env.alice).join()
 
     assert.ok(dagJSON.parse(list1.output))
@@ -751,10 +752,20 @@ export const testW3Up = {
   'w3 remove': test(async (assert, context) => {
     await loginAndCreateSpace(context)
 
+    const up = await w3
+      .args(['up', 'test/fixtures/pinpie.jpg'])
+      .env(context.env.alice)
+      .join()
+
+    assert.match(
+      up.output,
+      /bafybeiajdopsmspomlrpaohtzo5sdnpknbolqjpde6huzrsejqmvijrcea/
+    )
+
     const rm = await w3
       .args([
         'rm',
-        'bafybeih2k7ughhfwedltjviunmn3esueijz34snyay77zmsml5w24tqamm',
+        'bafybeiajdopsmspomlrpaohtzo5sdnpknbolqjpde6huzrsejqmvijrcea',
       ])
       .env(context.env.alice)
       .join()
@@ -780,7 +791,7 @@ export const testW3Up = {
     assert.equal(rm.status.code, 1)
     assert.match(
       rm.error,
-      /Upload not found/
+      /not found/
     )
   }),
 }
@@ -1191,9 +1202,12 @@ export const testCan = {
       .join()
 
     const uploads = await context.uploadTable.list(space)
-    const upload = uploads.results[0]
-    const shard = upload.shards?.at(0)
+    const upload = uploads.ok?.results[0]
+    if (!upload) {
+      return assert.ok(upload, 'upload should appear in list')
+    }
 
+    const shard = upload.shards?.at(0)
     if (!shard) {
       return assert.ok(shard, 'shard should been created')
     }
@@ -1260,6 +1274,9 @@ export const testPlan = {
 
     await selectPlan(context)
 
+    // wait a second for invocation to get a different expiry
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+
     const plan = await w3.args(['plan', 'get']).env(context.env.alice).join()
     assert.match(plan.output, /did:web:free.web3.storage/)
   }),
@@ -1312,14 +1329,15 @@ export const login = async (
  * @param {Test.Context} context
  * @param {object} options
  * @param {DIDMailto.EmailAddress} [options.email]
+ * @param {string} [options.billingID]
  * @param {Plan} [options.plan]
  */
 export const selectPlan = async (
   context,
-  { email = 'alice@web.mail', plan = 'did:web:free.web3.storage' } = {}
+  { email = 'alice@web.mail', billingID = 'test:cus_alice', plan = 'did:web:free.web3.storage' } = {}
 ) => {
   const customer = DIDMailto.fromEmail(email)
-  await context.plansStorage.set(customer, plan)
+  Result.try(await context.plansStorage.initialize(customer, billingID, plan))
 }
 
 /**

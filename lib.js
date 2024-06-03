@@ -11,7 +11,7 @@ import { CID } from 'multiformats/cid'
 import { parse } from '@ipld/dag-ucan/did'
 import * as dagJSON from '@ipld/dag-json'
 import { create } from '@web3-storage/w3up-client'
-import { StoreConf } from '@web3-storage/access/stores/store-conf'
+import { StoreConf } from '@web3-storage/w3up-client/stores/conf'
 import { CarReader } from '@ipld/car'
 import chalk from 'chalk'
 
@@ -230,7 +230,6 @@ export function storeListResponseToString(res, opts = {}) {
 }
 
 /**
- * 
  * @param {FilecoinInfoSuccess} res 
  * @param {object} [opts]
  * @param {boolean} [opts.raw]
@@ -243,7 +242,7 @@ export function filecoinInfoToString(res, opts = {}) {
         aggregate: deal.aggregate.toString(),
         provider: deal.provider,
         dealId: deal.aux.dataSource.dealID,
-        inclusion: deal.inclusion
+        inclusion: res.aggregates.find(a => a.aggregate.toString() === deal.aggregate.toString())?.inclusion
       })))
       .join('\n')
   } else {

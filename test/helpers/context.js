@@ -8,7 +8,7 @@ import { createEnv } from './env.js'
 import { Signer } from '@ucanto/principal/ed25519'
 import { createServer as createHTTPServer } from './http-server.js'
 import http from 'node:http'
-import { StoreConf } from '@web3-storage/access/stores/store-conf'
+import { StoreConf } from '@web3-storage/w3up-client/stores/conf'
 import * as FS from 'node:fs/promises'
 
 /** did:key:z6Mkqa4oY9Z5Pf5tUcjLHLUsDjKwMC95HGXdE1j22jkbhz6r */
