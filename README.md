@@ -60,9 +60,10 @@ w3 up recipies.txt
 - UCAN-HTTP Bridge
   - [`w3 bridge generate-tokens`](#w3-bridge-generate-tokens)
 - Advanced usage
-  - [`w3 can blob add`](#w3-can-blob-add-car-path)
+  - [`w3 can blob add`](#w3-can-blob-add-path)
   - [`w3 can blob ls`](#w3-can-blob-ls)
-  - [`w3 can blob rm`](#w3-can-blob-rm-car-cid)
+  - [`w3 can blob rm`](#w3-can-blob-rm-multihash)
+  - [`w3 can index add`](#w3-can-index-add-cid)
   - [`w3 can space info`](#w3-can-space-info-did) <sup>coming soon!</sup>
   - [`w3 can space recover`](#w3-can-space-recover-email) <sup>coming soon!</sup>
   - [`w3 can upload add`](#w3-can-upload-add-root-cid-shard-cid-shard-cid)

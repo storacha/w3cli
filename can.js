@@ -90,6 +90,22 @@ export async function blobRemove(digestStr) {
 }
 
 /**
+ * @param {string} cidStr
+ */
+export async function indexAdd(cidStr) {
+  const client = await getClient()
+
+  const spinner = ora('Adding').start()
+  const cid = parseCarLink(cidStr)
+  if (!cid) {
+    spinner.fail(`Error: "${cidStr}" is not a valid index CID`)
+    process.exit(1)
+  }
+  await client.capability.index.add(cid)
+  spinner.stopAndPersist({ symbol: '⁂', text: `Added index ${cid}` })
+}
+
+/**
  * @param {string} carPath
  */
 export async function storeAdd(carPath) {
