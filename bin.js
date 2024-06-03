@@ -29,6 +29,7 @@ import {
   reset,
 } from './index.js'
 import {
+  blobAdd,
   storeAdd,
   storeList,
   storeRemove,
@@ -263,6 +264,11 @@ cli
   .command('can access claim')
   .describe('Claim delegated capabilities for the authorized account.')
   .action(accessClaim)
+
+cli
+  .command('can blob add <data-path>')
+  .describe('Store a blob with the service.')
+  .action(blobAdd)
 
 cli
   .command('can store add <car-path>')

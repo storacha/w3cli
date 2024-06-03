@@ -1182,7 +1182,7 @@ export const testCan = {
     await loginAndCreateSpace(context)
 
     await w3
-      .args(['up', 'test/fixtures/pinpie.jpg'])
+      .args(['can', 'store', 'add', 'test/fixtures/pinpie.car'])
       .env(context.env.alice)
       .join()
 
@@ -1197,19 +1197,14 @@ export const testCan = {
     const space = await loginAndCreateSpace(context)
 
     await w3
-      .args(['up', 'test/fixtures/pinpie.jpg'])
+      .args(['can', 'store', 'add', 'test/fixtures/pinpie.car'])
       .env(context.env.alice)
       .join()
 
-    const uploads = await context.uploadTable.list(space)
-    const upload = uploads.ok?.results[0]
-    if (!upload) {
-      return assert.ok(upload, 'upload should appear in list')
-    }
-
-    const shard = upload.shards?.at(0)
-    if (!shard) {
-      return assert.ok(shard, 'shard should been created')
+    const stores = await context.storeTable.list(space)
+    const store = stores.ok?.results[0]
+    if (!store) {
+      return assert.ok(store, 'stored item should appear in list')
     }
 
     const missingArg = await w3
@@ -1229,14 +1224,14 @@ export const testCan = {
     assert.match(invalidCID.error, /not a CAR CID/)
 
     const notCarCID = await w3
-      .args(['can', 'store', 'rm', upload.root.toString()])
+      .args(['can', 'store', 'rm', 'bafybeiajdopsmspomlrpaohtzo5sdnpknbolqjpde6huzrsejqmvijrcea'])
       .env(context.env.alice)
       .join()
       .catch()
     assert.match(notCarCID.error, /not a CAR CID/)
 
     const rm = await w3
-      .args(['can', 'store', 'rm', shard.toString()])
+      .args(['can', 'store', 'rm', store.link.toString()])
       .env(context.env.alice)
       .join()
 

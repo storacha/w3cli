@@ -1,6 +1,8 @@
 /* eslint-env browser */
-import fs from 'fs'
-import { CID } from 'multiformats'
+import fs from 'node:fs'
+import { Readable } from 'node:stream'
+import * as Link from 'multiformats/link'
+import * as raw from 'multiformats/codecs/raw'
 import { Piece } from '@web3-storage/data-segment'
 import ora from 'ora'
 import {
@@ -9,28 +11,31 @@ import {
   storeListResponseToString,
   filecoinInfoToString,
   parseCarLink,
+  streamToBlob,
 } from './lib.js'
 
 /**
- * @param {string} blobPath
+ * @param {string} [blobPath]
  */
-export async function spaceBlobAdd(blobPath) {
+export async function blobAdd(blobPath) {
   const client = await getClient()
 
-  const spinner = ora('Reading CAR').start()
+  const spinner = ora('Reading data').start()
   /** @type {Blob} */
   let blob
   try {
-    const data = await fs.promises.readFile(blobPath)
-    blob = new Blob([data])
+    blob = await streamToBlob(
+      /** @type {ReadableStream<Uint8Array>} */
+      (Readable.toWeb(blobPath ? fs.createReadStream(blobPath) : process.stdin))
+    )
   } catch (/** @type {any} */ err) {
-    spinner.fail(`Error: failed to read Blob: ${err.message}`)
+    spinner.fail(`Error: failed to read data: ${err.message}`)
     process.exit(1)
   }
 
   spinner.start('Storing')
-  const cid = await client.capability.blob.add(blob)
-  console.log(cid.toString())
+  const { multihash } = await client.capability.blob.add(blob)
+  const cid = Link.create(raw.code, multihash)
   spinner.stopAndPersist({ symbol: '⁂', text: `Stored ${cid}` })
 }
 
@@ -115,7 +120,7 @@ export async function uploadAdd(root, shard, opts) {
 
   let rootCID
   try {
-    rootCID = CID.parse(root)
+    rootCID = Link.parse(root)
   } catch (/** @type {any} */ err) {
     console.error(`Error: failed to parse root CID: ${root}: ${err.message}`)
     process.exit(1)
@@ -125,8 +130,7 @@ export async function uploadAdd(root, shard, opts) {
   const shards = []
   for (const str of [shard, ...opts._]) {
     try {
-      // @ts-expect-error may not be a CAR CID...
-      shards.push(CID.parse(str))
+      shards.push(Link.parse(str))
     } catch (/** @type {any} */ err) {
       console.error(`Error: failed to parse shard CID: ${str}: ${err.message}`)
       process.exit(1)
@@ -175,7 +179,7 @@ export async function uploadList(opts = {}) {
 export async function uploadRemove(rootCid) {
   let root
   try {
-    root = CID.parse(rootCid.trim())
+    root = Link.parse(rootCid.trim())
   } catch (/** @type {any} */ err) {
     console.error(`Error: ${rootCid} is not a CID`)
     process.exit(1)

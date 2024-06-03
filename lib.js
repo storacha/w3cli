@@ -305,3 +305,12 @@ export const startOfLastMonth = (now) => {
   d.setUTCMonth(d.getUTCMonth() - 1)
   return d
 }
+
+/** @param {ReadableStream<Uint8Array>} source */
+export const streamToBlob = async source => {
+  const chunks = /** @type {Uint8Array[]} */ ([])
+  await source.pipeTo(new WritableStream({
+    write: chunk => { chunks.push(chunk) }
+  }))
+  return new Blob(chunks)
+}
