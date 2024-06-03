@@ -1085,7 +1085,7 @@ export const testProof = {
 }
 
 export const testBlob = {
-  'only w3 can blob add': test(async (assert, context) => {
+  'w3 can blob add': test(async (assert, context) => {
     await loginAndCreateSpace(context)
 
     const { error } = await w3
@@ -1096,7 +1096,7 @@ export const testBlob = {
     assert.match(error, /Stored zQm/)
   }),
 
-  'only w3 can blob ls': test(async (assert, context) => {
+  'w3 can blob ls': test(async (assert, context) => {
     await loginAndCreateSpace(context)
 
     await w3
@@ -1112,7 +1112,7 @@ export const testBlob = {
     assert.ok(dagJSON.parse(list.output))
   }),
 
-  'only w3 can blob rm': test(async (assert, context) => {
+  'w3 can blob rm': test(async (assert, context) => {
     await loginAndCreateSpace(context)
 
     await w3
