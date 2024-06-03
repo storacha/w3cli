@@ -81,7 +81,7 @@ bafybeibvbxjeodaa6hdqlgbwmv4qzdp3bxnwdoukay4dpl7aemkiwc2eje`
   'uploadListResponseToString can return the upload roots as newline delimited JSON':
     (assert) => {
       assert.equal(
-        uploadListResponseToString(uploadListResponse, { shards: true }),
+        uploadListResponseToString(uploadListResponse, { shards: true, plainTree: true }),
         `bafybeia7tr4dgyln7zeyyyzmkppkcts6azdssykuluwzmmswysieyadcbm
 └─┬ shards
   └── bagbaierantza4rfjnhqksp2stcnd2tdjrn3f2kgi2wrvaxmayeuolryi66fq

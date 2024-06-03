@@ -12,6 +12,29 @@ import {
 } from './lib.js'
 
 /**
+ * @param {string} blobPath
+ */
+export async function spaceBlobAdd(blobPath) {
+  const client = await getClient()
+
+  const spinner = ora('Reading CAR').start()
+  /** @type {Blob} */
+  let blob
+  try {
+    const data = await fs.promises.readFile(blobPath)
+    blob = new Blob([data])
+  } catch (/** @type {any} */ err) {
+    spinner.fail(`Error: failed to read Blob: ${err.message}`)
+    process.exit(1)
+  }
+
+  spinner.start('Storing')
+  const cid = await client.capability.blob.add(blob)
+  console.log(cid.toString())
+  spinner.stopAndPersist({ symbol: '⁂', text: `Stored ${cid}` })
+}
+
+/**
  * @param {string} carPath
  */
 export async function storeAdd(carPath) {

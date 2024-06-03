@@ -184,6 +184,7 @@ export async function readProofFromBytes(bytes) {
  * @param {boolean} [opts.raw]
  * @param {boolean} [opts.json]
  * @param {boolean} [opts.shards]
+ * @param {boolean} [opts.plainTree]
  * @returns {string}
  */
 export function uploadListResponseToString(res, opts = {}) {
@@ -193,8 +194,9 @@ export function uploadListResponseToString(res, opts = {}) {
       .join('\n')
   } else if (opts.shards) {
     return res.results
-      .map(({ root, shards }) =>
-        tree({
+      .map(({ root, shards }) => {
+        const treeBuilder = opts.plainTree ? tree.plain : tree
+        return treeBuilder({
           label: root.toString(),
           nodes: [
             {
@@ -202,7 +204,7 @@ export function uploadListResponseToString(res, opts = {}) {
               leaf: shards?.map((s) => s.toString()),
             },
           ],
-        })
+        })}
       )
       .join('\n')
   } else {
