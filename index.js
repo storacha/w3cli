@@ -1,6 +1,7 @@
-import fs from 'fs'
-import ora from 'ora'
+import fs from 'node:fs'
 import { pipeline } from 'node:stream/promises'
+import { Readable } from 'node:stream'
+import ora from 'ora'
 import { CID } from 'multiformats/cid'
 import { base64 } from 'multiformats/bases/base64'
 import { identity } from 'multiformats/hashes/identity'
@@ -105,22 +106,39 @@ export async function authorize(email, opts = {}) {
  * }} [opts]
  */
 export async function upload(firstPath, opts) {
-  const paths = checkPathsExist([firstPath, ...(opts?._ ?? [])])
+  /** @type {import('@web3-storage/w3up-client/types').FileLike[]} */
+  let files
+  let totalSize // -1 when unknown size (input from stdin)
+  let spinner
   const client = await getClient()
-  const hidden = !!opts?.hidden
-  let totalSent = 0
-  const spinner = ora({ text: 'Reading files', isSilent: opts?.json }).start()
-  const files = await filesFromPaths(paths, { hidden })
-  const totalSize = files.reduce((total, f) => total + f.size, 0)
-  spinner.stopAndPersist({
-    text: `${files.length} file${files.length === 1 ? '' : 's'} ${chalk.dim(
-      filesize(totalSize)
-    )}`,
-  })
+  if (firstPath) {
+    const paths = checkPathsExist([firstPath, ...(opts?._ ?? [])])
+    const hidden = !!opts?.hidden
+    spinner = ora({ text: 'Reading files', isSilent: opts?.json }).start()
+    const localFiles = await filesFromPaths(paths, { hidden })
+    totalSize = localFiles.reduce((total, f) => total + f.size, 0)
+    files = localFiles
+    spinner.stopAndPersist({
+      text: `${files.length} file${files.length === 1 ? '' : 's'} ${chalk.dim(
+        filesize(totalSize)
+      )}`,
+    })
 
-  if (opts?.car && files.length > 1) {
-    console.error('Error: multiple CAR files not supported')
-    process.exit(1)
+    if (opts?.car && files.length > 1) {
+      console.error('Error: multiple CAR files not supported')
+      process.exit(1)
+    }
+  } else {
+    spinner = ora({ text: 'Reading from stdin', isSilent: opts?.json }).start()
+    files = [{
+      name: 'stdin',
+      stream: () =>
+        /** @type {ReadableStream} */
+        (Readable.toWeb(process.stdin))
+    }]
+    totalSize = -1
+    opts = opts ?? { _: [] }
+    opts.wrap = false
   }
 
   spinner.start('Storing')
@@ -131,6 +149,13 @@ export async function upload(firstPath, opts) {
     ? client.uploadFile.bind(client, files[0])
     : client.uploadDirectory.bind(client, files)
 
+  let totalSent = 0
+  const getStoringMessage = () => totalSize == -1
+      // for unknown size, display the amount sent so far
+    ? `Storing ${filesizeMB(totalSent)}`
+      // for known size, display percentage of total size that has been sent
+    : `Storing ${Math.min(Math.round((totalSent / totalSize) * 100), 100)}%`
+
   const root = await uploadFn({
     onShardStored: ({ cid, size, piece }) => {
       totalSent += size
@@ -140,14 +165,9 @@ export async function upload(firstPath, opts) {
             '   └── '
           )}Piece CID: ${piece}`,
         })
-        spinner.start(
-          `Storing ${Math.min(Math.round((totalSent / totalSize) * 100), 100)}%`
-        )
+        spinner.start(getStoringMessage())
       } else {
-        spinner.text = `Storing ${Math.min(
-          Math.round((totalSent / totalSize) * 100),
-          100
-        )}%`
+        spinner.text = getStoringMessage()
       }
       opts?.json &&
         opts?.verbose &&

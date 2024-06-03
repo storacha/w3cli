@@ -73,7 +73,7 @@ cli
   .action(Account.list)
 
 cli
-  .command('up <file>')
+  .command('up [file]')
   .alias('upload', 'put')
   .describe('Store a file(s) to the service and register an upload.')
   .option('-H, --hidden', 'Include paths that start with ".".', false)
