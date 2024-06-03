@@ -29,6 +29,10 @@ import {
   reset,
 } from './index.js'
 import {
+  blobAdd,
+  blobList,
+  blobRemove,
+  indexAdd,
   storeAdd,
   storeList,
   storeRemove,
@@ -263,6 +267,32 @@ cli
   .command('can access claim')
   .describe('Claim delegated capabilities for the authorized account.')
   .action(accessClaim)
+
+cli
+  .command('can blob add [data-path]')
+  .describe('Store a blob with the service.')
+  .action(blobAdd)
+
+cli
+  .command('can blob ls')
+  .describe('List blobs in the current space.')
+  .option('--json', 'Format as newline delimited JSON')
+  .option('--size', 'The desired number of results to return')
+  .option(
+    '--cursor',
+    'An opaque string included in a prior blob/list response that allows the service to provide the next "page" of results'
+  )
+  .action(blobList)
+
+cli
+  .command('can blob rm <multihash>')
+  .describe('Remove a blob from the store by base58btc encoded multihash.')
+  .action(blobRemove)
+
+cli
+  .command('can index add <cid>')
+  .describe('Register an "index" with the service.')
+  .action(indexAdd)
 
 cli
   .command('can store add <car-path>')

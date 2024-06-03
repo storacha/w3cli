@@ -171,6 +171,8 @@ class Join {
 const readInto = async (source, output, channel) => {
   const decoder = new TextDecoder()
   for await (const chunk of source) {
+    // Uncomment to debugger easily
+    // console.log(decoder.decode(chunk))
     output[channel] += decoder.decode(chunk)
   }
 }

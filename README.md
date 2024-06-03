@@ -60,11 +60,12 @@ w3 up recipies.txt
 - UCAN-HTTP Bridge
   - [`w3 bridge generate-tokens`](#w3-bridge-generate-tokens)
 - Advanced usage
+  - [`w3 can blob add`](#w3-can-blob-add-path)
+  - [`w3 can blob ls`](#w3-can-blob-ls)
+  - [`w3 can blob rm`](#w3-can-blob-rm-multihash)
+  - [`w3 can index add`](#w3-can-index-add-cid)
   - [`w3 can space info`](#w3-can-space-info-did) <sup>coming soon!</sup>
   - [`w3 can space recover`](#w3-can-space-recover-email) <sup>coming soon!</sup>
-  - [`w3 can store add`](#w3-can-store-add-car-path)
-  - [`w3 can store ls`](#w3-can-store-ls)
-  - [`w3 can store rm`](#w3-can-store-rm-car-cid)
   - [`w3 can upload add`](#w3-can-upload-add-root-cid-shard-cid-shard-cid)
   - [`w3 can upload ls`](#w3-can-upload-ls)
   - [`w3 can upload rm`](#w3-can-upload-rm-root-cid)
@@ -154,8 +155,15 @@ Create a delegation to the passed audience for the given abilities with the _cur
 # delegate space/info to did:key:z6M..., output as a CAR
 w3 delegation create did:key:z6M... --can space/info --output ./info.ucan
 
-# delegate store/* and upload/* to did:key:z6M..., output as a string
-w3 delegation create did:key:z6M... --can 'store/*' --can 'upload/*' --base64
+# delegate admin capabilities to did:key:z6M..., output as a string
+w3 delegation create did:key:z6M... --can 'space/*' --can 'upload/*' --can 'filecoin/*' --base64
+
+# delegate write (not remove) capabilities to did:key:z6M..., output as a string
+w3 delegation create did:key:z6M... \
+  --can 'space/blob/add' \
+  --can 'upload/add' \
+  --can 'filecoin/offer' \
+  --base64
 ```
 
 ### `w3 delegation ls`
@@ -197,30 +205,29 @@ on how these are expected to be used.
 - `--expiration` Unix timestamp (in seconds) when the delegation is no longer valid. Zero indicates no expiration.
 - `--json` If set, output JSON suitable to splat into the `headers` field of a `fetch` request.
 
-### `w3 can space info <did>`
+### `w3 can blob add [path]`
 
-### `w3 can space recover <email>`
+Store a blob file to the service.
 
-### `w3 can store add <car-path>`
+### `w3 can blob ls`
 
-Store a [CAR](https://ipld.io/specs/transport/car/carv1/) file to web3.storage.
-
-### `w3 can store ls`
-
-List CARs in the current space.
+List blobs in the current space.
 
 - `--json` Format as newline delimited JSON
 - `--size` The desired number of results to return
 - `--cursor` An opaque string included in a prior upload/list response that allows the service to provide the next "page" of results
-- `--pre` If true, return the page of results preceding the cursor
 
-### `w3 can store rm <shard-cid>`
+### `w3 can blob rm <multihash>`
 
-Remove a CAR from the store.
+Remove a blob from the store by base58btc encoded multihash.
+
+### `w3 can space info <did>`
+
+### `w3 can space recover <email>`
 
 ### `w3 can upload add <root-cid> <shard-cid> [shard-cid...]`
 
-Register an upload - a DAG with the given root data CID that is stored in the given CAR shard(s), identified by CAR CIDs.
+Register an upload - a DAG with the given root data CID that is stored in the given shard(s), identified by CID.
 
 ### `w3 can upload ls`
 
@@ -234,7 +241,7 @@ List uploads in the current space.
 
 ### `w3 can upload rm <root-cid>`
 
-Remove an upload from the current space's upload list. Does not remove CAR from the store.
+Remove an upload from the current space's upload list. Does not remove blobs from the store.
 
 ## Environment Variables
 

@@ -7,11 +7,14 @@ import { connect } from '@ucanto/client'
 import * as CAR from '@ucanto/transport/car'
 import * as HTTP from '@ucanto/transport/http'
 import * as Signer from '@ucanto/principal/ed25519'
-import { CID } from 'multiformats/cid'
+import * as Link from 'multiformats/link'
+import { base58btc } from 'multiformats/bases/base58'
+import * as Digest from 'multiformats/hashes/digest'
+import * as raw from 'multiformats/codecs/raw'
 import { parse } from '@ipld/dag-ucan/did'
 import * as dagJSON from '@ipld/dag-json'
 import { create } from '@web3-storage/w3up-client'
-import { StoreConf } from '@web3-storage/access/stores/store-conf'
+import { StoreConf } from '@web3-storage/w3up-client/stores/conf'
 import { CarReader } from '@ipld/car'
 import chalk from 'chalk'
 
@@ -19,6 +22,7 @@ import chalk from 'chalk'
  * @typedef {import('@web3-storage/w3up-client/types').AnyLink} AnyLink
  * @typedef {import('@web3-storage/w3up-client/types').CARLink} CARLink
  * @typedef {import('@web3-storage/w3up-client/types').FileLike & { size: number }} FileLike
+ * @typedef {import('@web3-storage/w3up-client/types').BlobListSuccess} BlobListSuccess
  * @typedef {import('@web3-storage/w3up-client/types').StoreListSuccess} StoreListSuccess
  * @typedef {import('@web3-storage/w3up-client/types').UploadListSuccess} UploadListSuccess
  * @typedef {import('@web3-storage/capabilities/types').FilecoinInfoSuccess} FilecoinInfoSuccess
@@ -184,6 +188,7 @@ export async function readProofFromBytes(bytes) {
  * @param {boolean} [opts.raw]
  * @param {boolean} [opts.json]
  * @param {boolean} [opts.shards]
+ * @param {boolean} [opts.plainTree]
  * @returns {string}
  */
 export function uploadListResponseToString(res, opts = {}) {
@@ -193,8 +198,9 @@ export function uploadListResponseToString(res, opts = {}) {
       .join('\n')
   } else if (opts.shards) {
     return res.results
-      .map(({ root, shards }) =>
-        tree({
+      .map(({ root, shards }) => {
+        const treeBuilder = opts.plainTree ? tree.plain : tree
+        return treeBuilder({
           label: root.toString(),
           nodes: [
             {
@@ -202,11 +208,34 @@ export function uploadListResponseToString(res, opts = {}) {
               leaf: shards?.map((s) => s.toString()),
             },
           ],
-        })
+        })}
       )
       .join('\n')
   } else {
     return res.results.map(({ root }) => root.toString()).join('\n')
+  }
+}
+
+/**
+ * @param {BlobListSuccess} res
+ * @param {object} [opts]
+ * @param {boolean} [opts.raw]
+ * @param {boolean} [opts.json]
+ * @returns {string}
+ */
+export function blobListResponseToString(res, opts = {}) {
+  if (opts.json) {
+    return res.results
+      .map(({ blob }) => dagJSON.stringify({ blob }))
+      .join('\n')
+  } else {
+    return res.results
+      .map(({ blob }) => {
+        const digest = Digest.decode(blob.digest)
+        const cid = Link.create(raw.code, digest)
+        return `${base58btc.encode(digest.bytes)} (${cid})`
+      })
+      .join('\n')
   }
 }
 
@@ -228,7 +257,6 @@ export function storeListResponseToString(res, opts = {}) {
 }
 
 /**
- * 
  * @param {FilecoinInfoSuccess} res 
  * @param {object} [opts]
  * @param {boolean} [opts.raw]
@@ -241,7 +269,7 @@ export function filecoinInfoToString(res, opts = {}) {
         aggregate: deal.aggregate.toString(),
         provider: deal.provider,
         dealId: deal.aux.dataSource.dealID,
-        inclusion: deal.inclusion
+        inclusion: res.aggregates.find(a => a.aggregate.toString() === deal.aggregate.toString())?.inclusion
       })))
       .join('\n')
   } else {
@@ -281,7 +309,7 @@ export function asCarLink(cid) {
  */
 export function parseCarLink(cidStr) {
   try {
-    return asCarLink(CID.parse(cidStr.trim()))
+    return asCarLink(Link.parse(cidStr.trim()))
   } catch {
     return undefined
   }
@@ -303,4 +331,13 @@ export const startOfLastMonth = (now) => {
   const d = startOfMonth(now)
   d.setUTCMonth(d.getUTCMonth() - 1)
   return d
+}
+
+/** @param {ReadableStream<Uint8Array>} source */
+export const streamToBlob = async source => {
+  const chunks = /** @type {Uint8Array[]} */ ([])
+  await source.pipeTo(new WritableStream({
+    write: chunk => { chunks.push(chunk) }
+  }))
+  return new Blob(chunks)
 }

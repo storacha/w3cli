@@ -1,6 +1,10 @@
 /* eslint-env browser */
-import fs from 'fs'
-import { CID } from 'multiformats'
+import fs from 'node:fs'
+import { Readable } from 'node:stream'
+import * as Link from 'multiformats/link'
+import * as raw from 'multiformats/codecs/raw'
+import { base58btc } from 'multiformats/bases/base58'
+import * as Digest from 'multiformats/hashes/digest'
 import { Piece } from '@web3-storage/data-segment'
 import ora from 'ora'
 import {
@@ -9,7 +13,97 @@ import {
   storeListResponseToString,
   filecoinInfoToString,
   parseCarLink,
+  streamToBlob,
+  blobListResponseToString,
 } from './lib.js'
+
+/**
+ * @param {string} [blobPath]
+ */
+export async function blobAdd(blobPath) {
+  const client = await getClient()
+
+  const spinner = ora('Reading data').start()
+  /** @type {Blob} */
+  let blob
+  try {
+    blob = await streamToBlob(
+      /** @type {ReadableStream<Uint8Array>} */
+      (Readable.toWeb(blobPath ? fs.createReadStream(blobPath) : process.stdin))
+    )
+  } catch (/** @type {any} */ err) {
+    spinner.fail(`Error: failed to read data: ${err.message}`)
+    process.exit(1)
+  }
+
+  spinner.start('Storing')
+  const digest = await client.capability.blob.add(blob)
+  const cid = Link.create(raw.code, digest)
+  spinner.stopAndPersist({ symbol: '⁂', text: `Stored ${base58btc.encode(digest.bytes)} (${cid})` })
+}
+
+/**
+ * Print out all the blobs in the current space.
+ *
+ * @param {object} opts
+ * @param {boolean} [opts.json]
+ * @param {string} [opts.cursor]
+ * @param {number} [opts.size]
+ */
+export async function blobList(opts = {}) {
+  const client = await getClient()
+  const listOptions = {}
+  if (opts.size) {
+    listOptions.size = parseInt(String(opts.size))
+  }
+  if (opts.cursor) {
+    listOptions.cursor = opts.cursor
+  }
+
+  const spinner = ora('Listing Blobs').start()
+  const res = await client.capability.blob.list(listOptions)
+  spinner.stop()
+  console.log(blobListResponseToString(res, opts))
+}
+
+/**
+ * @param {string} digestStr
+ */
+export async function blobRemove(digestStr) {
+  const spinner = ora(`Removing ${digestStr}`).start()
+  let digest
+  try {
+    digest = Digest.decode(base58btc.decode(digestStr))
+  } catch {
+    spinner.fail(`Error: "${digestStr}" is not a base58btc encoded multihash`)
+    process.exit(1)
+  }
+  const client = await getClient()
+  try {
+    await client.capability.blob.remove(digest)
+    spinner.stopAndPersist({ symbol: '⁂', text: `Removed ${digestStr}` })
+  } catch (/** @type {any} */ err) {
+    spinner.fail(`Error: blob remove failed: ${err.message ?? err}`)
+    console.error(err)
+    process.exit(1)
+  }
+}
+
+/**
+ * @param {string} cidStr
+ */
+export async function indexAdd(cidStr) {
+  const client = await getClient()
+
+  const spinner = ora('Adding').start()
+  const cid = parseCarLink(cidStr)
+  if (!cid) {
+    spinner.fail(`Error: "${cidStr}" is not a valid index CID`)
+    process.exit(1)
+  }
+  await client.capability.index.add(cid)
+  spinner.stopAndPersist({ symbol: '⁂', text: `Added index ${cid}` })
+}
 
 /**
  * @param {string} carPath
@@ -73,7 +167,7 @@ export async function storeRemove(cidStr) {
   }
   const client = await getClient()
   try {
-    client.capability.store.remove(shard)
+    await client.capability.store.remove(shard)
   } catch (/** @type {any} */ err) {
     console.error(`Store remove failed: ${err.message ?? err}`)
     console.error(err)
@@ -92,7 +186,7 @@ export async function uploadAdd(root, shard, opts) {
 
   let rootCID
   try {
-    rootCID = CID.parse(root)
+    rootCID = Link.parse(root)
   } catch (/** @type {any} */ err) {
     console.error(`Error: failed to parse root CID: ${root}: ${err.message}`)
     process.exit(1)
@@ -102,8 +196,7 @@ export async function uploadAdd(root, shard, opts) {
   const shards = []
   for (const str of [shard, ...opts._]) {
     try {
-      // @ts-expect-error may not be a CAR CID...
-      shards.push(CID.parse(str))
+      shards.push(Link.parse(str))
     } catch (/** @type {any} */ err) {
       console.error(`Error: failed to parse shard CID: ${str}: ${err.message}`)
       process.exit(1)
@@ -152,7 +245,7 @@ export async function uploadList(opts = {}) {
 export async function uploadRemove(rootCid) {
   let root
   try {
-    root = CID.parse(rootCid.trim())
+    root = Link.parse(rootCid.trim())
   } catch (/** @type {any} */ err) {
     console.error(`Error: ${rootCid} is not a CID`)
     process.exit(1)

@@ -1,5 +1,5 @@
 import fs from 'fs'
-import ora, { oraPromise } from 'ora'
+import ora from 'ora'
 import { pipeline } from 'node:stream/promises'
 import { CID } from 'multiformats/cid'
 import { base64 } from 'multiformats/bases/base64'

@@ -113,7 +113,7 @@ export const create = async (name, options) => {
 /**
  * @param {import('@web3-storage/w3up-client').Client} client
  * @param {object} options
- * @param {import('@web3-storage/upload-api').SpaceDID} options.space
+ * @param {import('@web3-storage/w3up-client/types').SpaceDID} options.space
  * @param {DIDMailto.EmailAddress} [options.customer]
  * @param {string} [options.message]
  * @param {string} [options.waitMessage]
@@ -233,7 +233,7 @@ export const provision = async (name = '', options = {}) => {
 }
 
 /**
- * @typedef {import('@web3-storage/upload-api').SpaceDID} SpaceDID
+ * @typedef {import('@web3-storage/w3up-client/types').SpaceDID} SpaceDID
  *
  * @param {import('@web3-storage/w3up-client').Client} client
  * @param {object} options
@@ -276,8 +276,7 @@ const parseEmail = (email) => {
 }
 
 /**
- *
- * @param {W3Space.Model} space
+ * @param {W3Space.OwnedSpace} space
  * @param {CreateOptions} options
  */
 export const setupRecovery = async (space, options = {}) => {

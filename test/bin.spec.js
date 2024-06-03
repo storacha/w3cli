@@ -19,7 +19,8 @@ import * as ED25519 from '@ucanto/principal/ed25519'
 import { sha256, delegate } from '@ucanto/core'
 import * as Result from '@web3-storage/w3up-client/result'
 import { base64 } from 'multiformats/bases/base64'
-import { info } from 'console'
+import { base58btc } from 'multiformats/bases/base58'
+import * as Digest from 'multiformats/hashes/digest'
 
 const w3 = Command.create('./bin.js')
 
@@ -297,7 +298,7 @@ export const testSpace = {
       const email = 'alice@web.mail'
       await login(context, { email })
 
-      context.plansStorage.get = async (account) => {
+      context.plansStorage.get = async () => {
         return {
           ok: { product: 'did:web:free.web3.storage', updatedAt: 'now' },
         }
@@ -742,6 +743,9 @@ export const testW3Up = {
       .env(context.env.alice)
       .join()
 
+    // wait a second for invocation to get a different expiry
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+
     const list1 = await w3.args(['ls', '--json']).env(context.env.alice).join()
 
     assert.ok(dagJSON.parse(list1.output))
@@ -750,10 +754,20 @@ export const testW3Up = {
   'w3 remove': test(async (assert, context) => {
     await loginAndCreateSpace(context)
 
+    const up = await w3
+      .args(['up', 'test/fixtures/pinpie.jpg'])
+      .env(context.env.alice)
+      .join()
+
+    assert.match(
+      up.output,
+      /bafybeiajdopsmspomlrpaohtzo5sdnpknbolqjpde6huzrsejqmvijrcea/
+    )
+
     const rm = await w3
       .args([
         'rm',
-        'bafybeih2k7ughhfwedltjviunmn3esueijz34snyay77zmsml5w24tqamm',
+        'bafybeiajdopsmspomlrpaohtzo5sdnpknbolqjpde6huzrsejqmvijrcea',
       ])
       .env(context.env.alice)
       .join()
@@ -779,7 +793,7 @@ export const testW3Up = {
     assert.equal(rm.status.code, 1)
     assert.match(
       rm.error,
-      /Upload not found/
+      /not found/
     )
   }),
 }
@@ -1070,6 +1084,58 @@ export const testProof = {
   }),
 }
 
+export const testBlob = {
+  'w3 can blob add': test(async (assert, context) => {
+    await loginAndCreateSpace(context)
+
+    const { error } = await w3
+      .args(['can', 'blob', 'add', 'test/fixtures/pinpie.jpg'])
+      .env(context.env.alice)
+      .join()
+
+    assert.match(error, /Stored zQm/)
+  }),
+
+  'w3 can blob ls': test(async (assert, context) => {
+    await loginAndCreateSpace(context)
+
+    await w3
+      .args(['can', 'blob', 'add', 'test/fixtures/pinpie.jpg'])
+      .env(context.env.alice)
+      .join()
+
+    const list = await w3
+      .args(['can', 'blob', 'ls', '--json'])
+      .env(context.env.alice)
+      .join()
+
+    assert.ok(dagJSON.parse(list.output))
+  }),
+
+  'w3 can blob rm': test(async (assert, context) => {
+    await loginAndCreateSpace(context)
+
+    await w3
+      .args(['can', 'blob', 'add', 'test/fixtures/pinpie.jpg'])
+      .env(context.env.alice)
+      .join()
+
+    const list = await w3
+      .args(['can', 'blob', 'ls', '--json'])
+      .env(context.env.alice)
+      .join()
+
+    const digest = Digest.decode(dagJSON.parse(list.output).blob.digest)
+
+    const remove = await w3
+      .args(['can', 'blob', 'rm', base58btc.encode(digest.bytes)])
+      .env(context.env.alice)
+      .join()
+
+    assert.match(remove.error, /Removed zQm/)
+  }),
+}
+
 export const testStore = {
   'w3 can store add': test(async (assert, context) => {
     await loginAndCreateSpace(context)
@@ -1170,7 +1236,7 @@ export const testCan = {
     await loginAndCreateSpace(context)
 
     await w3
-      .args(['up', 'test/fixtures/pinpie.jpg'])
+      .args(['can', 'store', 'add', 'test/fixtures/pinpie.car'])
       .env(context.env.alice)
       .join()
 
@@ -1185,16 +1251,14 @@ export const testCan = {
     const space = await loginAndCreateSpace(context)
 
     await w3
-      .args(['up', 'test/fixtures/pinpie.jpg'])
+      .args(['can', 'store', 'add', 'test/fixtures/pinpie.car'])
       .env(context.env.alice)
       .join()
 
-    const uploads = await context.uploadTable.list(space)
-    const upload = uploads.results[0]
-    const shard = upload.shards?.at(0)
-
-    if (!shard) {
-      return assert.ok(shard, 'shard should been created')
+    const stores = await context.storeTable.list(space)
+    const store = stores.ok?.results[0]
+    if (!store) {
+      return assert.ok(store, 'stored item should appear in list')
     }
 
     const missingArg = await w3
@@ -1214,14 +1278,14 @@ export const testCan = {
     assert.match(invalidCID.error, /not a CAR CID/)
 
     const notCarCID = await w3
-      .args(['can', 'store', 'rm', upload.root.toString()])
+      .args(['can', 'store', 'rm', 'bafybeiajdopsmspomlrpaohtzo5sdnpknbolqjpde6huzrsejqmvijrcea'])
       .env(context.env.alice)
       .join()
       .catch()
     assert.match(notCarCID.error, /not a CAR CID/)
 
     const rm = await w3
-      .args(['can', 'store', 'rm', shard.toString()])
+      .args(['can', 'store', 'rm', store.link.toString()])
       .env(context.env.alice)
       .join()
 
@@ -1258,6 +1322,9 @@ export const testPlan = {
     assert.match(notFound.output, /no plan/i)
 
     await selectPlan(context)
+
+    // wait a second for invocation to get a different expiry
+    await new Promise((resolve) => setTimeout(resolve, 1000))
 
     const plan = await w3.args(['plan', 'get']).env(context.env.alice).join()
     assert.match(plan.output, /did:web:free.web3.storage/)
@@ -1311,14 +1378,15 @@ export const login = async (
  * @param {Test.Context} context
  * @param {object} options
  * @param {DIDMailto.EmailAddress} [options.email]
+ * @param {string} [options.billingID]
  * @param {Plan} [options.plan]
  */
 export const selectPlan = async (
   context,
-  { email = 'alice@web.mail', plan = 'did:web:free.web3.storage' } = {}
+  { email = 'alice@web.mail', billingID = 'test:cus_alice', plan = 'did:web:free.web3.storage' } = {}
 ) => {
   const customer = DIDMailto.fromEmail(email)
-  await context.plansStorage.set(customer, plan)
+  Result.try(await context.plansStorage.initialize(customer, billingID, plan))
 }
 
 /**
