@@ -7,7 +7,10 @@ import { connect } from '@ucanto/client'
 import * as CAR from '@ucanto/transport/car'
 import * as HTTP from '@ucanto/transport/http'
 import * as Signer from '@ucanto/principal/ed25519'
-import { CID } from 'multiformats/cid'
+import * as Link from 'multiformats/link'
+import { base58btc } from 'multiformats/bases/base58'
+import * as Digest from 'multiformats/hashes/digest'
+import * as raw from 'multiformats/codecs/raw'
 import { parse } from '@ipld/dag-ucan/did'
 import * as dagJSON from '@ipld/dag-json'
 import { create } from '@web3-storage/w3up-client'
@@ -19,6 +22,7 @@ import chalk from 'chalk'
  * @typedef {import('@web3-storage/w3up-client/types').AnyLink} AnyLink
  * @typedef {import('@web3-storage/w3up-client/types').CARLink} CARLink
  * @typedef {import('@web3-storage/w3up-client/types').FileLike & { size: number }} FileLike
+ * @typedef {import('@web3-storage/w3up-client/types').BlobListSuccess} BlobListSuccess
  * @typedef {import('@web3-storage/w3up-client/types').StoreListSuccess} StoreListSuccess
  * @typedef {import('@web3-storage/w3up-client/types').UploadListSuccess} UploadListSuccess
  * @typedef {import('@web3-storage/capabilities/types').FilecoinInfoSuccess} FilecoinInfoSuccess
@@ -213,6 +217,29 @@ export function uploadListResponseToString(res, opts = {}) {
 }
 
 /**
+ * @param {BlobListSuccess} res
+ * @param {object} [opts]
+ * @param {boolean} [opts.raw]
+ * @param {boolean} [opts.json]
+ * @returns {string}
+ */
+export function blobListResponseToString(res, opts = {}) {
+  if (opts.json) {
+    return res.results
+      .map(({ blob }) => dagJSON.stringify({ blob }))
+      .join('\n')
+  } else {
+    return res.results
+      .map(({ blob }) => {
+        const digest = Digest.decode(blob.digest)
+        const cid = Link.create(raw.code, digest)
+        return `${base58btc.encode(digest.bytes)} (${cid})`
+      })
+      .join('\n')
+  }
+}
+
+/**
  * @param {StoreListSuccess} res
  * @param {object} [opts]
  * @param {boolean} [opts.raw]
@@ -282,7 +309,7 @@ export function asCarLink(cid) {
  */
 export function parseCarLink(cidStr) {
   try {
-    return asCarLink(CID.parse(cidStr.trim()))
+    return asCarLink(Link.parse(cidStr.trim()))
   } catch {
     return undefined
   }

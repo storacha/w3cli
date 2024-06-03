@@ -19,6 +19,8 @@ import * as ED25519 from '@ucanto/principal/ed25519'
 import { sha256, delegate } from '@ucanto/core'
 import * as Result from '@web3-storage/w3up-client/result'
 import { base64 } from 'multiformats/bases/base64'
+import { base58btc } from 'multiformats/bases/base58'
+import * as Digest from 'multiformats/hashes/digest'
 
 const w3 = Command.create('./bin.js')
 
@@ -1079,6 +1081,58 @@ export const testProof = {
     assert.equal(proofData.att.length, 1)
     assert.equal(proofData.att[0].with, spaceDID)
     assert.equal(proofData.att[0].can, 'store/*')
+  }),
+}
+
+export const testBlob = {
+  'only w3 can blob add': test(async (assert, context) => {
+    await loginAndCreateSpace(context)
+
+    const { error } = await w3
+      .args(['can', 'blob', 'add', 'test/fixtures/pinpie.jpg'])
+      .env(context.env.alice)
+      .join()
+
+    assert.match(error, /Stored zQm/)
+  }),
+
+  'only w3 can blob ls': test(async (assert, context) => {
+    await loginAndCreateSpace(context)
+
+    await w3
+      .args(['can', 'blob', 'add', 'test/fixtures/pinpie.jpg'])
+      .env(context.env.alice)
+      .join()
+
+    const list = await w3
+      .args(['can', 'blob', 'ls', '--json'])
+      .env(context.env.alice)
+      .join()
+
+    assert.ok(dagJSON.parse(list.output))
+  }),
+
+  'only w3 can blob rm': test(async (assert, context) => {
+    await loginAndCreateSpace(context)
+
+    await w3
+      .args(['can', 'blob', 'add', 'test/fixtures/pinpie.jpg'])
+      .env(context.env.alice)
+      .join()
+
+    const list = await w3
+      .args(['can', 'blob', 'ls', '--json'])
+      .env(context.env.alice)
+      .join()
+
+    const digest = Digest.decode(dagJSON.parse(list.output).blob.digest)
+
+    const remove = await w3
+      .args(['can', 'blob', 'rm', base58btc.encode(digest.bytes)])
+      .env(context.env.alice)
+      .join()
+
+    assert.match(remove.error, /Removed zQm/)
   }),
 }
 
