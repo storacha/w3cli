@@ -154,8 +154,15 @@ Create a delegation to the passed audience for the given abilities with the _cur
 # delegate space/info to did:key:z6M..., output as a CAR
 w3 delegation create did:key:z6M... --can space/info --output ./info.ucan
 
-# delegate all space admin capabilities to did:key:z6M..., output as a string
-w3 delegation create did:key:z6M... --can 'space/*' --base64
+# delegate admin capabilities to did:key:z6M..., output as a string
+w3 delegation create did:key:z6M... --can 'space/*' --can 'upload/*' --can 'filecoin/*' --base64
+
+# delegate write (not remove) capabilities to did:key:z6M..., output as a string
+w3 delegation create did:key:z6M... \
+  --can 'space/blob/add' \
+  --can 'upload/add' \
+  --can 'filecoin/offer' \
+  --base64
 ```
 
 ### `w3 delegation ls`
