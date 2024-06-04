@@ -72,11 +72,13 @@ export const setup = async () => {
         storeName: `w3cli-test-alice-${context.service.did()}`,
         servicePrincipal: context.service,
         serviceURL: serverURL,
+        receiptsEndpoint: new URL('receipt', serverURL),
       }),
       bob: createEnv({
         storeName: `w3cli-test-bob-${context.service.did()}`,
         servicePrincipal: context.service,
         serviceURL: serverURL,
+        receiptsEndpoint: new URL('receipt', serverURL),
       }),
     },
   })
