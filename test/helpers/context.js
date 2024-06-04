@@ -7,6 +7,7 @@ import {
 import { createEnv } from './env.js'
 import { Signer } from '@ucanto/principal/ed25519'
 import { createServer as createHTTPServer } from './http-server.js'
+import { createReceiptsServer } from './receipt-http-server.js'
 import http from 'node:http'
 import { StoreConf } from '@web3-storage/w3up-client/stores/conf'
 import * as FS from 'node:fs/promises'
@@ -49,6 +50,7 @@ export const provisionSpace = async (context, { space, account, provider }) => {
  * @typedef {import('@web3-storage/w3up-client/types').StoreAddSuccess} StoreAddSuccess
  * @typedef {UcantoServerTestContext & {
  *   server: import('./http-server').TestingServer['server']
+ *   receiptsServer: import('./receipt-http-server.js').TestingServer['server']
  *   router: import('./http-server').Router
  *   env: { alice: Record<string, string>, bob: Record<string, string> }
  *   serverURL: URL
@@ -61,10 +63,12 @@ export const setup = async () => {
   const { server, serverURL, router } = await createHTTPServer({
     '/': context.connection.channel.request.bind(context.connection.channel),
   })
+  const { server: receiptsServer, serverURL: receiptsServerUrl } = await createReceiptsServer()
 
   return Object.assign(context, {
     server,
     serverURL,
+    receiptsServer,
     router,
     serverRouter: router,
     env: {
@@ -72,13 +76,13 @@ export const setup = async () => {
         storeName: `w3cli-test-alice-${context.service.did()}`,
         servicePrincipal: context.service,
         serviceURL: serverURL,
-        receiptsEndpoint: new URL('receipt', serverURL),
+        receiptsEndpoint: new URL('receipt', receiptsServerUrl),
       }),
       bob: createEnv({
         storeName: `w3cli-test-bob-${context.service.did()}`,
         servicePrincipal: context.service,
         serviceURL: serverURL,
-        receiptsEndpoint: new URL('receipt', serverURL),
+        receiptsEndpoint: new URL('receipt', receiptsServerUrl),
       }),
     },
   })
@@ -90,6 +94,7 @@ export const setup = async () => {
 export const teardown = async (context) => {
   await cleanupContext(context)
   context.server.close()
+  context.receiptsServer.close()
 
   const stores = [
     context.env.alice.W3_STORE_NAME,

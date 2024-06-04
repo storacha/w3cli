@@ -19,9 +19,8 @@ import {
 
 /**
  * @param {string} [blobPath]
- * @param {import('@web3-storage/w3up-client/types.js').RequestOptions} [options]
  */
-export async function blobAdd(blobPath, options) {
+export async function blobAdd(blobPath) {
   const client = await getClient()
 
   const spinner = ora('Reading data').start()
@@ -38,9 +37,11 @@ export async function blobAdd(blobPath, options) {
   }
 
   spinner.start('Storing')
-  const digest = await client.capability.blob.add(blob, options)
-  const cid = Link.create(raw.code, digest)
-  spinner.stopAndPersist({ symbol: '⁂', text: `Stored ${base58btc.encode(digest.bytes)} (${cid})` })
+  const { multihash } = await client.capability.blob.add(blob, {
+    receiptsEndpoint: client._receiptsEndpoint.toString()
+  })
+  const cid = Link.create(raw.code, multihash)
+  spinner.stopAndPersist({ symbol: '⁂', text: `Stored ${base58btc.encode(multihash.bytes)} (${cid})` })
 }
 
 /**
