@@ -1,5 +1,13 @@
 # Changelog
 
+## [7.7.0](https://github.com/w3s-project/w3cli/compare/v7.6.2...v7.7.0) (2024-06-04)
+
+
+### Features
+
+* allow pipe to w3 up ([#188](https://github.com/w3s-project/w3cli/issues/188)) ([4961f4a](https://github.com/w3s-project/w3cli/commit/4961f4a94d4c18ec363147293dd8d57750e8f17e))
+* upgrade deps for blob ([#187](https://github.com/w3s-project/w3cli/issues/187)) ([7f52cc0](https://github.com/w3s-project/w3cli/commit/7f52cc0018f917b4bfa33f19106981ba714a3747))
+
 ## [7.6.2](https://github.com/w3s-project/w3cli/compare/v7.6.1...v7.6.2) (2024-04-23)
 
 
