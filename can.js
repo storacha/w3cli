@@ -37,9 +37,11 @@ export async function blobAdd(blobPath) {
   }
 
   spinner.start('Storing')
-  const digest = await client.capability.blob.add(blob)
-  const cid = Link.create(raw.code, digest)
-  spinner.stopAndPersist({ symbol: '⁂', text: `Stored ${base58btc.encode(digest.bytes)} (${cid})` })
+  const { multihash } = await client.capability.blob.add(blob, {
+    receiptsEndpoint: client._receiptsEndpoint.toString()
+  })
+  const cid = Link.create(raw.code, multihash)
+  spinner.stopAndPersist({ symbol: '⁂', text: `Stored ${base58btc.encode(multihash.bytes)} (${cid})` })
 }
 
 /**

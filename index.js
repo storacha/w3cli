@@ -177,6 +177,7 @@ export async function upload(firstPath, opts) {
     concurrentRequests:
       opts?.['concurrent-requests'] &&
       parseInt(String(opts?.['concurrent-requests'])),
+    receiptsEndpoint: client._receiptsEndpoint.toString()
   })
   spinner.stopAndPersist({
     symbol: '⁂',

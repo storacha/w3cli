@@ -96,6 +96,12 @@ export function getClient() {
     process.env.W3UP_SERVICE_DID || process.env.W3_UPLOAD_SERVICE_DID
   const uploadServiceURL =
     process.env.W3UP_SERVICE_URL || process.env.W3_UPLOAD_SERVICE_URL
+  const receiptsEndpointString = (process.env.W3UP_RECEIPTS_ENDPOINT || process.env.W3_UPLOAD_RECEIPTS_URL)
+  let receiptsEndpoint
+  if (receiptsEndpointString) {
+    receiptsEndpoint = new URL(receiptsEndpointString)
+  }
+    
   let serviceConf
   if (
     accessServiceDID &&
@@ -134,7 +140,7 @@ export function getClient() {
   }
 
   /** @type {import('@web3-storage/w3up-client/types').ClientFactoryOptions} */
-  const createConfig = { store, serviceConf }
+  const createConfig = { store, serviceConf, receiptsEndpoint }
 
   const principal = process.env.W3_PRINCIPAL
   if (principal) {
