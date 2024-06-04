@@ -32,6 +32,7 @@ import {
   blobAdd,
   blobList,
   blobRemove,
+  indexAdd,
   storeAdd,
   storeList,
   storeRemove,
@@ -287,6 +288,11 @@ cli
   .command('can blob rm <multihash>')
   .describe('Remove a blob from the store by base58btc encoded multihash.')
   .action(blobRemove)
+
+cli
+  .command('can index add <cid>')
+  .describe('Register an "index" with the service.')
+  .action(indexAdd)
 
 cli
   .command('can store add <car-path>')
