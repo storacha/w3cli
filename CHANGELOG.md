@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.7.1](https://github.com/w3s-project/w3cli/compare/v7.7.0...v7.7.1) (2024-06-05)
+
+
+### Bug Fixes
+
+* upgrade w3up client with double upload fix ([#191](https://github.com/w3s-project/w3cli/issues/191)) ([31a0bf7](https://github.com/w3s-project/w3cli/commit/31a0bf7d3ed540c6fabf910b6fd87b1994c97b21))
+
 ## [7.7.0](https://github.com/w3s-project/w3cli/compare/v7.6.2...v7.7.0) (2024-06-04)
 
 
