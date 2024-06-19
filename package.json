@@ -62,6 +62,7 @@
     "ansi-escapes": "^6.2.0",
     "chalk": "^5.3.0",
     "files-from-path": "^1.0.4",
+    "fr32-sha2-256-trunc254-padded-binary-tree-multihash": "^3.3.0",
     "open": "^9.1.0",
     "ora": "^7.0.1",
     "pretty-tree": "^1.0.0",
