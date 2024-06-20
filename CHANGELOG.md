@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.8.0](https://github.com/storacha-network/w3cli/compare/v7.7.1...v7.8.0) (2024-06-20)
+
+
+### Features
+
+* use wasm piece hasher ([#195](https://github.com/storacha-network/w3cli/issues/195)) ([8ddc4d2](https://github.com/storacha-network/w3cli/commit/8ddc4d2b692173a02f6e337a752b84878293ef1f))
+
 ## [7.7.1](https://github.com/w3s-project/w3cli/compare/v7.7.0...v7.7.1) (2024-06-05)
 
 
