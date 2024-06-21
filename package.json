@@ -1,7 +1,7 @@
 {
   "name": "@web3-storage/w3cli",
   "type": "module",
-  "version": "7.8.0",
+  "version": "7.8.1",
   "license": "(Apache-2.0 AND MIT)",
   "description": "💾 w3 command line interface",
   "bin": {
