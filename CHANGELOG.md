@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.8.1](https://github.com/storacha-network/w3cli/compare/v7.8.0...v7.8.1) (2024-06-21)
+
+
+### Bug Fixes
+
+* repo URLs ([9da051c](https://github.com/storacha-network/w3cli/commit/9da051c7f9b82ad27e749cbc3566a891a6513819))
+
 ## [7.8.0](https://github.com/storacha-network/w3cli/compare/v7.7.1...v7.8.0) (2024-06-20)
 
 
