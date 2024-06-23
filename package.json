@@ -1,7 +1,7 @@
 {
   "name": "@web3-storage/w3cli",
   "type": "module",
-  "version": "7.7.1",
+  "version": "7.8.1",
   "license": "(Apache-2.0 AND MIT)",
   "description": "💾 w3 command line interface",
   "bin": {
@@ -17,7 +17,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/w3s-project/w3cli.git"
+    "url": "git+https://github.com/storacha-network/w3cli.git"
   },
   "keywords": [
     "w3",
@@ -27,9 +27,9 @@
     "cli"
   ],
   "bugs": {
-    "url": "https://github.com/w3s-project/w3cli/issues"
+    "url": "https://github.com/storacha-network/w3cli/issues"
   },
-  "homepage": "https://github.com/w3s-project/w3cli#readme",
+  "homepage": "https://github.com/storacha-network/w3cli#readme",
   "devDependencies": {
     "@types/update-notifier": "^6.0.5",
     "@ucanto/interface": "^10.0.1",
@@ -62,6 +62,7 @@
     "ansi-escapes": "^6.2.0",
     "chalk": "^5.3.0",
     "files-from-path": "^1.0.4",
+    "fr32-sha2-256-trunc254-padded-binary-tree-multihash": "^3.3.0",
     "open": "^9.1.0",
     "ora": "^7.0.1",
     "pretty-tree": "^1.0.0",

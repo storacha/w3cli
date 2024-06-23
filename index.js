@@ -5,11 +5,14 @@ import ora from 'ora'
 import { CID } from 'multiformats/cid'
 import { base64 } from 'multiformats/bases/base64'
 import { identity } from 'multiformats/hashes/identity'
+import * as Digest from 'multiformats/hashes/digest'
 import * as DID from '@ipld/dag-ucan/did'
 import * as dagJSON from '@ipld/dag-json'
 import { CarWriter } from '@ipld/car'
 import { filesFromPaths } from 'files-from-path'
+import * as PieceHasher from 'fr32-sha2-256-trunc254-padded-binary-tree-multihash'
 import * as Account from './account.js'
+
 import { spaceAccess } from '@web3-storage/w3up-client/capability/access'
 import { AgentData } from '@web3-storage/access'
 import * as Space from './space.js'
@@ -157,6 +160,20 @@ export async function upload(firstPath, opts) {
     : `Storing ${Math.min(Math.round((totalSent / totalSize) * 100), 100)}%`
 
   const root = await uploadFn({
+    pieceHasher: {
+      code: PieceHasher.code,
+      name: 'fr32-sha2-256-trunc254-padded-binary-tree-multihash',
+      async digest (input) {
+        const hasher = PieceHasher.create()
+        hasher.write(input)
+  
+        const bytes = new Uint8Array(hasher.multihashByteLength())
+        hasher.digestInto(bytes, 0, true)
+        hasher.free()
+
+        return Digest.decode(bytes)
+      }
+    },
     onShardStored: ({ cid, size, piece }) => {
       totalSent += size
       if (opts?.verbose) {
