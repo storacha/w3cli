@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.8.2](https://github.com/storacha-network/w3cli/compare/v7.8.1...v7.8.2) (2024-07-02)
+
+
+### Bug Fixes
+
+* missing deps ([#200](https://github.com/storacha-network/w3cli/issues/200)) ([e8f13d5](https://github.com/storacha-network/w3cli/commit/e8f13d5bc75a253c91df353017e0a2ebc0154794))
+
 ## [7.8.1](https://github.com/storacha-network/w3cli/compare/v7.8.0...v7.8.1) (2024-06-21)
 
 
