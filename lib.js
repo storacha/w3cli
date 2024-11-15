@@ -1,5 +1,7 @@
-import fs from 'fs'
-import path from 'path'
+import fs from 'node:fs'
+import path from 'node:path'
+import { Worker } from 'node:worker_threads'
+import { fileURLToPath } from 'node:url'
 // @ts-expect-error no typings :(
 import tree from 'pretty-tree'
 import { importDAG } from '@ucanto/core/delegation'
@@ -28,9 +30,9 @@ import chalk from 'chalk'
  * @typedef {import('@web3-storage/capabilities/types').FilecoinInfoSuccess} FilecoinInfoSuccess
  */
 
-/**
- *
- */
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
 export function getPkg() {
   // @ts-ignore JSON.parse works with Buffer in Node.js
   return JSON.parse(fs.readFileSync(new URL('./package.json', import.meta.url)))
@@ -346,4 +348,29 @@ export const streamToBlob = async source => {
     write: chunk => { chunks.push(chunk) }
   }))
   return new Blob(chunks)
+}
+
+const workerPath = path.join(__dirname, 'piece-hasher-worker.js')
+
+/** @see https://github.com/multiformats/multicodec/pull/331/files */
+const pieceHasherCode = 0x1011
+
+/** @type {import('multiformats').MultihashHasher<typeof pieceHasherCode>} */
+export const pieceHasher = {
+  code: pieceHasherCode,
+  name: 'fr32-sha2-256-trunc254-padded-binary-tree',
+  async digest (input) {
+    const bytes = await new Promise((resolve, reject) => {
+      const worker = new Worker(workerPath, { workerData: input })
+      worker.on('message', resolve)
+      worker.on('error', reject)
+      worker.on('exit', (code) => {
+        if (code !== 0) reject(new Error(`Piece hasher worker exited with code: ${code}`))
+      })
+    })
+    const digest = 
+      /** @type {import('multiformats').MultihashDigest<typeof pieceHasherCode>} */
+      (Digest.decode(bytes))
+    return digest
+  }
 }
