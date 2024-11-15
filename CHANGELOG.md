@@ -1,5 +1,18 @@
 # Changelog
 
+
+## [7.9.0](https://github.com/storacha/w3cli/compare/v7.8.2...v7.9.0) (2024-11-15)
+
+
+### Features
+
+* use worker thread for piece hashing ([#198](https://github.com/storacha/w3cli/issues/198)) ([dfafbd3](https://github.com/storacha/w3cli/commit/dfafbd3e65cb74b64a62b2f63129a927ddcd79f4))
+
+
+### Bug Fixes
+
+* bump files-from-path dependency ([b25861d](https://github.com/storacha/w3cli/commit/b25861d42b3530841a7e136fdd56d1b4ab2494b3))
+
 ## [7.8.2](https://github.com/storacha/w3cli/compare/v7.8.1...v7.8.2) (2024-07-02)
 
 
