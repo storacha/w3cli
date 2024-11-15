@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [7.9.1](https://github.com/storacha/w3cli/compare/v7.9.0...v7.9.1) (2024-11-15)
+
+
+### Bug Fixes
+
+* repo url ([7110804](https://github.com/storacha/w3cli/commit/7110804b16f95e7e1c38714056147d16b75b0304))
+
 ## [7.9.0](https://github.com/storacha/w3cli/compare/v7.8.2...v7.9.0) (2024-11-15)
 
 
