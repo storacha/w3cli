@@ -110,7 +110,9 @@ export async function authorize(email, opts = {}) {
 export async function upload(firstPath, opts) {
   /** @type {import('@web3-storage/w3up-client/types').FileLike[]} */
   let files
+  /** @type {number} */
   let totalSize // -1 when unknown size (input from stdin)
+  /** @type {import('ora').Ora} */
   let spinner
   const client = await getClient()
   if (firstPath) {
@@ -246,7 +248,9 @@ export async function remove(rootCid, opts) {
  */
 export async function createSpace(name) {
   const client = await getClient()
-  const space = await client.createSpace(name)
+  const space = await client.createSpace(name, {
+    skipGatewayAuthorization: true
+  })
   await client.setCurrentSpace(space.did())
   console.log(space.did())
 }
