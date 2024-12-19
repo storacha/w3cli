@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [7.10.0](https://github.com/storacha/w3cli/compare/v7.9.1...v7.10.0) (2024-12-19)
+
+
+### Features
+
+* content serve authorization ([#205](https://github.com/storacha/w3cli/issues/205)) ([34efff2](https://github.com/storacha/w3cli/commit/34efff218576c9bb8b16cfad25cda10863a2f97e))
+
 ## [7.9.1](https://github.com/storacha/w3cli/compare/v7.9.0...v7.9.1) (2024-11-15)
 
 
