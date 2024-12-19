@@ -64,6 +64,7 @@ const generateReceipt = async (taskCid) => {
     fx: {
       fork: [locationClaim],
     },
+    /** @ts-expect-error not a UCAN Link */
     ran: parseLink(taskCid),
     result: {
       ok: {

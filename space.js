@@ -1,5 +1,8 @@
 import * as W3Space from '@web3-storage/w3up-client/space'
 import * as W3Account from '@web3-storage/w3up-client/account'
+import * as UcantoClient from '@ucanto/client'
+import { HTTP } from '@ucanto/transport'
+import * as CAR from '@ucanto/transport/car'
 import { getClient } from './lib.js'
 import process from 'node:process'
 import * as DIDMailto from '@web3-storage/did-mailto'
@@ -17,6 +20,8 @@ import * as Result from '@web3-storage/w3up-client/result'
  * @property {false} [caution]
  * @property {DIDMailto.EmailAddress|false} [customer]
  * @property {string|false} [account]
+ * @property {Array<{id: import('@ucanto/interface').DID, serviceEndpoint: string}>} [authorizeGatewayServices] - The DID Key or DID Web and URL of the Gateway to authorize to serve content from the created space.
+ * @property {boolean} [skipGatewayAuthorization] - Whether to skip the Gateway authorization. It means that the content of the space will not be served by any Gateway.
  *
  * @param {string|undefined} name
  * @param {CreateOptions} options
@@ -25,7 +30,28 @@ export const create = async (name, options) => {
   const client = await getClient()
   const spaces = client.spaces()
 
-  const space = await client.createSpace(await chooseName(name ?? '', spaces))
+  let space
+  if (options.skipGatewayAuthorization === true) {
+    space = await client.createSpace(await chooseName(name ?? '', spaces), {
+      skipGatewayAuthorization: true,
+    })
+  } else {
+    const gateways = options.authorizeGatewayServices ?? []
+    const connections = gateways.map(({ id, serviceEndpoint }) => {
+      /** @type {UcantoClient.ConnectionView<import('@web3-storage/w3up-client/types').ContentServeService>} */
+      const connection = UcantoClient.connect({
+        id: {
+          did: () => id,
+        },
+        codec: CAR.outbound,
+        channel: HTTP.open({ url: new URL(serviceEndpoint) }),
+      })
+      return connection
+    })
+    space = await client.createSpace(await chooseName(name ?? '', spaces), {
+      authorizeGatewayServices: connections,
+    })
+  }
 
   // Unless use opted-out from paper key recovery, we go through the flow
   if (options.recovery !== false) {
@@ -185,7 +211,7 @@ export const provision = async (name = '', options = {}) => {
     const { ok: bytes, error: fetchError } = await fetch(options.coupon)
       .then((response) => response.arrayBuffer())
       .then((buffer) => Result.ok(new Uint8Array(buffer)))
-      .catch((error) => Result.error(/** @type {Error} */ (error)))
+      .catch((error) => Result.error(/** @type {Error} */(error)))
 
     if (fetchError) {
       console.error(`Failed to fetch coupon from ${options.coupon}`)
@@ -221,8 +247,7 @@ export const provision = async (name = '', options = {}) => {
 
     if (result.error) {
       console.error(
-        `⚠️ Failed to set up billing account,\n ${
-          Object(result.error).message ?? ''
+        `⚠️ Failed to set up billing account,\n ${Object(result.error).message ?? ''
         }`
       )
       process.exit(1)
@@ -261,7 +286,7 @@ const chooseSpace = (client, { name }) => {
  * @param {W3Space.Model} space
  * @param {CreateOptions} options
  */
-export const setupEmailRecovery = async (space, options = {}) => {}
+export const setupEmailRecovery = async (space, options = {}) => { }
 
 /**
  * @param {string} email
@@ -391,9 +416,9 @@ export const setupAccount = async (client) => {
 
   return email
     ? await Account.loginWithClient(
-        /** @type {DIDMailto.EmailAddress} */ (email),
-        client
-      )
+        /** @type {DIDMailto.EmailAddress} */(email),
+      client
+    )
     : null
 }
 
