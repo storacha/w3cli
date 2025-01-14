@@ -452,6 +452,21 @@ export async function listDelegations(opts) {
         console.log(`  with: ${capability.with}`)
         console.log(`  can: ${capability.can}`)
       }
+      if (delegation.proofs.length) {
+        console.log('  proofs:')
+        for (const proof of delegation.proofs) {
+          if (ucanto.isDelegation(proof)) {
+            console.log(`    issuer: ${proof.issuer.did()}`)
+            console.log(`    audience: ${proof.audience.did()}`)
+            for (const capability of proof.capabilities) {
+              console.log(`    with: ${capability.with}`)
+              console.log(`    can: ${capability.can}`)
+            }
+          } else {
+            console.log(`    link: ${proof}`)
+          }
+        }
+      }
     }
   }
 }
@@ -634,6 +649,21 @@ export async function usageReport(opts) {
         // @ts-expect-error error is unknown
         console.warn(`     error: ${fail.error?.message}`)
         console.warn(`     account: ${fail.account}`)
+      }
+      if (proof.proofs.length) {
+        console.log('  proofs:')
+        for (const inner of proof.proofs) {
+          if (ucanto.isDelegation(inner)) {
+            console.log(`    issuer: ${inner.issuer.did()}`)
+            console.log(`    audience: ${inner.audience.did()}`)
+            for (const capability of inner.capabilities) {
+              console.log(`    with: ${capability.with}`)
+              console.log(`    can: ${capability.can}`)
+            }
+          } else {
+            console.log(`    link: ${proof}`)
+          }
+        }
       }
     }
   }
