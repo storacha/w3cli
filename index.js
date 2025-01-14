@@ -374,7 +374,7 @@ export async function createDelegation(audienceDID, opts) {
   const client = await getClient()
 
   if (client.currentSpace() == null) {
-    throw new Error('no current space, use `w3 space register` to create one.')
+    throw new Error('no current space, use `w3 space create` to create one.')
   }
   const audience = DID.parse(audienceDID)
 
