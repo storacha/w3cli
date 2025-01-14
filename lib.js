@@ -63,16 +63,27 @@ export function filesizeMB(bytes) {
   return `${(bytes / 1000 / 1000).toFixed(1)}MB`
 }
 
-/** Get a configured w3up store used by the CLI. */
+/**
+ * @typedef {import('@web3-storage/access/drivers/types').Driver<import('@web3-storage/access').AgentDataExport>} Store
+ */
+
+/** 
+ * Get a configured w3up store used by the CLI. 
+ * @returns {Store}
+ */
 export function getStore() {
   return new StoreConf({ profile: process.env.W3_STORE_NAME ?? 'w3cli' })
 }
 
 /**
  * Get a new API client configured from env vars.
+ * @param {{
+ *   principal?: string
+ *   store?: Store
+ * }} options
  */
-export function getClient() {
-  const store = getStore()
+export function getClient(options = {}) {
+  const store = options.store || getStore()
 
   if (process.env.W3_ACCESS_SERVICE_URL || process.env.W3_UPLOAD_SERVICE_URL) {
     console.warn(
@@ -144,7 +155,7 @@ export function getClient() {
   /** @type {import('@web3-storage/w3up-client/types').ClientFactoryOptions} */
   const createConfig = { store, serviceConf, receiptsEndpoint }
 
-  const principal = process.env.W3_PRINCIPAL
+  const principal = options.principal ?? process.env.W3_PRINCIPAL
   if (principal) {
     createConfig.principal = Signer.parse(principal)
   }

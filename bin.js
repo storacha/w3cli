@@ -248,6 +248,10 @@ cli
     '--base64',
     'Format as base64 identity CID string. Useful when saving it as an environment variable.'
   )
+  .option(
+    '--use-space-recovery-key',
+    'The recovery key of the space to use as the issuer of this delegation. Can only be used to grant capabilities on the given space.'
+  )
   .action(createDelegation)
 
 cli
