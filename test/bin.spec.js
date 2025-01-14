@@ -46,7 +46,7 @@ export const testW3 = {
     const { output, status } = await w3.args(['--version']).join()
 
     assert.equal(status.code, 0)
-    assert.match(output, /w3, \d.\d.\d/)
+    assert.match(output, /w3, \d+\.\d+\.\d+/)
   }),
 
   'w3 whoami': test(async (assert) => {
