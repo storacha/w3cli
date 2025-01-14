@@ -1,6 +1,14 @@
 # Changelog
 
 
+## [7.10.0](https://github.com/storacha/w3cli/compare/v7.9.1...v7.10.0) (2025-01-14)
+
+
+### Features
+
+* content serve authorization ([#205](https://github.com/storacha/w3cli/issues/205)) ([34efff2](https://github.com/storacha/w3cli/commit/34efff218576c9bb8b16cfad25cda10863a2f97e))
+* proof ls command shows proof aud ([#174](https://github.com/storacha/w3cli/issues/174)) ([29d2400](https://github.com/storacha/w3cli/commit/29d2400a398b4eded9379e62c7d48f3a06635972))
+
 ## [7.9.1](https://github.com/storacha/w3cli/compare/v7.9.0...v7.9.1) (2024-11-15)
 
 
