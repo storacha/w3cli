@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [7.10.1](https://github.com/storacha/w3cli/compare/v7.10.0...v7.10.1) (2025-01-14)
+
+
+### Bug Fixes
+
+* test and error msg ([6e53b5f](https://github.com/storacha/w3cli/commit/6e53b5f65b4f9533c2930531925307771af5e918))
+
 ## [7.10.0](https://github.com/storacha/w3cli/compare/v7.9.1...v7.10.0) (2025-01-14)
 
 
