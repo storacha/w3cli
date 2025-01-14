@@ -535,6 +535,7 @@ export async function listProofs(opts) {
     for (const proof of proofs) {
       console.log(chalk.dim(`# ${proof.cid.toString()}`))
       console.log(`iss: ${chalk.cyanBright(proof.issuer.did())}`)
+      console.log(`aud: ${chalk.cyanBright(proof.audience.did())}`)
       if (proof.expiration !== Infinity) {
         console.log(
           `exp: ${chalk.yellow(proof.expiration)} ${chalk.dim(
