@@ -4,7 +4,7 @@
 
 ## Getting started
 
-Install the CLI from npm (**requires Node 18 or higher**):
+Install the CLI from npm (**requires Node 22 or higher**):
 
 ```console
 npm install -g @web3-storage/w3cli
