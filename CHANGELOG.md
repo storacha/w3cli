@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [7.10.2](https://github.com/storacha/w3cli/compare/v7.10.1...v7.10.2) (2025-02-19)
+
+
+### Bug Fixes
+
+* updated nodejs requirement ([#209](https://github.com/storacha/w3cli/issues/209)) ([1a1b598](https://github.com/storacha/w3cli/commit/1a1b5988a49cea0c71a1304d101f27663633d590))
+
 ## [7.10.1](https://github.com/storacha/w3cli/compare/v7.10.0...v7.10.1) (2025-01-14)
 
 
