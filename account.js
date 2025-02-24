@@ -15,7 +15,18 @@ import ora from 'ora'
 const OAuthProviderGitHub = 'github'
 const OAuthProviders = /** @type {const} */ ([OAuthProviderGitHub])
 
-const githubOAuthClientID = process.env.GITHUB_OAUTH_CLIENT_ID || 'Ov23liRdyizj8EndxxAf'
+/** @type {Record<import('@web3-storage/w3up-client/types').DID, string>} */
+const GitHubOauthClientIDs = {
+  'did:web:web3.storage': 'Ov23liRdyizj8EndxxAf',
+  'did:web:staging.web3.storage': 'Ov23liRdyizj8EndxxAf',
+}
+
+/** @param {import('@web3-storage/w3up-client/types').DID} serviceID */
+const getGithubOAuthClientID = serviceID => {
+  const id = process.env.GITHUB_OAUTH_CLIENT_ID || GitHubOauthClientIDs[serviceID]
+  if (!id) throw new Error(`missing OAuth client ID for: ${serviceID}`)
+  return id
+}
 
 /**
  * @param {DidMailto.EmailAddress} [email]
@@ -91,7 +102,7 @@ export const oauthLoginWithClient = async (provider, client) => {
       throw new Error('archiving access authorize delegation', { cause: archive.error })
     }
 
-    const clientID = githubOAuthClientID
+    const clientID = getGithubOAuthClientID(client.agent.connection.id.did())
     const state = base64url.encode(archive.ok)
     const loginURL = `https://github.com/login/oauth/authorize?scope=read:user,user:email&client_id=${clientID}&state=${state}`
 
