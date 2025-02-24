@@ -77,13 +77,16 @@ export const oauthLoginWithClient = async (provider, client) => {
   let spinner
 
   try {
-    const delegation = await authorize.delegate({
+    // create access/authorize request
+    const request = await authorize.delegate({
       audience: client.agent.connection.id,
       issuer: client.agent.issuer,
+      // agent that should be granted access
       with: client.agent.did(),
+      // capabilities requested (account access)
       nb: { att: [{ can: '*' }] }
     })
-    const archive = await delegation.archive()
+    const archive = await request.archive()
     if (archive.error) {
       throw new Error('archiving access authorize delegation', { cause: archive.error })
     }
@@ -100,7 +103,7 @@ export const oauthLoginWithClient = async (provider, client) => {
     }
 
     const expiration = Math.floor(Date.now() / 1000) + (60 * 15)
-    const account = Result.unwrap(await Account.externalLogin(client, { request: delegation.cid, expiration }))
+    const account = Result.unwrap(await Account.externalLogin(client, { request: request.cid, expiration }))
 
     Result.unwrap(await account.save())
 
