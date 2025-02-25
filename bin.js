@@ -54,11 +54,12 @@ cli
   .example('up path/to/files')
 
 cli
-  .command('login <email>')
+  .command('login [email]')
   .example('login user@example.com')
   .describe(
     'Authenticate this agent with your email address to gain access to all capabilities that have been delegated to it.'
   )
+  .option('--github', 'Use GitHub to authenticate. GitHub developer accounts automatically gain access to a trial plan.', false)
   .action(Account.login)
 
 cli
