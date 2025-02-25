@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [7.12.0](https://github.com/storacha/w3cli/compare/v7.11.0...v7.12.0) (2025-02-25)
+
+
+### Features
+
+* prompt for login method ([#212](https://github.com/storacha/w3cli/issues/212)) ([c7a14da](https://github.com/storacha/w3cli/commit/c7a14da386148fdf49a9860d225d8071a1f7c4fd))
+
 ## [7.11.0](https://github.com/storacha/w3cli/compare/v7.10.1...v7.11.0) (2025-02-25)
 
 
