@@ -17,8 +17,8 @@ const OAuthProviders = /** @type {const} */ ([OAuthProviderGitHub])
 
 /** @type {Record<import('@web3-storage/w3up-client/types').DID, string>} */
 const GitHubOauthClientIDs = {
-  'did:web:web3.storage': 'Ov23liRdyizj8EndxxAf',
-  'did:web:staging.web3.storage': 'Ov23liRdyizj8EndxxAf',
+  'did:web:web3.storage': 'Ov23li0xr95ocCkZiwaD',
+  'did:web:staging.web3.storage': 'Ov23liDKQB1ePrcGy5HI',
 }
 
 /** @param {import('@web3-storage/w3up-client/types').DID} serviceID */
