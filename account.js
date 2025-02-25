@@ -12,7 +12,7 @@ import ora from 'ora'
  * @typedef {Awaited<ReturnType<Account.login>>['ok']&{}} View
  */
 
-const OAuthProviderGitHub = 'github'
+export const OAuthProviderGitHub = 'github'
 const OAuthProviders = /** @type {const} */ ([OAuthProviderGitHub])
 
 /** @type {Record<import('@web3-storage/w3up-client/types').DID, string>} */

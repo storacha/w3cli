@@ -409,6 +409,18 @@ export const selectAccount = async (client) => {
  * @param {import('@web3-storage/w3up-client').Client} client
  */
 export const setupAccount = async (client) => {
+  const method = await select({
+    message: 'How do you want to authorize your account?',
+    choices: [
+      { name: 'Via Email', value: 'email' },
+      { name: 'Via GitHub', value: 'github' },
+    ],
+  })
+
+  if (method === 'github') {
+    return Account.oauthLoginWithClient(Account.OAuthProviderGitHub, client)
+  }
+
   const email = await input({
     message: `📧 Please enter an email address to setup an account`,
     validate: (input) => parseEmail(input).ok != null,
