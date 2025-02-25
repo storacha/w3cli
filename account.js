@@ -5,6 +5,7 @@ import * as Result from '@web3-storage/w3up-client/result'
 import * as DidMailto from '@web3-storage/did-mailto'
 import { authorize } from '@web3-storage/capabilities/access'
 import { base64url } from 'multiformats/bases/base64'
+import { select } from '@inquirer/prompts'
 import { getClient } from './lib.js'
 import ora from 'ora'
 
@@ -34,9 +35,24 @@ const getGithubOAuthClientID = serviceID => {
  * @param {boolean} [options.github]
  */
 export const login = async (email, options) => {
+  let method
   if (email) {
-    await loginWithClient(email, await getClient())
+    method = 'email'
   } else if (options?.github) {
+    method = 'github'
+  } else {
+    method = await select({
+      message: 'How do you want to login?',
+      choices: [
+        { name: 'Via Email', value: 'email' },
+        { name: 'Via GitHub', value: 'github' },
+      ],
+    })
+  }
+
+  if (method === 'email' && email) {
+    await loginWithClient(email, await getClient())
+  } else if (method === 'github') {
     await oauthLoginWithClient(OAuthProviderGitHub, await getClient())
   } else {
     console.error('Error: please provide email address or specify flag for alternate login method')

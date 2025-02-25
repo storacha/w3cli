@@ -72,7 +72,7 @@ w3 up recipies.txt
 
 ---
 
-### `w3 login <email>`
+### `w3 login [email]`
 
 Authenticate this agent with your email address to get access to all capabilities that had been delegated to it.
 
